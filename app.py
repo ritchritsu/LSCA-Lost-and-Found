@@ -12,6 +12,12 @@ from helpers import apology, login_required, lookup, usd
 # Configure application
 app = Flask(__name__)
 
+# Ensure templates auto-reload
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+
+
+
 # Custom filter
 app.jinja_env.filters["usd"] = usd
 
@@ -259,3 +265,4 @@ def sell():
         user_id = session["user_id"]
         holdings = db.execute("SELECT * FROM purchases WHERE user_id = ?", user_id)
         return render_template("sell.html", holdings=holdings)
+
