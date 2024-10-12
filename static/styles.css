@@ -1,0 +1,39 @@
+/* Size for brand */
+nav .navbar-brand
+{
+    font-size: xx-large;
+    font-family: 'Proxima Nova', sans-serif;
+
+}
+
+/* Colors for brand */
+nav .navbar-brand .blue
+{
+    color: #00000;
+}
+nav .navbar-brand .red
+{
+    color: #00000;
+}
+
+#MainTable {
+    
+    background: transparent;
+}
+nav .navbar-brand .yellow
+{
+    color: #00000;
+}
+nav .navbar-brand .green
+{
+    color: #00000;
+}
+
+
+body {
+    background-image: url('aurora.jpg');
+    background-size: cover;
+    min-height: 100vh;
+
+}
+

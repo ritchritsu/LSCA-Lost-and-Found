@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Homepage
+{% endblock %}
+
+{% block main %}
+<h2>Portfolio</h2>
+<table class="table table-bordered table-striped table-transparent" id = "MainTable">
+    <thead class="thead-light">
+    <tr>
+      <th>Symbol</th>
+      <th>Shares</th>
+      <th>Price</th>
+      <th>Total Value</th>
+    </tr>
+    </thead>
+    <tbody>
+      {% for stock in stocks%}
+        <tr>
+          <td>{{stock.stock_symbol}}</td>
+          <td>{{stock.shares}}</td>
+          <td>{{stock.purchase_price | usd}}</td>
+          <td>{{stock.total | usd}}</td>
+        </tr>
+     {% endfor %}
+  </table>
+    {% endblock %}
