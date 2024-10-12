@@ -1,34 +1,37 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Lost Items
+    Found Items
 {% endblock %}
 
 {% block main %}
-<h2>Lost Items</h2>
-
-<table class="table table-bordered table-striped table-transparent" id = "MainTable">
-    <thead class="thead-light">
-    <tr>
-      <th>Transaction Type</th>
-      <th>Symbol</th>
-      <th>Price</th>
-      <th>Shares</th>
-      <th>Total</th>
-      <th>Date and Time</th>
-
-    </tr>
-    </thead>
-    <tbody>
-      {% for transaction in transactions%}
-        <tr>
-          <td>{{transaction.transaction_type}}</td>
-          <td>{{transaction.stock_symbol}}</td>
-          <td>{{transaction.price_per_share | usd}}</td>
-          <td>{{transaction.shares}}</td>
-          <td>{{transaction.total | usd}}</td>
-          <td>{{transaction.timestamp}}</td>
-        </tr>
-     {% endfor %}
-  </table>
-    {% endblock %}
+    <h1>Found Items</h1>
+    <table class="table table-bordered table-striped">
+        <thead class="thead-light">
+            <tr>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Location Found</th>
+                <th>Date Found</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.location_found }}</td>
+                    <td>{{ item.date_found }}</td>
+                    <td>
+                        {% if item.image_url %}
+                            <img src="{{ item.image_url }}" alt="Item Image" style="width:100px;height:auto;">
+                        {% else %}
+                            No Image
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

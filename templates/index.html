@@ -5,24 +5,33 @@ Homepage
 {% endblock %}
 
 {% block main %}
-<h2>Portfolio</h2>
-<table class="table table-bordered table-striped table-transparent" id = "MainTable">
-    <thead class="thead-light">
-    <tr>
-      <th>Symbol</th>
-      <th>Shares</th>
-      <th>Price</th>
-      <th>Total Value</th>
-    </tr>
-    </thead>
-    <tbody>
-      {% for stock in stocks%}
-        <tr>
-          <td>{{stock.stock_symbol}}</td>
-          <td>{{stock.shares}}</td>
-          <td>{{stock.purchase_price | usd}}</td>
-          <td>{{stock.total | usd}}</td>
-        </tr>
-     {% endfor %}
-  </table>
-    {% endblock %}
+<h2>Lost Items</h2>
+
+    <table class="table table-bordered table-striped table-transparent" id="LostItemsTable">
+        <thead class="thead-light">
+            <tr>
+                <th>Description</th>
+                <th>Location Lost</th>
+                <th>Date Lost</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in lost_items %}
+                <tr>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.location_lost }}</td>
+                    <td>{{ item.date_lost }}</td>
+                    <td>
+                        {% if item.image_url %}
+                            <img src="{{ item.image_url }}" alt="Item Image" style="width: 100px; height: auto;" />
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

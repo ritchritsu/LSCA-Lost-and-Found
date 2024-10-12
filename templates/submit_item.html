@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Lost or Found Item</title>
+    <style>
+        /* Optional: Add some basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<form action="/submit" method="post">
+    <h2>Submit Lost or Found Item</h2>
+
+    <!-- Item description -->
+    <label for="description">Description</label>
+    <input type="text" id="description" name="description" placeholder="e.g., Blue iPhone" required>
+
+    <!-- Item category -->
+    <label for="category">Category</label>
+    <input type="text" id="category" name="category" placeholder="e.g., Phone" required>
+
+    <!-- Item status: Lost or Found -->
+    <label for="status">Status</label>
+    <select id="status" name="status" required onchange="toggleLocationFields()">
+        <option value="">Select Status</option>
+        <option value="lost">Lost</option>
+        <option value="found">Found</option>
+    </select>
+
+    <!-- Location Lost (enabled if status is 'Lost') -->
+    <label for="location_lost">Location Lost</label>
+    <input type="text" id="location_lost" name="location_lost" placeholder="e.g., 12-A Classroom" disabled>
+
+    <!-- Location Found (enabled if status is 'Found') -->
+    <label for="location_found">Location Found</label>
+    <input type="text" id="location_found" name="location_found" placeholder="e.g., Under Table" disabled>
+
+    <!-- Date Lost -->
+    <label for="date_lost">Date Lost</label>
+    <input type="date" id="date_lost" name="date_lost" disabled>
+
+    <!-- Date Found -->
+    <label for="date_found">Date Found</label>
+    <input type="date" id="date_found" name="date_found" disabled>
+
+    <!-- Optional Image URL -->
+    <label for="image_url">Image URL (optional)</label>
+    <input type="url" id="image_url" name="image_url" placeholder="http://example.com/image.jpg">
+
+    <!-- Submit Button -->
+    <button type="submit">Submit Item</button>
+</form>
+
+<script>
+    function toggleLocationFields() {
+        const status = document.getElementById("status").value;
+        const locationLostField = document.getElementById("location_lost");
+        const locationFoundField = document.getElementById("location_found");
+        const dateLostField = document.getElementById("date_lost");
+        const dateFoundField = document.getElementById("date_found");
+
+        if (status === "lost") {
+            locationLostField.disabled = false;  // Enable "Location Lost"
+            locationFoundField.disabled = true;  // Disable "Location Found"
+            dateLostField.disabled = false;      // Enable "Date Lost"
+            dateFoundField.disabled = true;      // Disable "Date Found"
+            locationFoundField.value = "";       // Clear the value of "Location Found"
+            dateFoundField.value = "";           // Clear the value of "Date Found"
+        } else if (status === "found") {
+            locationLostField.disabled = true;   // Disable "Location Lost"
+            locationFoundField.disabled = false; // Enable "Location Found"
+            dateLostField.disabled = true;       // Disable "Date Lost"
+            dateFoundField.disabled = false;     // Enable "Date Found"
+            locationLostField.value = "";        // Clear the value of "Location Lost"
+            dateLostField.value = "";            // Clear the value of "Date Lost"
+        } else {
+            // If no status is selected, disable both location fields and clear their values
+            locationLostField.disabled = true;
+            locationFoundField.disabled = true;
+            dateLostField.disabled = true;
+            dateFoundField.disabled = true;
+            locationLostField.value = "";
+            locationFoundField.value = "";
+            dateLostField.value = "";
+            dateFoundField.value = "";
+        }
+    }
+
+    // Call toggleLocationFields on page load to set the correct initial state
+    window.onload = toggleLocationFields;
+</script>
+
+</body>
+</html>

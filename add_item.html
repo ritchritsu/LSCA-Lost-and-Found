@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add Item
+{% endblock %}
+
+{% block main %}
+    <h1>Add Lost/Found Item</h1>
+    <form action="/add_item" method="post">
+        <div class="mb-3">
+            <input class="form-control" name="description" placeholder="Description" required>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" name="container" placeholder="Container (optional)">
+        </div>
+        <div class="mb-3">
+            <input class="form-control" name="category" placeholder="Category" required>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" name="location_lost" placeholder="Location Lost" required>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" name="location_found" placeholder="Location Found" required>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" name="date_lost" type="date" required>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" name="date_found" type="date" required>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" name="status" placeholder="Status (lost/found)" required>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" name="image_url" placeholder="Image URL (optional)">
+        </div>
+        <button class="btn btn-primary" type="submit">Add Item</button>
+    </form>
+{% endblock %}
