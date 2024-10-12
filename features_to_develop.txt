@@ -1,0 +1,15 @@
+FEATURES I WANT:
+
+User Registration and login (change username to email)
+
+Form for submitting lost or found items
+
+Search and filter functionality to view submitted items
+
+Notifications when admin has found a match
+
+Admin panel for managing submissions
+
+Change the database
+
+
