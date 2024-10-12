@@ -103,12 +103,11 @@ def buy():
         return render_template("buy.html")
 
 
-@app.route("/history")
+@app.route("/found")
 @login_required
 def history():
 
-    transactions = db.execute("SELECT * FROM transactions WHERE user_id = ?", session["user_id"])
-    return render_template("history.html", transactions = transactions)
+    return render_template("found-items.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
