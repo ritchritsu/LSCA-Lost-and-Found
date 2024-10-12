@@ -5,33 +5,41 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Found Items</h1>
-    <table class="table table-bordered table-striped">
-        <thead class="thead-light">
-            <tr>
-                <th>Description</th>
-                <th>Category</th>
-                <th>Location Found</th>
-                <th>Date Found</th>
-                <th>Image</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
+    <div class="container mt-4">
+        <h1>Found Items</h1>
+        <table class="table table-bordered table-striped">
+            <thead class="thead-light">
                 <tr>
-                    <td>{{ item.description }}</td>
-                    <td>{{ item.category }}</td>
-                    <td>{{ item.location_found }}</td>
-                    <td>{{ item.date_found }}</td>
-                    <td>
-                        {% if item.image_url %}
-                            <img src="{{ item.image_url }}" alt="Item Image" style="width:100px;height:auto;">
-                        {% else %}
-                            No Image
-                        {% endif %}
-                    </td>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Location Found</th>
+                    <th>Date Found</th>
+                    <th>Image</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% if items %}
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.location_found }}</td>
+                        <td>{{ item.date_found }}</td>
+                        <td>
+                            {% if item.image_url %}
+                            <img src="{{ item.image_url }}" alt="Item Image" style="width:100px;height:auto;">
+                            {% else %}
+                            No Image
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No items found.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

@@ -38,3 +38,6 @@ Change the database (or remake it and edit the entire app.py)
         timestamp DATETIME,
         FOREIGN KEY(user_id) REFERENCES users(id)
     );
+
+
+    FIX DARK MODE LIGHT MODE
