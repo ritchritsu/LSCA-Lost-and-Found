@@ -1,13 +1,20 @@
 /* Size for brand */
+
+
+
 nav .navbar-brand {
-  font-size: xx-large;
+  font-size: 2em;
   font-family: "Proxima Nova", sans-serif;
+  font-weight: bolder;
 }
 
 #MainTable {
   background: transparent;
 }
 
+h1{
+    font-weight: bold;
+}
 body {
   background-size: cover;
   min-height: 100vh;
@@ -23,7 +30,7 @@ body.light-mode {
 }
 
 body.dark-mode {
-  background-color: #343a40; /* Dark background */
+  background-color: #ffffff; /* Dark background */
   color: #ffffff; /* Light text */
 }
 
@@ -36,7 +43,7 @@ body.dark-mode {
 }
 
 .navbar.dark-mode {
-  background-color: #495057; /* Dark navbar */
+  background-color: #222222; /* Dark navbar */
 }
 
 .modal-content {
@@ -48,7 +55,7 @@ body.dark-mode {
 }
 
 .modal-content.dark-mode {
-  background-color: #343a40; /* Dark modal background */
+  background-color: #252525; /* Dark modal background */
 }
 
 body.light-mode {
@@ -214,13 +221,13 @@ select.form-select.dark-mode {
 /* For all input fields in light mode */
 input.form-control.light-mode,
 select.form-select.light-mode {
-    background-color: #ffffff; /* White background */
+    background-color: #000000; /* White background */
     color: #000000; /* Black text */
 }
 
 /* Modal body styles */
 .modal-body.dark-mode {
-    background-color: #2a2a2a; /* Match modal background with dark mode */
+    background-color: #242424; /* Match modal background with dark mode */
     color: #ffffff; /* White text for modal */
 }
 
@@ -245,7 +252,7 @@ select.form-select.light-mode {
 input.form-control.dark-mode,
 select.form-select.dark-mode {
     background-color: #2a2a2a; /* Dark background for input fields */
-    color: #ffffff; /* White text for input fields */
+    color: #8d8d8d; /* White text for input fields */
     border: 1px solid #ffffff; /* White border for visibility */
 }
 
@@ -269,7 +276,7 @@ label {
 }
 
 .light-mode .modal-header {
-    background-color: #f8f9fa; /* Light header */
+    background-color: #ebebeb; /* Light header */
 }
 
 .light-mode .modal-footer {
@@ -283,7 +290,7 @@ label {
 }
 
 .dark-mode .modal-header {
-    background-color: #495057; /* Dark header */
+    background-color: #272727; /* Dark header */
 }
 
 .dark-mode .modal-footer {
@@ -336,3 +343,15 @@ label {
 .btn-primary:hover {
     background-color: #0056b3; /* Darker shade on hover */
 }
+
+/* Add a loading class to hide the page content */
+.loading {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  /* Remove the loading class when the theme is applied */
+  .light-mode, .dark-mode {
+    opacity: 1;
+    pointer-events: auto;
+  }

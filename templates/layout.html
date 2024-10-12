@@ -13,16 +13,36 @@
     <link href="/static/favicon.ico" rel="icon">
     <link href="/static/styles.css" rel="stylesheet">
 
-    
+    <title>LSCA Lost and Found</title>
 
-    <title>LSCA Lost and Found: {% block title %}{% endblock %}</title>
+    <script>
+        // Apply saved theme before page loads
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem("theme");
+            document.body.classList.remove("light-mode", "dark-mode");
+            document.body.classList.add(savedTheme ? savedTheme + "-mode" : "dark-mode");
+            document.body.classList.remove("loading");
+
+            // Also apply the theme to the modal body
+            const modalBody = document.querySelector(".modal-body");
+            if (modalBody) {
+                modalBody.classList.remove("light-mode", "dark-mode");
+                modalBody.classList.add(savedTheme ? savedTheme + "-mode" : "dark-mode");
+            }
+        }
+
+        // Apply theme on page load
+        window.onload = function() {
+            setTimeout(applySavedTheme, 100);
+        };
+    </script>
 </head>
 <body>
 
     <nav class="bg-transparent border navbar navbar-expand-md navbar-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="/"><span>LSCA Lost and Found</span></a>
-            <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbar">
@@ -34,13 +54,12 @@
                     </ul>
                     <ul class="navbar-nav ms-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
-                        <!--<button id="theme-toggle" class="btn btn-outline-secondary ms-2">Toggle Theme</button>                 UN COMMENT IF U WANT TO DO THE DARK MODE LIGHT MODE--> 
+                        <button id="theme-toggle" class="btn btn-outline-secondary ms-2">Toggle Theme</button>
                     </ul>
                 {% else %}
                     <ul class="navbar-nav ms-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
                         <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
-                        
                     </ul>
                 {% endif %}
             </div>
@@ -58,7 +77,7 @@
     <main class="container py-5 text-center">
         {% block main %}
             <!-- Example Table -->
-            <table>
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Description</th>
@@ -83,57 +102,57 @@
     </main>
 
     <!-- Modal for submitting lost or found item -->
-<div class="modal fade" id="submitModal" tabindex="-1" aria-labelledby="submitModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="submitModalLabel">Submit Lost or Found Item</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body dark-mode"> <!-- Start with dark-mode for testing -->
-                <form action="/submit" method="post">
-                    <div class="mb-4">
-                        <label for="description">Description</label>
-                        <input type="text" class="form-control" id="description" name="description" placeholder="e.g., Blue iPhone" required>
-                    </div>
-                    <div class="mb-4">
-                        <label for="category">Category</label>
-                        <input type="text" class="form-control" id="category" name="category" placeholder="e.g., Phone" required>
-                    </div>
-                    <div class="mb-4">
-                        <label for="status">Status</label>
-                        <select class="form-select" id="status" name="status" required onchange="toggleLocationFields()">
-                            <option value="">Select Status</option>
-                            <option value="lost">Lost</option>
-                            <option value="found">Found</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label for="location_lost">Location Lost</label>
-                        <input type="text" class="form-control" id="location_lost" name="location_lost" placeholder="e.g., 12-A Classroom" disabled>
-                    </div>
-                    <div class="mb-4">
-                        <label for="location_found">Location Found</label>
-                        <input type="text" class="form-control" id="location_found" name="location_found" placeholder="e.g., Under Table" disabled>
-                    </div>
-                    <div class="mb-4">
-                        <label for="date_lost">Date Lost</label>
-                        <input type="date" class="form-control" id="date_lost" name="date_lost" disabled>
-                    </div>
-                    <div class="mb-4">
-                        <label for="date_found">Date Found</label>
-                        <input type="date" class="form-control" id="date_found" name="date_found" disabled>
-                    </div>
-                    <div class="mb-4">
-                        <label for="image_url">Image URL (optional)</label>
-                        <input type="url" class="form-control" id="image_url" name="image_url" placeholder="http://example.com/image.jpg">
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-3">Submit Item</button>
-                </form>
+    <div class="modal fade" id="submitModal" tabindex="-1" aria-labelledby="submitModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="submitModalLabel">Submit Lost or Found Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body dark-mode"> <!-- Start with dark-mode for testing -->
+                    <form action="/submit" method="post">
+                        <div class="mb-4">
+                            <label for="description">Description</label>
+                            <input type="text" class="form-control" id="description" name="description" placeholder="e.g., Blue iPhone" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="category">Category</label>
+                            <input type="text" class="form-control" id="category" name="category" placeholder="e.g., Phone" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="status">Status</label>
+                            <select class="form-select" id="status" name="status" required onchange="toggleLocationFields()">
+                                <option value="">Select Status</option>
+                                <option value="lost">Lost</option>
+                                <option value="found">Found</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label for="location_lost">Location Lost</label>
+                            <input type="text" class="form-control" id="location_lost" name="location_lost" placeholder="e.g., 12-A Classroom" disabled>
+                        </div>
+                        <div class="mb-4">
+                            <label for="location_found">Location Found</label>
+                            <input type="text" class="form-control" id="location_found" name="location_found" placeholder="e.g., Under Table" disabled>
+                        </div>
+                        <div class="mb-4">
+                            <label for="date_lost">Date Lost</label>
+                            <input type="date" class="form-control" id="date_lost" name="date_lost" disabled>
+                        </div>
+                        <div class="mb-4">
+                            <label for="date_found">Date Found</label>
+                            <input type="date" class="form-control" id="date_found" name="date_found" disabled>
+                        </div>
+                        <div class="mb-4">
+                            <label for="image_url">Image URL (optional)</label>
+                            <input type="url" class="form-control" id="image_url" name="image_url" placeholder="http://example.com/image.jpg">
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Submit Item</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <footer class="mb-5"></footer>
 
@@ -147,19 +166,19 @@
             const dateFoundField = document.getElementById("date_found");
 
             if (status === "lost") {
-                locationLostField.disabled = false;  // Enable "Location Lost"
-                locationFoundField.disabled = true;  // Disable "Location Found"
-                dateLostField.disabled = false;      // Enable "Date Lost"
-                dateFoundField.disabled = true;      // Disable "Date Found"
-                locationFoundField.value = "";       // Clear the value of "Location Found"
-                dateFoundField.value = "";           // Clear the value of "Date Found"
+                locationLostField.disabled = false;
+                locationFoundField.disabled = true;
+                dateLostField.disabled = false;
+                dateFoundField.disabled = true;
+                locationFoundField.value = "";
+                dateFoundField.value = "";
             } else if (status === "found") {
-                locationLostField.disabled = true;   // Disable "Location Lost"
-                locationFoundField.disabled = false; // Enable "Location Found"
-                dateLostField.disabled = true;       // Disable "Date Lost"
-                dateFoundField.disabled = false;     // Enable "Date Found"
-                locationLostField.value = "";        // Clear the value of "Location Lost"
-                dateLostField.value = "";            // Clear the value of "Date Lost"
+                locationLostField.disabled = true;
+                locationFoundField.disabled = false;
+                dateLostField.disabled = true;
+                dateFoundField.disabled = false;
+                locationLostField.value = "";
+                dateLostField.value = "";
             } else {
                 locationLostField.disabled = true;
                 locationFoundField.disabled = true;
@@ -168,69 +187,42 @@
             }
         }
 
-        // Theme toggle functionality
-        
-    // Function to toggle the theme
-    
-    /*(function applySavedTheme() {
-            const savedTheme = localStorage.getItem("theme"); // Get the saved theme from localStorage
-            const body = document.body; // Get the body element
+        // Add event listener for status select
+        document.getElementById("status").addEventListener("change", toggleLocationFields);
+        toggleLocationFields(); // Initialize on page load
 
-            if (savedTheme) {
-                body.classList.add(savedTheme + "-mode"); // Apply the saved theme
-                const toggleButton = document.getElementById("theme-toggle");
-                toggleButton.textContent = savedTheme === "dark" ? "Light Mode" : "Dark Mode"; // Set button text
-
-                // Apply the same theme to the table
-                const table = document.querySelector("table");
-                table.classList.add(savedTheme + "-mode");
-
-                // Apply the same theme to the modal
-                const modalContent = document.querySelector(".modal-content");
-                modalContent.classList.add(savedTheme + "-mode");
-            } else {
-                // Default to dark mode if no theme is saved
-                body.classList.add("dark-mode");
-                const toggleButton = document.getElementById("theme-toggle");
-                toggleButton.textContent = "Light Mode"; // Set button text to light mode
-            }
-        })();
-
-        // Function to toggle theme
+        // Theme toggle
         function toggleTheme() {
-            const body = document.body; // Get the body element
-            body.classList.toggle("dark-mode"); // Toggle the dark mode class
-            body.classList.toggle("light-mode"); // Toggle the light mode class
+            document.body.classList.toggle("dark-mode");
+            document.body.classList.toggle("light-mode");
 
-            // Toggle table classes
-            const table = document.querySelector("table"); // Get the first table
-            table.classList.toggle("dark-mode");
-            table.classList.toggle("light-mode");
+            // Toggle table and modal classes
+            const table = document.querySelector("table");
+            const modalContent = document.querySelector(".modal-content");
+            const modalBody = document.querySelector(".modal-body");
 
-            // Get modal content and toggle classes
-            const modalContent = document.querySelector(".modal-content"); // Get modal content
-            modalContent.classList.toggle("dark-mode");
-            modalContent.classList.toggle("light-mode");
+            if (table) {
+                table.classList.toggle("dark-mode");
+                table.classList.toggle("light-mode");
+            }
+
+            if (modalContent && modalBody) {
+                modalContent.classList.toggle("dark-mode");
+                modalContent.classList.toggle("light-mode");
+                modalBody.classList.toggle("dark-mode");
+                modalBody.classList.toggle("light-mode");
+            }
 
             // Change button text based on the current theme
             const toggleButton = document.getElementById("theme-toggle");
-            toggleButton.textContent = body.classList.contains("dark-mode") ? "Light Mode" : "Dark Mode";
+            toggleButton.textContent = document.body.classList.contains("dark-mode") ? "Light Mode" : "Dark Mode";
 
-            // Save the theme preference in localStorage
-            localStorage.setItem("theme", body.classList.contains("dark-mode") ? "dark" : "light");
+            // Save the theme preference
+            localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
         }
 
         // Add event listener for theme toggle button
         document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
-
-        // Ensure location fields are set correctly
-        function toggleLocationFields() {
-            // Your existing function logic here
-        }*/
-</script>
-
-
-        
     </script>
 </body>
 </html>
