@@ -1,43 +1,17 @@
 FEATURES I WANT:
 
-User Registration and login (change username to email)
+Admin panel for managing submissions DONEEEEEEEEEEEEEEEEEEEE
 
-Form for submitting lost or found items
+User Registration and login (change username to email) DONEEEEEEEEEEEEEEE
+
+Form for submitting lost or found items DONEEEEEEEEEEEEEEEEEEE
 
 Search and filter functionality to view submitted items
 
 Notifications when admin has found a match
 
-Admin panel for managing submissions
-
-Change the database (or remake it and edit the entire app.py)
-    item_id
-    description
-    container(optional)
-    category
-    location_lost
-    location_found
-    date_lost
-    date_found
-    status
-    image_url
-
-    THIS IS THE PREVIOUS DB. YOU NEED TO CHANGE STUFF LIKE THE USER AND GIVE IT AN EMAIL, THEN DELETE THE OTHER ONES AND CREATE A NEW DB
-    CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT NOT NULL, hash TEXT NOT NULL, cash NUMERIC NOT NULL DEFAULT 10000.00);
-    CREATE TABLE sqlite_sequence(name,seq);
-    CREATE UNIQUE INDEX username ON users (username);
-    CREATE TABLE purchases (id INTEGER PRIMARY KEY, user_id INTEGER, stock_symbol TEXT, purchase_price REAL, shares INTEGER, total REAL, FOREIGN KEY(user_id) REFERENCES users(id));
-    CREATE TABLE transactions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        stock_symbol TEXT,
-        transaction_type TEXT,
-        shares INTEGER,
-        price_per_share REAL,
-        total REAL,
-        timestamp DATETIME,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    );
 
 
-    FIX DARK MODE LIGHT MODE
+Admin can directly edit the table
+
+

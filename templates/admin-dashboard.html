@@ -1,49 +1,59 @@
-{% extends "layout.html" %}
-
-{% block title %}
-    Found Items
-{% endblock %}
+{% extends "layout.html" %} 
+{% block title %} 
+    Admin Dashboard - Found Items 
+{% endblock %} 
 
 {% block main %}
-    <div class="container mt-4">
-        <h1>Found Items</h1>
+<div class="container mt-4">
+    <h1>SHS Item Record</h1>
+    <div class="table-responsive">
+        <!-- This div makes the table responsive -->
         <table class="table table-bordered table-striped">
             <thead class="thead-light">
                 <tr>
+                    <th>ID</th>                              <!-- Column for ID -->
                     <th>Lost Date</th>
+                    <th>Location</th>                       <!-- New column for Location -->
                     <th>Item Description</th>
-                    <th>Turned Over By</th>
-                    <th>Claimed By</th>
-                    <th>Grade & Section</th>
-                    <th>Found Date</th>
                     <th>Image</th>
+                    <th>Email</th>                          <!-- Column for Email -->
+                    <th>Grade & Section</th>
+                    
+                    <th>Phone Number</th>                   <!-- Column for Phone Number -->
+                    <th>Found Date</th>
+                    <th>Found Location</th>                 <!-- New column for Found Location -->
                 </tr>
             </thead>
             <tbody>
-                {% if items %}
+                {% if items %} 
                     {% for item in items %}
                     <tr>
-                        <td>{{ item.lost_date }}</td>  {# Date the item was lost #}
+                        <td>{{ item.id }}</td>                {# ID of the item #}
+                        <td>{{ item.lost_date }}</td>         {# Date the item was lost #}
+                        <td>{{ item.location }}</td>           {# Location where the item was lost #}
                         <td>{{ item.item_description }}</td>  {# Description of the item #}
-                        <td>{{ item.turned_over_by }}</td>  {# Name of the person who turned over the item #}
-                        <td>{{ item.claimed_by }}</td>  {# Name of the person who claimed the item #}
-                        <td>{{ item.grade_and_section }}</td>  {# Grade and section of the student #}
-                        <td>{{ item.found_date }}</td>  {# Date the item was found #}
                         <td>
                             {% if item.image_url %}
-                                <img src="{{ item.image_url }}" alt="Item Image" style="width:100px;height:auto;">
+                                <img src="{{ item.image_url }}" alt="Item Image" style="width: 100px; height: auto" />
                             {% else %}
                                 <span class="text-muted">No Image Available</span>
                             {% endif %}
                         </td>
+                        <td>{{ item.email }}</td>              {# Email of the claimant #}
+                        <td>{{ item.grade_and_section }}</td> {# Grade and section of the student #}
+                        
+                        <td>{{ item.phone_number }}</td>       {# Phone number of the claimant #}
+                        <td>{{ item.found_date }}</td>        {# Date the item was found #}
+                        <td>{{ item.found_location }}</td>     {# Location where the item was found #}
                     </tr>
-                    {% endfor %}
+                    {% endfor %} 
                 {% else %}
                     <tr>
-                        <td colspan="7" class="text-center">No items found.</td>
+                        <td colspan="11" class="text-center">No items found.</td> {# Adjusted colspan to 11 for new columns #}
                     </tr>
                 {% endif %}
             </tbody>
         </table>
     </div>
+</div>
 {% endblock %}

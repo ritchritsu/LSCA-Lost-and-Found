@@ -1,7 +1,5 @@
 /* Size for brand */
 
-
-
 nav .navbar-brand {
   font-size: 2em;
   font-family: "Proxima Nova", sans-serif;
@@ -12,8 +10,8 @@ nav .navbar-brand {
   background: transparent;
 }
 
-h1{
-    font-weight: bold;
+h1 {
+  font-weight: bold;
 }
 body {
   background-size: cover;
@@ -173,187 +171,206 @@ table td {
 }
 
 /* Default styles for light mode */
-h1, h2, h3, h4, h5, h6 { /* Adjust based on your specific title element */
-    color: black; /* Title color in light mode */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  /* Adjust based on your specific title element */
+  color: black; /* Title color in light mode */
 }
 
 .navbar a {
-    color: black !important; /* Navigation link color in light mode */
+  color: black !important; /* Navigation link color in light mode */
 }
 
 /* Dark mode styles */
-.dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h4, .dark-mode h5, .dark-mode h6 {
-    color: white; /* Title color in dark mode */
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6 {
+  color: white; /* Title color in dark mode */
 }
 
 .dark-mode .navbar a {
-    color: white !important; /* Navigation link color in dark mode */
+  color: white !important; /* Navigation link color in dark mode */
 }
 
 body {
-    transition: background-color 0.5s; /* Smooth transition */
-    background-color: #fff; /* Default light background */
+  transition: background-color 0.5s; /* Smooth transition */
+  background-color: #fff; /* Default light background */
 }
 
 body.dark-mode {
-    background-color: #252525; /* Dark mode background */
+  background-color: #252525; /* Dark mode background */
 }
 
 /* Ensure modal has smooth transition */
 .modal-content {
-    transition: background-color 0.5s; /* Smooth transition for modal */
+  transition: background-color 0.5s; /* Smooth transition for modal */
 }
 
 .modal-content.light-mode {
-    background-color: #fff; /* Light mode for modal */
+  background-color: #fff; /* Light mode for modal */
 }
 
 .modal-content.dark-mode {
-    background-color: #2a2a2a; /* Dark mode for modal */
+  background-color: #2a2a2a; /* Dark mode for modal */
 }
 
 input.form-control.dark-mode,
 select.form-select.dark-mode {
-    background-color: #2a2a2a; /* Dark background */
-    color: #ffffff; /* White text */
+  background-color: #2a2a2a; /* Dark background */
+  color: #ffffff; /* White text */
 }
 
 /* For all input fields in light mode */
 input.form-control.light-mode,
 select.form-select.light-mode {
-    background-color: #000000; /* White background */
-    color: #000000; /* Black text */
+  background-color: #000000; /* White background */
+  color: #000000; /* Black text */
 }
 
 /* Modal body styles */
 .modal-body.dark-mode {
-    background-color: #242424; /* Match modal background with dark mode */
-    color: #ffffff; /* White text for modal */
+  background-color: #242424; /* Match modal background with dark mode */
+  color: #ffffff; /* White text for modal */
 }
 
 /* Modal Body Styles */
 .modal-content {
-    transition: background-color 0.3s, color 0.3s; /* Smooth transition for colors */
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition for colors */
 }
 
 /* Dark mode styles for modal body */
 .modal-content.dark-mode {
-    background-color: #2a2a2a; /* Dark background for modal */
-    color: #ffffff; /* White text for modal */
+  background-color: #2a2a2a; /* Dark background for modal */
+  color: #ffffff; /* White text for modal */
 }
 
 /* Light mode styles for modal body */
 .modal-content.light-mode {
-    background-color: #ffffff; /* Light background for modal */
-    color: #000000; /* Black text for modal */
+  background-color: #ffffff; /* Light background for modal */
+  color: #000000; /* Black text for modal */
 }
 
 /* Input and select styles for dark mode */
 input.form-control.dark-mode,
 select.form-select.dark-mode {
-    background-color: #2a2a2a; /* Dark background for input fields */
-    color: #8d8d8d; /* White text for input fields */
-    border: 1px solid #ffffff; /* White border for visibility */
+  background-color: #2a2a2a; /* Dark background for input fields */
+  color: #8d8d8d; /* White text for input fields */
+  border: 1px solid #ffffff; /* White border for visibility */
 }
 
 /* Input and select styles for light mode */
 input.form-control.light-mode,
 select.form-select.light-mode {
-    background-color: #ffffff; /* White background for input fields */
-    color: #000000; /* Black text for input fields */
-    border: 1px solid #000000; /* Black border for visibility */
+  background-color: #ffffff; /* White background for input fields */
+  color: #000000; /* Black text for input fields */
+  border: 1px solid #000000; /* Black border for visibility */
 }
 
 /* Style the labels for better contrast */
 label {
-    color: inherit; /* Use inherited color for text (white in dark mode, black in light mode) */
+  color: inherit; /* Use inherited color for text (white in dark mode, black in light mode) */
 }
 
 /* Light mode styles */
 .light-mode .modal-content {
-    background-color: #ffffff; /* White background for light mode */
-    color: #000000; /* Black text for light mode */
+  background-color: #ffffff; /* White background for light mode */
+  color: #000000; /* Black text for light mode */
 }
 
 .light-mode .modal-header {
-    background-color: #ebebeb; /* Light header */
+  background-color: #ebebeb; /* Light header */
 }
 
 .light-mode .modal-footer {
-    background-color: #f8f9fa; /* Light footer */
+  background-color: #f8f9fa; /* Light footer */
 }
 
 /* Dark mode styles */
 .dark-mode .modal-content {
-    background-color: #343a40; /* Dark background for dark mode */
-    color: #ffffff; /* White text for dark mode */
+  background-color: #343a40; /* Dark background for dark mode */
+  color: #ffffff; /* White text for dark mode */
 }
 
 .dark-mode .modal-header {
-    background-color: #272727; /* Dark header */
+  background-color: #272727; /* Dark header */
 }
 
 .dark-mode .modal-footer {
-    background-color: #495057; /* Dark footer */
+  background-color: #495057; /* Dark footer */
 }
 
 /* Light mode styles for the modal */
 .modal-content {
-    background-color: #ffffff; /* White background for light mode */
-    color: #000000; /* Black text for light mode */
+  background-color: #ffffff; /* White background for light mode */
+  color: #000000; /* Black text for light mode */
 }
 
 .modal-header {
-    background-color: #f8f9fa; /* Light header background */
-    border-bottom: 1px solid #dee2e6; /* Light border */
+  background-color: #f8f9fa; /* Light header background */
+  border-bottom: 1px solid #dee2e6; /* Light border */
 }
 
 .modal-footer {
-    background-color: #f8f9fa; /* Light footer background */
+  background-color: #f8f9fa; /* Light footer background */
 }
 
 .modal-body {
-    background-color: #ffffff; /* Ensure the body is white */
+  background-color: #ffffff; /* Ensure the body is white */
 }
 
 /* Input fields */
 .form-control {
-    background-color: #ffffff; /* White background for input fields */
-    color: #000000; /* Black text for input fields */
-    border: 1px solid #ced4da; /* Light border */
+  background-color: #ffffff; /* White background for input fields */
+  color: #000000; /* Black text for input fields */
+  border: 1px solid #ced4da; /* Light border */
 }
 
 .form-control:focus {
-    border-color: #80bdff; /* Blue border on focus */
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); /* Blue shadow */
+  border-color: #80bdff; /* Blue border on focus */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Blue shadow */
 }
 
 .form-select {
-    background-color: #ffffff; /* White background for select */
-    color: #000000; /* Black text for select */
+  background-color: #ffffff; /* White background for select */
+  color: #000000; /* Black text for select */
 }
 
 /* Button styles */
 .btn-primary {
-    background-color: #007bff; /* Primary button color */
-    border-color: #007bff; /* Button border color */
+  background-color: #007bff; /* Primary button color */
+  border-color: #007bff; /* Button border color */
 }
 
 /* Optional: Change button text color in light mode */
 .btn-primary:hover {
-    background-color: #0056b3; /* Darker shade on hover */
+  background-color: #0056b3; /* Darker shade on hover */
 }
 
 /* Add a loading class to hide the page content */
 .loading {
-    opacity: 0;
-    pointer-events: none;
-  }
-  
-  /* Remove the loading class when the theme is applied */
-  .light-mode, .dark-mode {
-    opacity: 1;
-    pointer-events: auto;
-  }
+  opacity: 0;
+  pointer-events: none;
+}
 
-  
+/* Remove the loading class when the theme is applied */
+.light-mode,
+.dark-mode {
+  opacity: 1;
+  pointer-events: auto;
+}
+.table th,
+.table td {
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+
+.table img {
+  max-width: 100px; /* Control image size */
+  height: auto;
+}

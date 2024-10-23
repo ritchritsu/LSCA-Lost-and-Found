@@ -21,18 +21,39 @@
             <input type="text" class="form-control" name="location" placeholder="Enter location where the item was lost">
         </div>
         <div class="form-group">
-            <label for="email">Your Email:</label>
+            <label for="email">Your School Email:</label>
             <input type="email" class="form-control" name="email" placeholder="Enter your email" required pattern=".+@lsca\.edu\.ph" title="Valid LSCA email address (e.g., example@lsca.edu.ph)">
         </div>
         <div class="form-group">
             <label for="phone">Your Phone Number:</label>
-            <input type="tel" class="form-control" name="phone" placeholder="Enter your phone number">
+            <input type="text" class="form-control" name="phone" 
+                   placeholder="Enter your phone number" 
+                   pattern="^(?:\+639|09)\d{9}$" 
+                   title="Format: 639xxxxxxxxx or 09xxxxxxxxx" required>
         </div>
         <div class="form-group">
             <label for="image_url">Optional Image Link of Item:</label>
             <input type="text" class="form-control" name="image_url" placeholder="Enter image URL (optional)">
         </div>
-        <button type="submit" class="btn btn-primary">Submit Item</button>
-    </form>
+        <button type="submit" class="btn btn-primary" onclick="return validatePhoneNumber()">Submit Item</button>    </form>
 </div>
+
+<script>
+    function validatePhoneNumber() {
+        // Get the phone input value
+        var phoneInput = document.querySelector('input[name="phone"]');
+        var phoneValue = phoneInput.value;
+    
+        // Regular expression to match Philippine phone number formats
+        var phonePattern = /^(?:\+639|09)\d{9}$/;
+    
+        // Check if the phone number matches the pattern
+        if (!phonePattern.test(phoneValue)) {
+            alert("Please enter a valid Philippine phone number in the format: 639xxxxxxxxx or 09xxxxxxxxx");
+            phoneInput.focus();  // Focus back on the input field
+            return false;  // Prevent form submission
+        }
+        return true;  // Allow form submission
+    }
+    </script>
 {% endblock %}

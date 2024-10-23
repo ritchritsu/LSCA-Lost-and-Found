@@ -1,5 +1,5 @@
 import os
-import re  # To use regular expressions for email format validation
+import re
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
@@ -36,32 +36,35 @@ def index():
     user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
 
     if user_email == "ritchangelo.dacanay@lsca.edu.ph":
-        return render_template("admin-dashboard.html")  # Show admin dashboard for this user
+        items = db.execute("SELECT * FROM items")
+        return render_template("admin-dashboard.html", items=items)
     else:
-        return render_template("submission.html")  # Show submission form for regular users
+        return render_template("submission.html")
 
 @app.route("/submit", methods=["POST"])
 @login_required
 def submit_item():
-    """Submit a lost or found item"""
-    # Get data from the form
-    lost_date = request.form.get("lost_date")  # Date the item was lost
-    item_description = request.form.get("item_description")  # Description of the item
-    turned_over_by = request.form.get("turned_over_by")  # Name of the person who turned over the item
-    claimed_by = request.form.get("claimed_by")  # Name of the person who claimed the item
-    grade_and_section = request.form.get("grade_and_section")  # Grade and section of the student (if applicable)
-    found_date = request.form.get("found_date")  # Date the item was found
+    """Submit a lost item"""
+    lost_date = request.form.get("lost_date")  # Date when the item was lost
+    item_description = request.form.get("item_description")  # Description of the lost item
+    location = request.form.get("location")  # Location where the item was lost
+    email = request.form.get("email")  # Email of the claimant
+    phone_number = request.form.get("phone")  # Phone number of the claimant
+    image_url = request.form.get("image_url")  # Image URL of the lost item
 
-    # Basic validation for empty fields
-    if not lost_date or not item_description:
-        flash("All fields are required")
+    # Debugging print statement
+    print(f"lost_date: {lost_date}, item_description: {item_description}, location: {location}, email: {email}, phone_number: {phone_number}, image_url: {image_url}")
+
+    # Check for required fields
+    if not lost_date or not item_description or not location or not email or not phone_number:
+        flash("Please fill all required fields.")
         return redirect("/")
 
-    # Insert into the database without the status
-    db.execute("INSERT INTO items (lost_date, item_description, turned_over_by, claimed_by, grade_and_section, found_date) VALUES (?, ?, ?, ?, ?, ?)",
-               lost_date, item_description, turned_over_by, claimed_by, grade_and_section, found_date)
+    # Inserting into the database
+    db.execute("INSERT INTO items (lost_date, item_description, location, email, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?)",
+               lost_date, item_description, location, email, phone_number, image_url)
 
-    flash("Your item has been submitted successfully! Please wait for an email confirmation or we will reach out to you shortly.")
+    flash("Your item has been submitted successfully!")
     return redirect("/")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -72,12 +75,11 @@ def login():
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
-        
-        # Check if email ends with lsca.edu.ph
+
         if not email or not email.endswith("@lsca.edu.ph"):
             flash("Invalid email. Please use your LSCA email.")
             return render_template("login.html")
-        
+
         if not password:
             flash("Please provide a password")
             return render_template("login.html")
@@ -87,11 +89,11 @@ def login():
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
             flash("Invalid email or password")
             return render_template("login.html")
-            
+        
         session["user_id"] = rows[0]["id"]
         flash("Logged in successfully!")
         return redirect("/")
-    
+
     return render_template("login.html")
 
 @app.route("/logout")
@@ -109,12 +111,10 @@ def register():
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
 
-        # Check if email is valid using regex
-        if not email or not re.match(r"[^@]+@lsca\.edu\.ph$", email):  # Only allow lsca.edu.ph
+        if not email or not re.match(r"[^@]+@lsca\.edu\.ph$", email):
             flash("Invalid email format. Please use your LSCA email.")
             return render_template("register.html")
 
-        # Ensure password length is at least 8 characters
         if not password or len(password) < 8:
             flash("Password must be at least 8 characters long")
             return render_template("register.html")
@@ -123,13 +123,11 @@ def register():
             flash("Password and confirmation do not match")
             return render_template("register.html")
 
-        # Check if email is already registered
         rows = db.execute("SELECT * FROM users WHERE email = ?", email)
         if len(rows) > 0:
             flash("This email is already registered")
             return render_template("register.html")
 
-        # Hash the password
         hashed_password = generate_password_hash(password)
 
         try:
@@ -139,21 +137,21 @@ def register():
         except:
             flash("An error occurred during registration")
             return render_template("register.html")
-    
+
     return render_template("register.html")
 
 @app.route("/found")
 @login_required
 def found_items():
     """Show all found items"""
-    items = db.execute("SELECT * FROM items")  # Retrieve all items (no status filter)
+    items = db.execute("SELECT * FROM items")
     return render_template("found-items.html", items=items)
 
 @app.route("/lost")
 @login_required
 def lost_items():
     """Show all lost items"""
-    items = db.execute("SELECT * FROM items")  # Retrieve all items (no status filter)
+    items = db.execute("SELECT * FROM items")
     return render_template("lost-items.html", items=items)
 
 if __name__ == "__main__":
