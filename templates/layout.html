@@ -47,11 +47,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbar">
                 {% if session["user_id"] %}
-                    <ul class="navbar-nav me-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/">Lost Items</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/found">Found Items</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#submitModal">Submit Item</a></li>
-                    </ul>
+                    
                     <ul class="navbar-nav ms-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                         <button id="theme-toggle" class="btn btn-outline-secondary ms-2">Toggle Theme</button>

@@ -5,7 +5,7 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
-from helpers import login_required, lookup, usd
+from helpers import login_required
 
 # Configure application
 app = Flask(__name__)
@@ -32,34 +32,35 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-    """Show found and lost items"""
-    found_items = db.execute("SELECT * FROM items WHERE status = 'found'")  # Retrieve all found items
-    lost_items = db.execute("SELECT * FROM items WHERE status = 'lost'")    # Retrieve all lost items
+    """Show submission form or admin dashboard based on user"""
+    user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
 
-    return render_template("index.html", found_items=found_items, lost_items=lost_items)
+    if user_email == "ritchangelo.dacanay@lsca.edu.ph":
+        return render_template("admin-dashboard.html")  # Show admin dashboard for this user
+    else:
+        return render_template("submission.html")  # Show submission form for regular users
 
 @app.route("/submit", methods=["POST"])
 @login_required
 def submit_item():
     """Submit a lost or found item"""
     # Get data from the form
-    description = request.form.get("description")
-    category = request.form.get("category")
-    location_lost = request.form.get("location_lost")
-    location_found = request.form.get("location_found")
-    date_lost = request.form.get("date_lost")
-    date_found = request.form.get("date_found")
-    status = request.form.get("status")  # 'lost' or 'found'
-    image_url = request.form.get("image_url")  # optional
+    lost_date = request.form.get("lost_date")  # Date the item was lost
+    item_description = request.form.get("item_description")  # Description of the item
+    turned_over_by = request.form.get("turned_over_by")  # Name of the person who turned over the item
+    claimed_by = request.form.get("claimed_by")  # Name of the person who claimed the item
+    grade_and_section = request.form.get("grade_and_section")  # Grade and section of the student (if applicable)
+    found_date = request.form.get("found_date")  # Date the item was found
+    status = request.form.get("status")  # Status of the item (lost or found)
 
     # Basic validation for empty fields
-    if not description or not category or not status:
+    if not lost_date or not item_description:
         flash("All fields are required")
         return redirect("/")
 
     # Insert into the database
-    db.execute("INSERT INTO items (description, category, location_lost, location_found, date_lost, date_found, status, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-               description, category, location_lost, location_found, date_lost, date_found, status, image_url)
+    db.execute("INSERT INTO items (lost_date, item_description, turned_over_by, claimed_by, grade_and_section, found_date, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+               lost_date, item_description, turned_over_by, claimed_by, grade_and_section, found_date, status)
 
     flash("Item submitted successfully!")
     return redirect("/")
@@ -73,8 +74,9 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
         
-        if not email:
-            flash("Please provide an email")
+        # Check if email ends with @lsca.edu.ph
+        if not email or not email.endswith("@lsca.edu.ph"):
+            flash("Email must be a valid LSCA email ending with @lsca.edu.ph")
             return render_template("login.html")
         
         if not password:
@@ -108,9 +110,9 @@ def register():
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
 
-        # Check if email is valid using regex
-        if not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            flash("Invalid email format")
+        # Check if email is valid and ends with @lsca.edu.ph
+        if not email or not re.match(r"[^@]+@lsca\.edu\.ph$", email):
+            flash("Email must be a valid LSCA email ending with @lsca.edu.ph")
             return render_template("register.html")
 
         # Ensure password length is at least 8 characters
@@ -147,6 +149,13 @@ def found_items():
     """Show all found items"""
     items = db.execute("SELECT * FROM items WHERE status = 'found'")  # Retrieve found items
     return render_template("found-items.html", items=items)
+
+@app.route("/lost")
+@login_required
+def lost_items():
+    """Show all lost items"""
+    items = db.execute("SELECT * FROM items WHERE status = 'lost'")  # Retrieve lost items
+    return render_template("lost-items.html", items=items)
 
 if __name__ == "__main__":
     app.run(debug=True)

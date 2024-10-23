@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Item Submission
+{% endblock %}
+
+{% block main %}
+<div class="container mt-4">
+    <h1>Submit an Item</h1>
+    <form action="/submit" method="post">
+        <div class="form-group">
+            <label for="lost_date">Date Lost:</label>
+            <input type="date" class="form-control" name="lost_date" required>
+        </div>
+        <div class="form-group">
+            <label for="item_description">Item Description:</label>
+            <input type="text" class="form-control" name="item_description" required placeholder="Enter item description">
+        </div>
+        <div class="form-group">
+            <label for="location">Location Lost:</label>
+            <input type="text" class="form-control" name="location" placeholder="Enter location where the item was lost">
+        </div>
+        <div class="form-group">
+            <label for="email">Your Email:</label>
+            <input type="email" class="form-control" name="email" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <label for="phone">Your Phone Number:</label>
+            <input type="tel" class="form-control" name="phone" placeholder="Enter your phone number">
+        </div>
+        <div class="form-group">
+            <label for="image_url">Optional Image Link:</label>
+            <input type="text" class="form-control" name="image_url" placeholder="Enter image URL (optional)">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Item</button>
+    </form>
+</div>
+{% endblock %}
