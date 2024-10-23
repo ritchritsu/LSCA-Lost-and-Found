@@ -51,18 +51,17 @@ def submit_item():
     claimed_by = request.form.get("claimed_by")  # Name of the person who claimed the item
     grade_and_section = request.form.get("grade_and_section")  # Grade and section of the student (if applicable)
     found_date = request.form.get("found_date")  # Date the item was found
-    status = request.form.get("status")  # Status of the item (lost or found)
 
     # Basic validation for empty fields
     if not lost_date or not item_description:
         flash("All fields are required")
         return redirect("/")
 
-    # Insert into the database
-    db.execute("INSERT INTO items (lost_date, item_description, turned_over_by, claimed_by, grade_and_section, found_date, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-               lost_date, item_description, turned_over_by, claimed_by, grade_and_section, found_date, status)
+    # Insert into the database without the status
+    db.execute("INSERT INTO items (lost_date, item_description, turned_over_by, claimed_by, grade_and_section, found_date) VALUES (?, ?, ?, ?, ?, ?)",
+               lost_date, item_description, turned_over_by, claimed_by, grade_and_section, found_date)
 
-    flash("Item submitted successfully!")
+    flash("Your item has been submitted successfully! Please wait for an email confirmation or we will reach out to you shortly.")
     return redirect("/")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -74,9 +73,9 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
         
-        # Check if email ends with @lsca.edu.ph
+        # Check if email ends with lsca.edu.ph
         if not email or not email.endswith("@lsca.edu.ph"):
-            flash("Email must be a valid LSCA email ending with @lsca.edu.ph")
+            flash("Invalid email. Please use your LSCA email.")
             return render_template("login.html")
         
         if not password:
@@ -110,9 +109,9 @@ def register():
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
 
-        # Check if email is valid and ends with @lsca.edu.ph
-        if not email or not re.match(r"[^@]+@lsca\.edu\.ph$", email):
-            flash("Email must be a valid LSCA email ending with @lsca.edu.ph")
+        # Check if email is valid using regex
+        if not email or not re.match(r"[^@]+@lsca\.edu\.ph$", email):  # Only allow lsca.edu.ph
+            flash("Invalid email format. Please use your LSCA email.")
             return render_template("register.html")
 
         # Ensure password length is at least 8 characters
@@ -147,14 +146,14 @@ def register():
 @login_required
 def found_items():
     """Show all found items"""
-    items = db.execute("SELECT * FROM items WHERE status = 'found'")  # Retrieve found items
+    items = db.execute("SELECT * FROM items")  # Retrieve all items (no status filter)
     return render_template("found-items.html", items=items)
 
 @app.route("/lost")
 @login_required
 def lost_items():
     """Show all lost items"""
-    items = db.execute("SELECT * FROM items WHERE status = 'lost'")  # Retrieve lost items
+    items = db.execute("SELECT * FROM items")  # Retrieve all items (no status filter)
     return render_template("lost-items.html", items=items)
 
 if __name__ == "__main__":
