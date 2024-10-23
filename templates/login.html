@@ -5,13 +5,40 @@
 {% endblock %}
 
 {% block main %}
-    <form action="/login" method="post">
+    <form action="/login" method="post" onsubmit="return validateLoginForm()">
         <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="email" placeholder="Email" type="email" required>
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="login-email" name="email" placeholder="Email" type="email" required>
+            <div class="invalid-feedback" id="login-email-error">Please enter a valid email address</div>
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" name="password" placeholder="Password" type="password" required>
+            <input class="form-control mx-auto w-auto" id="login-password" name="password" placeholder="Password" type="password" required>
+            <div class="invalid-feedback" id="login-password-error">Please enter your password</div>
         </div>
         <button class="btn btn-primary" type="submit">Log In</button>
     </form>
-{% endblock %} 
+
+    <script>
+        function validateLoginForm() {
+            // Email validation
+            const email = document.getElementById("login-email").value;
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                document.getElementById("login-email-error").style.display = "block";
+                return false;
+            } else {
+                document.getElementById("login-email-error").style.display = "none";
+            }
+
+            // Password validation
+            const password = document.getElementById("login-password").value;
+            if (!password) {
+                document.getElementById("login-password-error").style.display = "block";
+                return false;
+            } else {
+                document.getElementById("login-password-error").style.display = "none";
+            }
+
+            return true; // Submit the form if all validations pass
+        }
+    </script>
+{% endblock %}
