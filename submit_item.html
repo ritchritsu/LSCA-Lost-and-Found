@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Item</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>Submit Item</h1>
+    <form action="/submit" method="POST">
+        <input type="text" name="description" placeholder="Item Description" required>
+        <input type="text" name="claimed_by" placeholder="Claimed By">
+        <input type="text" name="grade_and_section" placeholder="Grade and Section" required>
+        <button type="submit">Submit Item</button>
+    </form>
+    <a href="/">Back to Home</a>
+</body>
+</html>

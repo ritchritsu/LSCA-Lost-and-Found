@@ -1,10 +1,11 @@
 import os
+import re  # To use regular expressions for email format validation
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
-from helpers import apology, login_required, lookup, usd
+from helpers import login_required, lookup, usd
 
 # Configure application
 app = Flask(__name__)
@@ -51,12 +52,17 @@ def submit_item():
     status = request.form.get("status")  # 'lost' or 'found'
     image_url = request.form.get("image_url")  # optional
 
+    # Basic validation for empty fields
+    if not description or not category or not status:
+        flash("All fields are required")
+        return redirect("/")
+
     # Insert into the database
     db.execute("INSERT INTO items (description, category, location_lost, location_found, date_lost, date_found, status, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                description, category, location_lost, location_found, date_lost, date_found, status, image_url)
 
-    flash("Item submitted successfully!")  # Use flash to notify the user
-    return redirect("/")  # Redirect to the homepage upon successful submission
+    flash("Item submitted successfully!")
+    return redirect("/")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -64,59 +70,75 @@ def login():
     session.clear()  # Clear any existing user session
 
     if request.method == "POST":
-        email = request.form.get("email")  # Get email from form
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
         if not email:
-            return apology("must provide email", 403)  # Ensure email is provided
+            flash("Please provide an email")
+            return render_template("login.html")
+        
+        if not password:
+            flash("Please provide a password")
+            return render_template("login.html")
 
-        if not request.form.get("password"):
-            return apology("must provide password", 403)  # Ensure password is provided
-
-        # Query the database for the provided email
         rows = db.execute("SELECT * FROM users WHERE email = ?", email)
 
-        # Ensure email exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            return apology("invalid email and/or password", 403)  # If not valid, return error
-
-        session["user_id"] = rows[0]["id"]  # Store user ID in session
-        return redirect("/")  # Redirect to homepage upon successful login
-
-    return render_template("login.html")  # Render the login template for GET requests
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
+            flash("Invalid email or password")
+            return render_template("login.html")
+            
+        session["user_id"] = rows[0]["id"]
+        flash("Logged in successfully!")
+        return redirect("/")
+    
+    return render_template("login.html")
 
 @app.route("/logout")
 def logout():
     """Log user out"""
-    session.clear()  # Forget any user_id
-    return redirect("/")  # Redirect user to login form
+    session.clear()
+    flash("You have been logged out.")
+    return redirect("/")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
     if request.method == "POST":
-        email = request.form.get("email")  # Get email instead of username
-        if not email:
-            return apology("email is blank")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+
+        # Check if email is valid using regex
+        if not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            flash("Invalid email format")
+            return render_template("register.html")
+
+        # Ensure password length is at least 8 characters
+        if not password or len(password) < 8:
+            flash("Password must be at least 8 characters long")
+            return render_template("register.html")
+
+        if password != confirmation:
+            flash("Password and confirmation do not match")
+            return render_template("register.html")
 
         # Check if email is already registered
         rows = db.execute("SELECT * FROM users WHERE email = ?", email)
         if len(rows) > 0:
-            return apology("this email is already registered")
+            flash("This email is already registered")
+            return render_template("register.html")
 
-        # Check for password and confirmation
-        if not request.form.get("password"):
-            return apology("password is blank")
+        # Hash the password
+        hashed_password = generate_password_hash(password)
 
-        if request.form.get("confirmation") != request.form.get("password"):
-            return apology("passwords do not match")
-
-        hashed_password = generate_password_hash(request.form.get("password"))
         try:
-            # Insert user with email instead of username
             db.execute("INSERT INTO users (email, hash) VALUES (?, ?)", email, hashed_password)
+            flash("Registration successful!")
             return redirect("/login")
         except:
-            return apology("error occurred during registration")
-
+            flash("An error occurred during registration")
+            return render_template("register.html")
+    
     return render_template("register.html")
 
 @app.route("/found")
