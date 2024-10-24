@@ -12,6 +12,6 @@ Notifications when admin has found a match
 
 
 
-Admin can directly edit the table
+Admin can directly edit the table KINDA DONEEEEEEEEEEEEEEEE
 
-
+add email verification so students are accountable an email is known if they sent something bad
