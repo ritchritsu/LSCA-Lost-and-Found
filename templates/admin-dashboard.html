@@ -6,54 +6,82 @@
 {% block main %}
 <div class="container mt-4">
     <h1>SHS Item Record</h1>
-    <div class="table-responsive">
-        <!-- This div makes the table responsive -->
-        <table class="table table-bordered table-striped">
-            <thead class="thead-light">
-                <tr>
-                    <th>ID</th>                              <!-- Column for ID -->
-                    <th>Lost Date</th>
-                    <th>Location</th>                       <!-- New column for Location -->
-                    <th>Item Description</th>
-                    <th>Image</th>
-                    <th>Email</th>                          <!-- Column for Email -->
-                    <th>Grade & Section</th>
-                    
-                    <th>Phone Number</th>                   <!-- Column for Phone Number -->
-                    <th>Found Date</th>
-                    <th>Found Location</th>                 <!-- New column for Found Location -->
-                </tr>
-            </thead>
-            <tbody>
-                {% if items %} 
-                    {% for item in items %}
-                    <tr>
-                        <td>{{ item.id }}</td>                {# ID of the item #}
-                        <td>{{ item.lost_date }}</td>         {# Date the item was lost #}
-                        <td>{{ item.location }}</td>           {# Location where the item was lost #}
-                        <td>{{ item.item_description }}</td>  {# Description of the item #}
-                        <td>
-                            {% if item.image_url %}
-                                <img src="{{ item.image_url }}" alt="Item Image" style="width: 100px; height: auto" />
-                            {% else %}
-                                <span class="text-muted">No Image Available</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ item.email }}</td>              {# Email of the claimant #}
-                        <td>{{ item.grade_and_section }}</td> {# Grade and section of the student #}
-                        
-                        <td>{{ item.phone_number }}</td>       {# Phone number of the claimant #}
-                        <td>{{ item.found_date }}</td>        {# Date the item was found #}
-                        <td>{{ item.found_location }}</td>     {# Location where the item was found #}
-                    </tr>
-                    {% endfor %} 
-                {% else %}
-                    <tr>
-                        <td colspan="11" class="text-center">No items found.</td> {# Adjusted colspan to 11 for new columns #}
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
+    <div id="editable-table" class="table-responsive"></div> <!-- Div for Handsontable -->
+
+    <!-- Button to save changes -->
+    <button id="save-changes" class="btn btn-primary mt-3" disabled>Save Changes</button>
 </div>
+
+<!-- Include Handsontable CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@8.4.0/dist/handsontable.full.min.css">
+<script src="https://cdn.jsdelivr.net/npm/handsontable@8.4.0/dist/handsontable.full.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('editable-table');
+    
+    // Parse the data from Flask to ensure it's handled as valid JSON in JavaScript
+    const itemsData = JSON.parse(`{{ items | tojson | safe }}`);
+    console.log("Items Data:", itemsData);  // Check if itemsData is populated
+
+    const hot = new Handsontable(container, {
+        licenseKey: 'non-commercial-and-evaluation',  // Add this line for the license
+        data: itemsData,  // Use parsed data here
+        colHeaders: ['ID', 'Lost Date', 'Location', 'Item Description', 'Image', 'Email', 'Grade & Section', 'Phone Number', 'Found Date', 'Found Location'],
+        columns: [
+            { data: 'id', readOnly: true },  // Make ID read-only since it's not editable
+            { data: 'lost_date', type: 'date', dateFormat: 'YYYY-MM-DD' },
+            { data: 'location' },
+            { data: 'item_description' },
+            { data: 'image_url', renderer: imageRenderer },  // Custom renderer for image
+            { data: 'email' },
+            { data: 'grade_and_section' },
+            { data: 'phone_number' },
+            { data: 'found_date', type: 'date', dateFormat: 'YYYY-MM-DD' },
+            { data: 'found_location' }
+        ],
+        stretchH: 'all',
+        rowHeights: 50,
+        width: '100%',
+        height: 'auto',
+        autoWrapRow: true,
+        manualRowResize: true,
+        manualColumnResize: true,
+        afterChange: function(changes, source) {
+            if (source === 'loadData') {
+                return;  // Don't trigger save button when loading data
+            }
+            document.getElementById('save-changes').disabled = false;  // Enable save button on changes
+        }
+    });
+
+    // Function to render images in the table
+    function imageRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
+        td.innerHTML = value ? `<img src="${value}" alt="Image" style="width: 50px; height: auto;">` : '';
+        return td;
+    }
+
+    // Event listener for save button
+    document.getElementById('save-changes').addEventListener('click', function() {
+        const data = hot.getData();  // Get current data from the table
+        fetch('/update-table-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data: data })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert('Changes saved successfully!');
+                document.getElementById('save-changes').disabled = true;  // Disable save button after saving
+            } else {
+                alert('Error saving changes: ' + result.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+</script>
 {% endblock %}
