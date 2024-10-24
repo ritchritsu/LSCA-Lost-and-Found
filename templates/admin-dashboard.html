@@ -55,9 +55,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Function to render images in the table
+    // Function to render images in the table as hyperlinks
     function imageRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
-        td.innerHTML = value ? `<img src="${value}" alt="Image" style="width: 50px; height: auto;">` : '';
+        // Simple regex to validate URL format
+        const urlPattern = /^(ftp|http|https):\/\/[^ "]+$/;
+
+        if (urlPattern.test(value)) {
+            // If value is a valid URL, create a hyperlink
+            td.innerHTML = `<a href="${value}" target="_blank">View Image</a>`;
+        } else {
+            // If not a valid URL, leave cell empty
+            td.innerHTML = '';
+        }
         return td;
     }
 
