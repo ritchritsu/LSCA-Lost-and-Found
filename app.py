@@ -1,10 +1,8 @@
-import os
 import re
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime
 from helpers import login_required
 
 # Configure application
@@ -35,7 +33,11 @@ def index():
     """Show submission form or admin dashboard based on user"""
     user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
 
-    # Debugging statement
+    try:
+        user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
+    except IndexError:
+        flash("User not found.")
+        return redirect("/logout")
     print("User Email:", user_email)
 
     if user_email == "ritchangelo.dacanay@lsca.edu.ph":
@@ -57,15 +59,17 @@ def submit_item():
     phone_number = request.form.get("phone")  # Phone number of the claimant
     image_url = request.form.get("image_url")  # Image URL of the lost item
 
-    # Debugging print statement
-    print(f"lost_date: {lost_date}, item_description: {item_description}, location: {location}, email: {email}, phone_number: {phone_number}, image_url: {image_url}")
-
     # Check for required fields
     if not lost_date or not item_description or not location or not email or not phone_number:
         flash("Please fill all required fields.")
         return redirect("/")
-
-    # Inserting into the database
+    try:
+        db.execute("INSERT INTO items (lost_date, item_description, location, email, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?)",
+                   lost_date, item_description, location, email, phone_number, image_url)
+    except Exception as e:
+        flash("An error occurred while submitting your item.")
+        print(f"Error inserting item: {e}")
+        return redirect("/")
     db.execute("INSERT INTO items (lost_date, item_description, location, email, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?)",
                lost_date, item_description, location, email, phone_number, image_url)
 
@@ -85,7 +89,12 @@ def login():
         if not email or not email.endswith("@lsca.edu.ph"):
             flash("Invalid email. Please use your LSCA email.")
             return render_template("login.html")
-
+        try:
+            rows = db.execute("SELECT * FROM users WHERE email = ?", email)
+        except Exception as e:
+            flash("An error occurred while checking your credentials.")
+            print(f"Error fetching user: {e}")
+            return render_template("login.html")
         # Validate password
         if not password:
             flash("Please provide a password")
