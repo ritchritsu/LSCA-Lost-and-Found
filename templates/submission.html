@@ -25,6 +25,10 @@
             <input type="email" class="form-control" name="email" placeholder="Enter your email" required pattern=".+@lsca\.edu\.ph" title="Valid LSCA email address (e.g., example@lsca.edu.ph)">
         </div>
         <div class="form-group">
+            <label for="grade_and_section">Your Grade & Section:</label>
+            <input type="text" class="form-control" name="grade_and_section" required placeholder="Enter your grade and section">
+        </div>
+        <div class="form-group">
             <label for="phone">Your Phone Number:</label>
             <input type="text" class="form-control" name="phone" 
                    placeholder="Enter your phone number" 
@@ -35,7 +39,8 @@
             <label for="image_url">Optional Image Link of Item:</label>
             <input type="text" class="form-control" name="image_url" placeholder="Enter image URL (optional)">
         </div>
-        <button type="submit" class="btn btn-primary" onclick="return validatePhoneNumber()">Submit Item</button>    </form>
+        <button type="submit" class="btn btn-primary" onclick="return validatePhoneNumber()">Submit Item</button>    
+    </form>
 </div>
 
 <script>
@@ -55,5 +60,5 @@
         }
         return true;  // Allow form submission
     }
-    </script>
+</script>
 {% endblock %}
