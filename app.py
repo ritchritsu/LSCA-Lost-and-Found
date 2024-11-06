@@ -31,18 +31,15 @@ def after_request(response):
 @login_required
 def index():
     """Show submission form or admin dashboard based on user"""
-    user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
-
     try:
         user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
     except IndexError:
         flash("User not found.")
         return redirect("/logout")
-    print("User Email:", user_email)
 
+    # Display admin dashboard if the user is an admin
     if user_email == "ritchangelo.dacanay@lsca.edu.ph":
-        items = db.execute("SELECT * FROM items")  # Retrieve items for admin dashboard
-        print("Items retrieved:", items)  # Debugging statement
+        items = db.execute("SELECT * FROM items")
         return render_template("admin-dashboard.html", items=items)
     else:
         return render_template("submission.html")
@@ -52,26 +49,28 @@ def index():
 def submit_item():
     """Submit a lost item"""
     # Get form data
-    lost_date = request.form.get("lost_date")  # Date when the item was lost
-    item_description = request.form.get("item_description")  # Description of the lost item
-    location = request.form.get("location")  # Location where the item was lost
-    email = request.form.get("email")  # Email of the claimant
-    phone_number = request.form.get("phone")  # Phone number of the claimant
-    image_url = request.form.get("image_url")  # Image URL of the lost item
+    lost_date = request.form.get("lost_date")
+    item_description = request.form.get("item_description")
+    location = request.form.get("location")
+    email = request.form.get("email")
+    grade_and_section = request.form.get("grade_and_section")
+    phone_number = request.form.get("phone")
+    image_url = request.form.get("image_url")
 
     # Check for required fields
-    if not lost_date or not item_description or not location or not email or not phone_number:
-        flash("Please fill all required fields.")
+    if not all([lost_date, item_description, location, email, grade_and_section, phone_number]):
+        flash("Please fill in all required fields.")
         return redirect("/")
+
     try:
-        db.execute("INSERT INTO items (lost_date, item_description, location, email, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?)",
-                   lost_date, item_description, location, email, phone_number, image_url)
+        db.execute(
+            "INSERT INTO items (lost_date, item_description, location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            lost_date, item_description, location, email, grade_and_section, phone_number, image_url
+        )
     except Exception as e:
         flash("An error occurred while submitting your item.")
         print(f"Error inserting item: {e}")
         return redirect("/")
-    db.execute("INSERT INTO items (lost_date, item_description, location, email, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?)",
-               lost_date, item_description, location, email, phone_number, image_url)
 
     flash("Your item has been submitted successfully!")
     return redirect("/")
@@ -89,24 +88,24 @@ def login():
         if not email or not email.endswith("@lsca.edu.ph"):
             flash("Invalid email. Please use your LSCA email.")
             return render_template("login.html")
+
         try:
             rows = db.execute("SELECT * FROM users WHERE email = ?", email)
         except Exception as e:
             flash("An error occurred while checking your credentials.")
             print(f"Error fetching user: {e}")
             return render_template("login.html")
+
         # Validate password
         if not password:
             flash("Please provide a password")
             return render_template("login.html")
 
         # Check user credentials
-        rows = db.execute("SELECT * FROM users WHERE email = ?", email)
-
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
             flash("Invalid email or password")
             return render_template("login.html")
-        
+
         session["user_id"] = rows[0]["id"]
         flash("Logged in successfully!")
         return redirect("/")
@@ -156,7 +155,7 @@ def register():
             flash("Registration successful!")
             return redirect("/login")
         except Exception as e:
-            print(f"Error during registration: {e}")  # Log error
+            print(f"Error during registration: {e}")
             flash("An error occurred during registration")
             return render_template("register.html")
 
@@ -189,7 +188,7 @@ def update_table_data():
                        row[1], row[2], row[3], row[5], row[6], row[7], row[8], row[9], row[0])
         return jsonify({'success': True})
     except Exception as e:
-        print(f"Error updating data: {e}")  # Log the error
+        print(f"Error updating data: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == "__main__":
