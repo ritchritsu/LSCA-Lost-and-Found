@@ -24,9 +24,38 @@
             <label for="email">Your School Email:</label>
             <input type="email" class="form-control" name="email" placeholder="Enter your email" required pattern=".+@lsca\.edu\.ph" title="Valid LSCA email address (e.g., example@lsca.edu.ph)">
         </div>
-        <div class="form-group">
-            <label for="grade_and_section">Your Grade & Section:</label>
-            <input type="text" class="form-control" name="grade_and_section" required placeholder="Enter your grade and section">
+        <div class="form-group mb-3">
+            <label for="grade_and_section" class="form-label">Your Group:</label>
+            <select class="form-select" name="grade_and_section" required>
+                <option value="" disabled selected>Select your group</option>
+                <optgroup label="Grade 11">
+                    <option value="11A">11A</option>
+                    <option value="11B">11B</option>
+                    <option value="11C">11C</option>
+                    <option value="11D">11D</option>
+                    <option value="11E">11E</option>
+                    <option value="11F">11F</option>
+                    <option value="11G">11G</option>
+                    <option value="11H">11H</option>
+                    <option value="11I">11I</option>
+                    <option value="11J">11J</option>
+                </optgroup>
+                <optgroup label="Grade 12">
+                    <option value="12A">12A</option>
+                    <option value="12B">12B</option>
+                    <option value="12C">12C</option>
+                    <option value="12D">12D</option>
+                    <option value="12E">12E</option>
+                    <option value="12F">12F</option>
+                    <option value="12G">12G</option>
+                    <option value="12H">12H</option>
+                    <option value="12I">12I</option>
+                </optgroup>
+                <optgroup label="Other">
+                    <option value="Staff">Staff</option>
+                </optgroup>
+                
+            </select>
         </div>
         <div class="form-group">
             <label for="phone">Your Phone Number:</label>
