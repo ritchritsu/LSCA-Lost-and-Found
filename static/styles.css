@@ -1067,3 +1067,7 @@ body.dark-mode {
   border: none !important;
   color: #000000 !important; /* Handsontable text color */
 }
+
+li a{
+  color: white;
+}
