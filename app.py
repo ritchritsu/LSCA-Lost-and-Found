@@ -107,6 +107,7 @@ def login():
             return render_template("login.html")
 
         session["user_id"] = rows[0]["id"]
+        flash("Logged in successfully!")
         return redirect("/")
 
     return render_template("login.html")
