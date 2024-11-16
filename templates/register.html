@@ -5,54 +5,100 @@
 {% endblock %}
 
 {% block main %}
-    <form action="/register" method="post" onsubmit="return validateForm()">
-        <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="email" name="email" placeholder="School Email" type="email" required>
-            <div class="invalid-feedback" id="email-error">Please enter a valid email address</div>
-        </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password" required>
-            <div class="invalid-feedback" id="password-error">Password must be at least 8 characters, with numbers, symbols, uppercase, and lowercase letters</div>
-        </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="confirmation" name="confirmation" placeholder="Confirm Password" type="password" required>
-            <div class="invalid-feedback" id="confirm-error">Passwords do not match</div>
-        </div>
-        <button class="btn btn-primary" type="submit">Register</button>
-    </form>
+<div class="container mt-4 d-flex justify-content-center">
+    <div class="col-md-6">
+        <h3 class="text-light text-center">Register</h3>
+        <form action="/register" method="post" onsubmit="return validateForm()">
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control custom-input w-75 mx-auto" id="email" name="email" placeholder="School Email" type="email" required>
+                <div class="invalid-feedback" id="email-error">Please enter a valid email address</div>
+            </div>
+            <div class="mb-3">
+                <input class="form-control custom-input w-75 mx-auto" id="password" name="password" placeholder="Password" type="password" required>
+                <div class="invalid-feedback" id="password-error">Password must be at least 8 characters long</div>
+            </div>
+            <div class="mb-3">
+                <input class="form-control custom-input w-75 mx-auto" id="confirmation" name="confirmation" placeholder="Confirm Password" type="password" required>
+                <div class="invalid-feedback" id="confirm-error">Passwords do not match</div>
+            </div>
+            <button class="btn custom-green-btn w-50 mx-auto d-block" type="submit">Register</button>
+        </form>
+    </div>
+</div>
 
-    <script>
-        function validateForm() {
-            // Email validation
-            const email = document.getElementById("email").value;
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email)) {
-                document.getElementById("email-error").style.display = "block";
-                return false;
-            } else {
-                document.getElementById("email-error").style.display = "none";
-            }
+<style>
+    .custom-input {
+        background-color: transparent;
+        border: none;
+        border-bottom: 2px solid #86C232;
+        color: #ffffff; /* White text */
+    }
 
-            // Password validation
-            const password = document.getElementById("password").value;
-            const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
-            if (!passwordPattern.test(password)) {
-                document.getElementById("password-error").style.display = "block";
-                return false;
-            } else {
-                document.getElementById("password-error").style.display = "none";
-            }
+    .custom-input::placeholder {
+        color: #ffffff; /* White placeholder text */
+        opacity: 0.7; /* Slightly transparent */
+    }
 
-            // Password confirmation validation
-            const confirmation = document.getElementById("confirmation").value;
-            if (password !== confirmation) {
-                document.getElementById("confirm-error").style.display = "block";
-                return false;
-            } else {
-                document.getElementById("confirm-error").style.display = "none";
-            }
+    .custom-input:focus {
+        background-color: transparent;
+        border-bottom: 2px solid #087830;
+        box-shadow: none;
+    }
 
-            return true; // Submit the form if all validations pass
+    .custom-green-btn {
+        background-color: #087830;
+        border-color: #087830;
+        color: white;
+        transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    }
+
+    .custom-green-btn:hover {
+        background-color: #065a2b;
+        border-color: #065a2b;
+        transform: scale(1.05); /* Slightly increase size */
+    }
+
+    .custom-green-btn:active {
+        transform: scale(1.1); /* Slightly increase size when clicked */
+    }
+
+    .text-light {
+        color: #ffffff !important; /* Ensure text is white */
+    }
+</style>
+
+<script>
+    function validateForm() {
+        // Email validation
+        const email = document.getElementById("email").value;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            document.getElementById("email-error").style.display = "block";
+            return false;
+        } else {
+            document.getElementById("email-error").style.display = "none";
         }
-    </script>
+
+        // Password validation
+        const password = document.getElementById("password").value;
+        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+        if (!passwordPattern.test(password)) {
+            document.getElementById("password-error").style.display = "block";
+            return false;
+        } else {
+            document.getElementById("password-error").style.display = "none";
+        }
+
+        // Password confirmation validation
+        const confirmation = document.getElementById("confirmation").value;
+        if (password !== confirmation) {
+            document.getElementById("confirm-error").style.display = "block";
+            return false;
+        } else {
+            document.getElementById("confirm-error").style.display = "none";
+        }
+
+        return true; // Submit the form if all validations pass
+    }
+</script>
 {% endblock %}

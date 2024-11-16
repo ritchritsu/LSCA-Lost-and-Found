@@ -5,40 +5,86 @@
 {% endblock %}
 
 {% block main %}
-    <form action="/login" method="post" onsubmit="return validateLoginForm()">
-        <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="login-email" name="email" placeholder="School Email" type="email" required>
-            <div class="invalid-feedback" id="login-email-error">Please enter a valid email address</div>
-        </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="login-password" name="password" placeholder="Password" type="password" required>
-            <div class="invalid-feedback" id="login-password-error">Please enter your password</div>
-        </div>
-        <button class="btn btn-primary" type="submit">Log In</button>
-    </form>
+<div class="container mt-4 d-flex justify-content-center">
+    <div class="col-md-6">
+        <h3 class="text-light text-center">Log In</h3>
+        <form action="/login" method="post" onsubmit="return validateLoginForm()">
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control custom-input w-75 mx-auto" id="login-email" name="email" placeholder="School Email" type="email" required>
+                <div class="invalid-feedback" id="login-email-error">Please enter a valid email address</div>
+            </div>
+            <div class="mb-3">
+                <input class="form-control custom-input w-75 mx-auto" id="login-password" name="password" placeholder="Password" type="password" required>
+                <div class="invalid-feedback" id="login-password-error">Please enter your password</div>
+            </div>
+            <button class="btn custom-green-btn w-50 mx-auto d-block" type="submit">Log In</button>
+        </form>
+    </div>
+</div>
 
-    <script>
-        function validateLoginForm() {
-            // Email validation
-            const email = document.getElementById("login-email").value;
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email)) {
-                document.getElementById("login-email-error").style.display = "block";
-                return false;
-            } else {
-                document.getElementById("login-email-error").style.display = "none";
-            }
+<style>
+    .custom-input {
+        background-color: transparent;
+        border: none;
+        border-bottom: 2px solid #86C232;
+        color: #ffffff; /* White text */
+    }
 
-            // Password validation
-            const password = document.getElementById("login-password").value;
-            if (!password) {
-                document.getElementById("login-password-error").style.display = "block";
-                return false;
-            } else {
-                document.getElementById("login-password-error").style.display = "none";
-            }
+    .custom-input::placeholder {
+        color: #ffffff; /* White placeholder text */
+        opacity: 0.7; /* Slightly transparent */
+    }
 
-            return true; // Submit the form if all validations pass
+    .custom-input:focus {
+        background-color: transparent;
+        border-bottom: 2px solid #087830;
+        box-shadow: none;
+    }
+
+    .custom-green-btn {
+        background-color: #087830;
+        border-color: #087830;
+        color: white;
+        transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    }
+
+    .custom-green-btn:hover {
+        background-color: #065a2b;
+        border-color: #065a2b;
+        transform: scale(1.05); /* Slightly increase size */
+    }
+
+    .custom-green-btn:active {
+        transform: scale(1.1); /* Slightly increase size when clicked */
+    }
+
+    .text-light {
+        color: #ffffff !important; /* Ensure text is white */
+    }
+</style>
+
+<script>
+    function validateLoginForm() {
+        // Email validation
+        const email = document.getElementById("login-email").value;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            document.getElementById("login-email-error").style.display = "block";
+            return false;
+        } else {
+            document.getElementById("login-email-error").style.display = "none";
         }
-    </script>
+
+        // Password validation
+        const password = document.getElementById("login-password").value;
+        if (!password) {
+            document.getElementById("login-password-error").style.display = "block";
+            return false;
+        } else {
+            document.getElementById("login-password-error").style.display = "none";
+        }
+
+        return true; // Submit the form if all validations pass
+    }
+</script>
 {% endblock %}

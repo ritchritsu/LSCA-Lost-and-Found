@@ -1,21 +1,48 @@
-{% extends "layout.html" %} 
-{% block title %} 
+{% extends "layout.html" %}
+{% block title %}
     Admin Dashboard
-{% endblock %} 
+{% endblock %}
 
 {% block main %}
-
 <div class="container mt-4">
-    <h1>SHS Item Record</h1>
+    <h1 class="text-light">SHS Item Record</h1>
     <div id="editable-table" class="table-responsive" style="width: 80vw; overflow-y: auto;"></div> <!-- Div for Handsontable -->
 
     <!-- Button to save changes -->
-    <button id="save-changes" class="btn btn-primary mt-3" disabled>Save Changes</button>
+    <button id="save-changes" class="btn custom-green-btn mt-3" disabled>Save Changes</button>
 </div>
 
 <!-- Include Handsontable CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@8.4.0/dist/handsontable.full.min.css">
 <script src="https://cdn.jsdelivr.net/npm/handsontable@8.4.0/dist/handsontable.full.min.js"></script>
+
+<!-- Custom CSS for Handsontable -->
+<style>
+    .handsontable .htCore,
+    .handsontable .ht_master .wtHolder,
+    .handsontable .ht_master .wtHider,
+    .handsontable .ht_master .wtSpreader,
+    .handsontable .ht_master .wtTable,
+    .handsontable .ht_master .wtHider .wtHolder,
+    .handsontable .ht_master .wtHider .wtHolder .wtSpreader,
+    .handsontable .ht_master .wtHider .wtHolder .wtSpreader .wtTable,
+    .handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable td,
+    .handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable th {
+        background-color: transparent !important;
+        border: none !important;
+    }
+
+    .custom-green-btn {
+        background-color: #087830;
+        border-color: #087830;
+        color: white;
+    }
+
+    .custom-green-btn:hover {
+        background-color: #065a2b;
+        border-color: #065a2b;
+    }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -105,6 +132,5 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => console.error('Error:', error));
     });
 });
-
 </script>
 {% endblock %}

@@ -10,23 +10,23 @@
     <form action="/submit" method="post">
         <div class="form-group">
             <label for="lost_date">Date Lost:</label>
-            <input type="date" class="form-control" name="lost_date" required>
+            <input type="date" class="form-control custom-input" name="lost_date" required>
         </div>
         <div class="form-group">
             <label for="item_description">Item Description:</label>
-            <input type="text" class="form-control" name="item_description" required placeholder="Enter item description">
+            <input type="text" class="form-control custom-input" name="item_description" required placeholder="Enter item description">
         </div>
         <div class="form-group">
             <label for="location">Location Lost:</label>
-            <input type="text" class="form-control" name="location" placeholder="Enter location where the item was lost">
+            <input type="text" class="form-control custom-input" name="location" placeholder="Enter location where the item was lost">
         </div>
         <div class="form-group">
             <label for="email">Your School Email:</label>
-            <input type="email" class="form-control" name="email" placeholder="Enter your email" required pattern=".+@lsca\.edu\.ph" title="Valid LSCA email address (e.g., example@lsca.edu.ph)">
+            <input type="email" class="form-control custom-input" name="email" placeholder="Enter your email" required pattern=".+@lsca\.edu\.ph" title="Valid LSCA email address (e.g., example@lsca.edu.ph)">
         </div>
         <div class="form-group mb-3">
             <label for="grade_and_section" class="form-label">Your Group:</label>
-            <select class="form-select" name="grade_and_section" required>
+            <select class="form-select custom-input" name="grade_and_section" required>
                 <option value="" disabled selected>Select your group</option>
                 <optgroup label="Grade 11">
                     <option value="11A">11A</option>
@@ -54,21 +54,20 @@
                 <optgroup label="Other">
                     <option value="Staff">Staff</option>
                 </optgroup>
-                
             </select>
         </div>
         <div class="form-group">
             <label for="phone">Your Phone Number:</label>
-            <input type="text" class="form-control" name="phone" 
+            <input type="text" class="form-control custom-input" name="phone" 
                    placeholder="Enter your phone number" 
                    pattern="^(?:\+639|09)\d{9}$" 
                    title="Format: 639xxxxxxxxx or 09xxxxxxxxx" required>
         </div>
         <div class="form-group">
             <label for="image_url">Optional Image Link of Item:</label>
-            <input type="text" class="form-control" name="image_url" placeholder="Enter image URL (optional)">
+            <input type="text" class="form-control custom-input" name="image_url" placeholder="Enter image URL (optional)">
         </div>
-        <button type="submit" class="btn btn-primary" onclick="return validatePhoneNumber()">Submit Item</button>    
+        <button type="submit" class="btn custom-green-btn" onclick="return validatePhoneNumber()">Submit Item</button>    
     </form>
 </div>
 

@@ -107,7 +107,6 @@ def login():
             return render_template("login.html")
 
         session["user_id"] = rows[0]["id"]
-        flash("Logged in successfully!")
         return redirect("/")
 
     return render_template("login.html")
@@ -189,6 +188,17 @@ def update_table_data():
         return jsonify({'success': True})
     except Exception as e:
         print(f"Error updating data: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+    
+@app.route("/delete-item/<int:item_id>", methods=["DELETE"])
+@login_required
+def delete_item(item_id):
+    """Delete an item from the database"""
+    try:
+        db.execute("DELETE FROM items WHERE id = ?", item_id)
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error deleting item: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == "__main__":
