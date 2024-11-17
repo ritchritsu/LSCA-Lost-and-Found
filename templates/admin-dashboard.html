@@ -55,18 +55,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const hot = new Handsontable(container, {
         licenseKey: 'non-commercial-and-evaluation',  // Add this line for the license
         data: itemsData,  // Use parsed data here
-        colHeaders: ['ID', 'Lost Date', 'Location Lost', 'Item Description', 'Image', 'Email', 'Student Grade & Section', 'Phone Number', 'Found Date', 'Found Location'],
+        colHeaders: ['ID', 'Status', 'Lost Date', 'Found Date', 'Lost Location', 'Found Location', 'Item Description', 'Image', 'Email', 'Student Grade & Section', 'Phone Number'],
         columns: [
             { data: 'id', readOnly: true },
+            { data: 'status', type: 'dropdown', source: ['lost', 'found'] },
             { data: 'lost_date', type: 'date', dateFormat: 'YYYY-MM-DD' },
+            { data: 'found_date', type: 'date', dateFormat: 'YYYY-MM-DD' },
             { data: 'location' },
+            { data: 'found_location' },
             { data: 'item_description' },
             { data: 'image_url', renderer: imageRenderer },  // Updated renderer for image
             { data: 'email' },
             { data: 'grade_and_section' },
-            { data: 'phone_number' },
-            { data: 'found_date', type: 'date', dateFormat: 'YYYY-MM-DD' },
-            { data: 'found_location' }
+            { data: 'phone_number' }
         ],
         stretchH: 'all',
         rowHeights: 50,
@@ -75,6 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
         autoWrapRow: true,
         manualRowResize: true,
         manualColumnResize: true,
+        columnSorting: true,  // Enable column sorting
         afterChange: function(changes, source) {
             if (source === 'loadData') return;
             document.getElementById('save-changes').disabled = false;
