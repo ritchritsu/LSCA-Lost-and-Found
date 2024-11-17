@@ -47,8 +47,9 @@ def index():
 @app.route("/submit", methods=["POST"])
 @login_required
 def submit_item():
-    """Submit a lost item"""
+    """Submit a lost or found item"""
     # Get form data
+    item_status = request.form.get("item_status")
     lost_date = request.form.get("lost_date")
     item_description = request.form.get("item_description")
     location = request.form.get("location")
@@ -58,14 +59,14 @@ def submit_item():
     image_url = request.form.get("image_url")
 
     # Check for required fields
-    if not all([lost_date, item_description, location, email, grade_and_section, phone_number]):
+    if not all([item_status, lost_date, item_description, location, email, grade_and_section, phone_number]):
         flash("Please fill in all required fields.")
         return redirect("/")
 
     try:
         db.execute(
-            "INSERT INTO items (lost_date, item_description, location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            lost_date, item_description, location, email, grade_and_section, phone_number, image_url
+            "INSERT INTO items (item_status, lost_date, item_description, location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            item_status, lost_date, item_description, location, email, grade_and_section, phone_number, image_url
         )
     except Exception as e:
         flash("An error occurred while submitting your item.")
@@ -165,14 +166,14 @@ def register():
 @login_required
 def found_items():
     """Show all found items"""
-    items = db.execute("SELECT * FROM items")
+    items = db.execute("SELECT * FROM items WHERE item_status = 'found'")
     return render_template("found-items.html", items=items)
 
 @app.route("/lost")
 @login_required
 def lost_items():
     """Show all lost items"""
-    items = db.execute("SELECT * FROM items")
+    items = db.execute("SELECT * FROM items WHERE item_status = 'lost'")
     return render_template("lost-items.html", items=items)
 
 @app.route("/update-table-data", methods=["POST"])
@@ -184,7 +185,7 @@ def update_table_data():
     try:
         # Iterate over each row in the data and update the database accordingly
         for row in data:
-            db.execute("""UPDATE items SET lost_date = ?, location = ?, item_description = ?, email = ?, grade_and_section = ?, phone_number = ?, found_date = ?, found_location = ? WHERE id = ?""",
+            db.execute("""UPDATE items SET item_status = ?, lost_date = ?, location = ?, item_description = ?, email = ?, grade_and_section = ?, phone_number = ?, found_date = ?, found_location = ? WHERE id = ?""",
                        row[1], row[2], row[3], row[5], row[6], row[7], row[8], row[9], row[0])
         return jsonify({'success': True})
     except Exception as e:
