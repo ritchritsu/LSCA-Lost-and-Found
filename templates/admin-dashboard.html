@@ -29,7 +29,7 @@
     .handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable td,
     .handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable th {
         background-color: #808080 !important; /* Gray background */
-        color: #ffffff !important; /* White text */
+        color: #000000 !important; /* White text */
     }
 
     .custom-green-btn {
@@ -42,6 +42,36 @@
         background-color: #065a2b;
         border-color: #065a2b;
     }
+
+    .custom-nav-link {
+  color: #ffffff !important;
+  position: relative;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.custom-nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  display: block;
+  margin-top: 5px;
+  right: 0;
+  background: #ffffff;
+  transition: width 0.2s ease-in-out;
+  -webkit-transition: width 0.2s ease-in-out;
+}
+
+.custom-nav-link:hover::after {
+  width: 100%;
+  left: 0;
+  background: #ffffff;
+}
+
+.custom-nav-link:hover {
+  color: #ffffff;
+}
 </style>
 
 <script>
