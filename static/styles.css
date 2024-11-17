@@ -1,5 +1,4 @@
 /* Size for brand */
-
 nav .navbar-brand {
   font-size: 2em;
   font-family: "Proxima Nova", sans-serif;
@@ -10,15 +9,15 @@ nav .navbar-brand {
   background: transparent;
 }
 
-h1,h2,h3 {
+h1, h2, h3 {
   font-weight: bold;
-}
-body {
-  background-size: cover;
-  min-height: 100vh;
 }
 
 body {
+  background: linear-gradient(to bottom, rgba(34, 34, 34, 0.5), rgba(34, 34, 34, 0.5)), url('/static/lsca.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #ffffff;
+  min-height: 100vh;
   transition: background-color 0.3s, color 0.3s;
 }
 
@@ -28,7 +27,7 @@ body.light-mode {
 }
 
 body.dark-mode {
-  background-color: #ffffff; /* Dark background */
+  background-color: #222629; /* Dark background */
   color: #ffffff; /* Light text */
 }
 
@@ -37,34 +36,77 @@ body.dark-mode {
 }
 
 .navbar.light-mode {
-  background-color: #f8f9fa; /* Light navbar */
+  background-color: #ffffff; /* Light background */
+  color: #000000; /* Dark text */
 }
 
 .navbar.dark-mode {
-  background-color: #222222; /* Dark navbar */
-}
-
-.modal-content {
-  transition: background-color 0.3s;
-}
-
-.modal-content.light-mode {
-  background-color: #ffffff; /* Light modal background */
-}
-
-.modal-content.dark-mode {
-  background-color: #252525; /* Dark modal background */
-}
-
-body.light-mode {
-  background-color: #f8f9fa; /* Light background */
-  color: #212529; /* Dark text */
-}
-
-/* Dark mode styles */
-body.dark-mode {
-  background-color: #212529; /* Dark background */
+  background-color: #222629; /* Dark background */
   color: #ffffff; /* Light text */
+}
+
+/* Custom nav link styles */
+.custom-nav-link {
+  color: #ffffff !important;
+  position: relative;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.custom-nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  display: block;
+  margin-top: 5px;
+  right: 0;
+  background: #ffffff;
+  transition: width 0.2s ease-in-out;
+  -webkit-transition: width 0.2s ease-in-out;
+}
+
+.custom-nav-link:hover::after {
+  width: 100%;
+  left: 0;
+  background: #ffffff;
+}
+
+.custom-nav-link:hover {
+  color: #ffffff;
+}
+
+/* Button styles */
+.custom-green-btn {
+  background-color: #087830;
+  border-color: #087830;
+  color: white;
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+.custom-green-btn:hover {
+  background-color: #065a2b;
+  border-color: #065a2b;
+  transform: scale(1.05); /* Slightly increase size */
+}
+
+.custom-green-btn:active {
+  transform: scale(1.1); /* Slightly increase size when clicked */
+}
+
+/* Input styles */
+.custom-input {
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #86C232;
+  color: #86C232;
+  transition: border-bottom-color 0.2s ease-in-out;
+}
+
+.custom-input:focus {
+  background-color: transparent;
+  border-bottom: 2px solid #087830;
+  box-shadow: none;
 }
 
 /* Table styles */
@@ -76,240 +118,41 @@ table {
   background-color: transparent; /* Make table background transparent */
 }
 
-th,
-td {
+th, td {
   padding: 10px; /* Add padding for header and cells */
   text-align: left; /* Align text to the left */
   background-color: transparent; /* Make header and cell backgrounds transparent */
-}
-
-th {
-  color: inherit; /* Keep header text color consistent with the theme */
-}
-
-/* Navbar link styles */
-.navbar-light .navbar-nav .nav-link {
-  color: #212529; /* Default link color for light mode */
-}
-
-.navbar-light .navbar-nav .nav-link:hover {
-  color: #0056b3; /* Link hover color for light mode */
-}
-
-.dark-mode .navbar-light .navbar-nav .nav-link {
-  color: #ffffff; /* Link color for dark mode */
-}
-
-.dark-mode .navbar-light .navbar-nav .nav-link:hover {
-  color: #d1d1d1; /* Link hover color for dark mode */
-}
-
-.navbar-light .navbar-brand {
-  color: #212529; /* Default title color for light mode */
-}
-
-.dark-mode .navbar-light .navbar-brand {
-  color: #ffffff; /* Title color for dark mode */
-}
-
-table {
-  background-color: transparent; /* Make table background transparent */
-  border-collapse: collapse; /* Optional: to make borders collapse into a single border */
-  width: 100%; /* Make the table full width (optional) */
-}
-
-table th,
-table td {
-  border: 1px solid rgba(255, 255, 255, 0.5); /* Light border for dark mode, change opacity for visibility */
-  color: inherit; /* Make text color inherit the current color */
-}
-
-.dark-mode table th,
-.dark-mode table td {
-  border-color: rgba(255, 255, 255, 0.5); /* White border in dark mode */
-}
-
-table {
-  background-color: transparent !important; /* Force transparent background */
-  border-collapse: collapse; /* Optional: collapses borders for a cleaner look */
-  width: 100%; /* Optional: full width for the table */
-}
-
-/* Style for table header and cells */
-table th,
-table td {
   border: 1px solid rgba(255, 255, 255, 0.5); /* Light border color */
   color: inherit; /* Inherit text color from parent */
-  background-color: transparent !important; /* Force transparent background on cells */
 }
 
-/* Adjust borders in dark mode */
-.dark-mode table th,
-.dark-mode table td {
-  border-color: rgba(
-    255,
-    255,
-    255,
-    0.5
-  ); /* Ensure visible borders in dark mode */
-}
-
-/* Optional: Ensure navbar text is visible */
-.navbar a {
-  color: white !important; /* Make navbar text white for visibility */
-}
-
-table th,
-table td {
-  color: black; /* Default text color */
-}
-
-/* Dark mode text color */
-.dark-mode table th,
-.dark-mode table td {
+.dark-mode table th, .dark-mode table td {
+  border-color: rgba(255, 255, 255, 0.5); /* White border in dark mode */
   color: white; /* Change text color to white in dark mode */
 }
 
-/* Default styles for light mode */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  /* Adjust based on your specific title element */
-  color: black; /* Title color in light mode */
+.table th, .table td {
+  white-space: nowrap; /* Prevent text from wrapping */
 }
 
-.navbar a {
-  color: rgb(255, 255, 255) !important; /* Navigation link color in light mode */
+.table img {
+  max-width: 100px; /* Control image size */
+  height: auto;
 }
 
-/* Dark mode styles */
-.dark-mode h1,
-.dark-mode h2,
-.dark-mode h3,
-.dark-mode h4,
-.dark-mode h5,
-.dark-mode h6 {
-  color: white; /* Title color in dark mode */
-}
-
-.dark-mode .navbar a {
-  color: white !important; /* Navigation link color in dark mode */
-}
-
-body {
-  transition: background-color 0.5s; /* Smooth transition */
-  background-color: #fff; /* Default light background */
-}
-
-body.dark-mode {
-  background-color: #252525; /* Dark mode background */
-}
-
-/* Ensure modal has smooth transition */
-.modal-content {
-  transition: background-color 0.5s; /* Smooth transition for modal */
-}
-
-.modal-content.light-mode {
-  background-color: #fff; /* Light mode for modal */
-}
-
-.modal-content.dark-mode {
-  background-color: #2a2a2a; /* Dark mode for modal */
-}
-
-input.form-control.dark-mode,
-select.form-select.dark-mode {
-  background-color: #2a2a2a; /* Dark background */
-  color: #ffffff; /* White text */
-}
-
-/* For all input fields in light mode */
-input.form-control.light-mode,
-select.form-select.light-mode {
-  background-color: #000000; /* White background */
-  color: #000000; /* Black text */
-}
-
-/* Modal body styles */
-.modal-body.dark-mode {
-  background-color: #242424; /* Match modal background with dark mode */
-  color: #ffffff; /* White text for modal */
-}
-
-/* Modal Body Styles */
+/* Modal styles */
 .modal-content {
   transition: background-color 0.3s, color 0.3s; /* Smooth transition for colors */
 }
 
-/* Dark mode styles for modal body */
-.modal-content.dark-mode {
-  background-color: #2a2a2a; /* Dark background for modal */
-  color: #ffffff; /* White text for modal */
-}
-
-/* Light mode styles for modal body */
 .modal-content.light-mode {
   background-color: #ffffff; /* Light background for modal */
   color: #000000; /* Black text for modal */
 }
 
-/* Input and select styles for dark mode */
-input.form-control.dark-mode,
-select.form-select.dark-mode {
-  background-color: #2a2a2a; /* Dark background for input fields */
-  color: #8d8d8d; /* White text for input fields */
-  border: 1px solid #ffffff; /* White border for visibility */
-}
-
-/* Input and select styles for light mode */
-input.form-control.light-mode,
-select.form-select.light-mode {
-  background-color: #ffffff; /* White background for input fields */
-  color: #000000; /* Black text for input fields */
-  border: 1px solid #000000; /* Black border for visibility */
-}
-
-/* Style the labels for better contrast */
-label {
-  color: inherit; /* Use inherited color for text (white in dark mode, black in light mode) */
-}
-
-/* Light mode styles */
-.light-mode .modal-content {
-  background-color: #ffffff; /* White background for light mode */
-  color: #000000; /* Black text for light mode */
-}
-
-.light-mode .modal-header {
-  background-color: #ebebeb; /* Light header */
-}
-
-.light-mode .modal-footer {
-  background-color: #f8f9fa; /* Light footer */
-}
-
-/* Dark mode styles */
-.dark-mode .modal-content {
-  background-color: #343a40; /* Dark background for dark mode */
-  color: #ffffff; /* White text for dark mode */
-}
-
-.dark-mode .modal-header {
-  background-color: #272727; /* Dark header */
-}
-
-.dark-mode .modal-footer {
-  background-color: #495057; /* Dark footer */
-}
-
-/* Light mode styles for the modal */
-.modal-content {
-  background-color: #ffffff; /* White background for light mode */
-  color: #000000; /* Black text for light mode */
+.modal-content.dark-mode {
+  background-color: #2a2a2a; /* Dark background for modal */
+  color: #ffffff; /* White text for modal */
 }
 
 .modal-header {
@@ -325,32 +168,49 @@ label {
   background-color: #ffffff; /* Ensure the body is white */
 }
 
-/* Input fields */
-.form-control {
+.modal-body.dark-mode {
+  background-color: #242424; /* Match modal background with dark mode */
+  color: #ffffff; /* White text for modal */
+}
+
+/* Input and select styles for dark mode */
+input.form-control.dark-mode, select.form-select.dark-mode {
+  background-color: #2a2a2a; /* Dark background for input fields */
+  color: #8d8d8d; /* White text for input fields */
+  border: 1px solid #ffffff; /* White border for visibility */
+}
+
+/* Input and select styles for light mode */
+input.form-control.light-mode, select.form-select.light-mode {
   background-color: #ffffff; /* White background for input fields */
   color: #000000; /* Black text for input fields */
-  border: 1px solid #ced4da; /* Light border */
+  border: 1px solid #000000; /* Black border for visibility */
 }
 
-.form-control:focus {
-  border-color: #80bdff; /* Blue border on focus */
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Blue shadow */
+/* Style the labels for better contrast */
+label {
+  color: inherit; /* Use inherited color for text (white in dark mode, black in light mode) */
 }
 
-.form-select {
-  background-color: #ffffff; /* White background for select */
-  color: #000000; /* Black text for select */
+
+/* General styles */
+.background-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 128, 0, 0.2); /* Green overlay with low opacity */
+  pointer-events: none; /* Allows clicks to pass through */
+  z-index: -1; /* Places the overlay behind other elements */
 }
 
-/* Button styles */
-.btn-primary {
-  background-color: #007bff; /* Primary button color */
-  border-color: #007bff; /* Button border color */
+h1, h2, h3, h4, h5, h6, p, label, .nav-link, .alert {
+  color: #ffffff !important;
 }
 
-/* Optional: Change button text color in light mode */
-.btn-primary:hover {
-  background-color: #0056b3; /* Darker shade on hover */
+li a, .navbar a {
+  color: white !important;
 }
 
 /* Add a loading class to hide the page content */
@@ -360,720 +220,27 @@ label {
 }
 
 /* Remove the loading class when the theme is applied */
-.light-mode,
-.dark-mode {
+.light-mode, .dark-mode {
   opacity: 1;
   pointer-events: auto;
 }
-.table th,
-.table td {
-  white-space: nowrap; /* Prevent text from wrapping */
-}
 
-.table img {
-  max-width: 100px; /* Control image size */
-  height: auto;
-}
 
-/* Size for brand */
-nav .navbar-brand {
-  font-size: 2em;
-  font-family: "Proxima Nova", sans-serif;
-  font-weight: bolder;
-}
-
-#MainTable {
-  background: transparent;
-}
-
-h1, h2, h3 {
-  font-weight: bold;
-}
-
-body {
-  background-size: cover;
-  min-height: 100vh;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-body.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-body.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-.navbar {
-  transition: background-color 0.3s;
-}
-
-.navbar.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-.navbar.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-/* Button styles */
-.custom-green-btn {
-  background-color: #087830;
-  border-color: #087830;
+.htCore {
+  background: grey;
   color: white;
-  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 
-.custom-green-btn:hover {
-  background-color: #065a2b;
-  border-color: #065a2b;
-  transform: scale(1.05); /* Slightly increase size */
-}
-
-.custom-green-btn:active {
-  transform: scale(1.1); /* Slightly increase size when clicked */
-}
-
-/* Input styles */
-.custom-input {
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px solid #86C232;
-  color: #86C232;
-  transition: border-bottom-color 0.2s ease-in-out;
-}
-
-.custom-input:focus {
-  background-color: transparent;
-  border-bottom: 2px solid #087830;
-  box-shadow: none;
-}
-
-/* Size for brand */
-nav .navbar-brand {
-  font-size: 2em;
-  font-family: "Proxima Nova", sans-serif;
-  font-weight: bolder;
-}
-
-#MainTable {
-  background: transparent;
-}
-
-h1, h2, h3 {
-  font-weight: bold;
-}
-
-body {
-  background-size: cover;
-  min-height: 100vh;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-body.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-body.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-.navbar {
-  transition: background-color 0.3s;
-}
-
-.navbar.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-.navbar.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-/* Custom nav link styles */
-.custom-nav-link {
-  color: #ffffff;
-  position: relative;
-  text-decoration: none;
-  transition: color 0.2s ease-in-out;
-}
-
-.custom-nav-link::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  display: block;
-  margin-top: 5px;
-  right: 0;
-  background: #ffffff;
-  transition: width 0.2s ease-in-out;
-  -webkit-transition: width 0.2s ease-in-out;
-}
-
-.custom-nav-link:hover::after {
-  width: 100%;
-  left: 0;
-  background: #065a2b;
-}
-
-.custom-nav-link:hover {
-  color: #065a2b;
-}
-
-/* Button styles */
-.custom-green-btn {
-  background-color: #087830;
-  border-color: #087830;
-  color: white;
-  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
-}
-
-.custom-green-btn:hover {
-  background-color: #065a2b;
-  border-color: #065a2b;
-  transform: scale(1.05); /* Slightly increase size */
-}
-
-.custom-green-btn:active {
-  transform: scale(1.1); /* Slightly increase size when clicked */
-}
-
-/* Input styles */
-.custom-input {
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px solid #86C232;
-  color: #86C232;
-  transition: border-bottom-color 0.2s ease-in-out;
-}
-
-.custom-input:focus {
-  background-color: transparent;
-  border-bottom: 2px solid #087830;
-  box-shadow: none;
-}
-
-/* Size for brand */
-nav .navbar-brand {
-  font-size: 2em;
-  font-family: "Proxima Nova", sans-serif;
-  font-weight: bolder;
-}
-
-#MainTable {
-  background: transparent;
-}
-
-h1, h2, h3 {
-  font-weight: bold;
-}
-
-body {
-  background: linear-gradient(to bottom, rgba(34, 34, 34, 0.5), rgba(34, 34, 34, 0.5)), url('/static/lsca.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: #ffffff;
-  min-height: 100vh;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.background-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 128, 0, 0.2); /* Green overlay with low opacity */
-  pointer-events: none; /* Allows clicks to pass through */
-  z-index: -1; /* Places the overlay behind other elements */
-}
-
-body.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-body.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-.navbar {
-  transition: background-color 0.3s;
-}
-
-
-
-.navbar.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #ffffff; /* Dark text */
-}
-
-.navbar.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-/* Custom nav link styles */
-.custom-nav-link {
-  color: #087830;
-  position: relative;
-  text-decoration: none;
-  transition: color 0.2s ease-in-out;
-}
-
-.custom-nav-link::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  display: block;
-  margin-top: 5px;
-  right: 0;
-  background: #087830;
-  transition: width 0.2s ease-in-out;
-  -webkit-transition: width 0.2s ease-in-out;
-}
-
-.custom-nav-link:hover::after {
-  width: 100%;
-  left: 0;
-  background: #065a2b;
-}
-
-.custom-nav-link:hover {
-  color: #065a2b;
-}
-
-/* Button styles */
-.custom-green-btn {
-  background-color: #087830;
-  border-color: #087830;
-  color: white;
-  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
-}
-
-.custom-green-btn:hover {
-  background-color: #065a2b;
-  border-color: #065a2b;
-  transform: scale(1.05); /* Slightly increase size */
-}
-
-.custom-green-btn:active {
-  transform: scale(1.1); /* Slightly increase size when clicked */
-}
-
-/* Input styles */
-.custom-input {
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px solid #86C232;
-  color: #86C232;
-  transition: border-bottom-color 0.2s ease-in-out;
-}
-
-.custom-input:focus {
-  background-color: transparent;
-  border-bottom: 2px solid #087830;
-  box-shadow: none;
-}
-
-/* General styles */
-body {
-  background: linear-gradient(to bottom, rgba(34, 34, 34, 0.5), rgba(34, 34, 34, 0.5)), url('/static/lsca.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: #ffffff;
-  min-height: 100vh;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.background-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 128, 0, 0.2); /* Green overlay with low opacity */
-  pointer-events: none; /* Allows clicks to pass through */
-  z-index: -1; /* Places the overlay behind other elements */
-}
-
-h1, h2, h3, h4, h5, h6, p, label, .nav-link, .alert {
-  color: #ffffff !important;
-}
-
-body.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-body.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-.navbar {
-  transition: background-color 0.3s;
-}
-
-.navbar.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-.navbar.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-/* Custom nav link styles */
-.custom-nav-link {
-  color: #087830;
-  position: relative;
-  text-decoration: none;
-  transition: color 0.2s ease-in-out;
-}
-
-.custom-nav-link::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  display: block;
-  margin-top: 5px;
-  right: 0;
-  background: #087830;
-  transition: width 0.2s ease-in-out;
-  -webkit-transition: width 0.2s ease-in-out;
-}
-
-.custom-nav-link:hover::after {
-  width: 100%;
-  left: 0;
-  background: #065a2b;
-}
-
-.custom-nav-link:hover {
-  color: #065a2b;
-}
-
-/* Button styles */
-.custom-green-btn {
-  background-color: #087830;
-  border-color: #087830;
-  color: white;
-  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
-}
-
-.custom-green-btn:hover {
-  background-color: #065a2b;
-  border-color: #065a2b;
-  transform: scale(1.05); /* Slightly increase size */
-}
-
-.custom-green-btn:active {
-  transform: scale(1.1); /* Slightly increase size when clicked */
-}
-
-/* Input styles */
-.custom-input {
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px solid #86C232;
-  color: #86C232;
-  transition: border-bottom-color 0.2s ease-in-out;
-}
-
-.custom-input:focus {
-  background-color: transparent;
-  border-bottom: 2px solid #087830;
-  box-shadow: none;
-}
-
-/* Handsontable styles */
 .handsontable .htCore,
-.handsontable .ht_master .wtHolder,
-.handsontable .ht_master .wtHider,
-.handsontable .ht_master .wtSpreader,
-.handsontable .ht_master .wtTable,
-.handsontable .ht_master .wtHider .wtHolder,
-.handsontable .ht_master .wtHider .wtHolder .wtSpreader,
-.handsontable .ht_master .wtHider .wtHolder .wtSpreader .wtTable,
-.handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable td,
-.handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable th {
-  background-color: transparent !important;
-  border: none !important;
-  color: #000000 !important; /* Handsontable text color */
-}
-
-/* General styles */
-body {
-  background: linear-gradient(to bottom, rgba(34, 34, 34, 0.5), rgba(34, 34, 34, 0.5)), url('/static/lsca.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: #ffffff;
-  min-height: 100vh;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.background-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 128, 0, 0.2); /* Green overlay with low opacity */
-  pointer-events: none; /* Allows clicks to pass through */
-  z-index: -1; /* Places the overlay behind other elements */
-}
-
-h1, h2, h3, h4, h5, h6, p, label, .nav-link, .alert {
-  color: #ffffff !important;
-}
-
-body.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-body.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-.navbar {
-  transition: background-color 0.3s;
-}
-
-.navbar.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-.navbar.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-/* Custom nav link styles */
-.custom-nav-link {
-  color: #ffffff !important;
-  position: relative;
-  text-decoration: none;
-  transition: color 0.2s ease-in-out;
-}
-
-.custom-nav-link::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  display: block;
-  margin-top: 5px;
-  right: 0;
-  background: #ffffff;
-  transition: width 0.2s ease-in-out;
-  -webkit-transition: width 0.2s ease-in-out;
-}
-
-.custom-nav-link:hover::after {
-  width: 100%;
-  left: 0;
-  background: #065a2b;
-}
-
-.custom-nav-link:hover {
-  color: #065a2b;
-}
-
-/* Button styles */
-.custom-green-btn {
-  background-color: #087830;
-  border-color: #087830;
-  color: white;
-  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
-}
-
-.custom-green-btn:hover {
-  background-color: #065a2b;
-  border-color: #065a2b;
-  transform: scale(1.05); /* Slightly increase size */
-}
-
-.custom-green-btn:active {
-  transform: scale(1.1); /* Slightly increase size when clicked */
-}
-
-/* Input styles */
-.custom-input {
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px solid #86C232;
-  color: #86C232;
-  transition: border-bottom-color 0.2s ease-in-out;
-}
-
-.custom-input:focus {
-  background-color: transparent;
-  border-bottom: 2px solid #087830;
-  box-shadow: none;
-}
-
-/* Handsontable styles */
-.handsontable .htCore,
-.handsontable .ht_master .wtHolder,
-.handsontable .ht_master .wtHider,
-.handsontable .ht_master .wtSpreader,
-.handsontable .ht_master .wtTable,
-.handsontable .ht_master .wtHider .wtHolder,
-.handsontable .ht_master .wtHider .wtHolder .wtSpreader,
-.handsontable .ht_master .wtHider .wtHolder .wtSpreader .wtTable,
-.handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable td,
-.handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable th {
-  background-color: transparent !important;
-  border: none !important;
-  color: #000000 !important; /* Handsontable text color */
-}
-
-/* General styles */
-body {
-  background: linear-gradient(to bottom, rgba(34, 34, 34, 0.5), rgba(34, 34, 34, 0.5)), url('/static/lsca.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: #ffffff;
-  min-height: 100vh;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.background-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 128, 0, 0.2); /* Green overlay with low opacity */
-  pointer-events: none; /* Allows clicks to pass through */
-  z-index: -1; /* Places the overlay behind other elements */
-}
-
-h1, h2, h3, h4, h5, h6, p, label, .nav-link, .alert {
-  color: #ffffff !important;
-}
-
-body.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-body.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-.navbar {
-  transition: background-color 0.3s;
-}
-
-.navbar.light-mode {
-  background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
-}
-
-.navbar.dark-mode {
-  background-color: #222629; /* Dark background */
-  color: #ffffff; /* Light text */
-}
-
-/* Custom nav link styles */
-.custom-nav-link {
-  color: #ffffff !important;
-  position: relative;
-  text-decoration: none;
-  transition: color 0.2s ease-in-out;
-}
-
-.custom-nav-link::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  display: block;
-  margin-top: 5px;
-  right: 0;
-  background: #ffffff;
-  transition: width 0.2s ease-in-out;
-  -webkit-transition: width 0.2s ease-in-out;
-}
-
-.custom-nav-link:hover::after {
-  width: 100%;
-  left: 0;
-  background: #065a2b;
-}
-
-.custom-nav-link:hover {
-  color: #065a2b;
-}
-
-/* Button styles */
-.custom-green-btn {
-  background-color: #087830;
-  border-color: #087830;
-  color: white;
-  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
-}
-
-.custom-green-btn:hover {
-  background-color: #065a2b;
-  border-color: #065a2b;
-  transform: scale(1.05); /* Slightly increase size */
-}
-
-.custom-green-btn:active {
-  transform: scale(1.1); /* Slightly increase size when clicked */
-}
-
-/* Input styles */
-.custom-input {
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px solid #86C232;
-  color: #86C232;
-  transition: border-bottom-color 0.2s ease-in-out;
-}
-
-.custom-input:focus {
-  background-color: transparent;
-  border-bottom: 2px solid #087830;
-  box-shadow: none;
-}
-
-/* Handsontable styles */
-.handsontable .htCore,
-.handsontable .ht_master .wtHolder,
-.handsontable .ht_master .wtHider,
-.handsontable .ht_master .wtSpreader,
-.handsontable .ht_master .wtTable,
-.handsontable .ht_master .wtHider .wtHolder,
-.handsontable .ht_master .wtHider .wtHolder .wtSpreader,
-.handsontable .ht_master .wtHider .wtHolder .wtSpreader .wtTable,
-.handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable td,
-.handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable th {
-  background-color: transparent !important;
-  border: none !important;
-  color: #000000 !important; /* Handsontable text color */
-}
-
-li a{
-  color: white;
-}
-
-.navbar .a{
-  color: white;
-}
+    .handsontable .ht_master .wtHolder,
+    .handsontable .ht_master .wtHider,
+    .handsontable .ht_master .wtSpreader,
+    .handsontable .ht_master .wtTable,
+    .handsontable .ht_master .wtHider .wtHolder,
+    .handsontable .ht_master .wtHider .wtHolder .wtSpreader,
+    .handsontable .ht_master .wtHider .wtHolder .wtSpreader .wtTable,
+    .handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable td,
+    .handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable th {
+        background: rgba(128, 128, 128, 0);
+        color: white;
+    }
