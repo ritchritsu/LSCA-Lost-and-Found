@@ -68,6 +68,37 @@
     .text-light {
         color: #ffffff !important; /* Ensure text is white */
     }
+
+    .custom-nav-link {
+  color: #ffffff !important;
+  position: relative;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.custom-nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  display: block;
+  margin-top: 5px;
+  right: 0;
+  background: #ffffff;
+  transition: width 0.2s ease-in-out;
+  -webkit-transition: width 0.2s ease-in-out;
+}
+
+.custom-nav-link:hover::after {
+  width: 100%;
+  left: 0;
+  background: #ffffff;
+}
+
+.custom-nav-link:hover {
+  color: #ffffff;
+}
+
 </style>
 
 <script>
