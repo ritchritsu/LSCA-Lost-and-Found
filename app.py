@@ -50,23 +50,30 @@ def submit_item():
     """Submit a lost or found item"""
     # Get form data
     item_status = request.form.get("item_status")
-    lost_date = request.form.get("lost_date")
+    date = request.form.get("date")
     item_description = request.form.get("item_description")
     location = request.form.get("location")
     email = request.form.get("email")
     grade_and_section = request.form.get("grade_and_section")
-    phone_number = request.form.get("phone")
+    phone_number = request.form.get("phone_number")
     image_url = request.form.get("image_url")
 
     # Check for required fields
-    if not all([item_status, lost_date, item_description, location, email, grade_and_section, phone_number]):
+    if not all([item_status, date, item_description, location, email, grade_and_section, phone_number]):
         flash("Please fill in all required fields.")
         return redirect("/")
 
+    # Determine the correct date and location fields based on item_status
+    lost_date = date if item_status == "lost" else ""
+    found_date = date if item_status == "found" else ""
+    lost_location = location if item_status == "lost" else ""
+    found_location = location if item_status == "found" else ""
+
+    # Insert data into the database
     try:
         db.execute(
-            "INSERT INTO items (item_status, lost_date, item_description, location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            item_status, lost_date, item_description, location, email, grade_and_section, phone_number, image_url
+            "INSERT INTO items (item_status, lost_date, found_date, item_description, location, found_location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            item_status, lost_date, found_date, item_description, lost_location, found_location, email, grade_and_section, phone_number, image_url
         )
     except Exception as e:
         flash("An error occurred while submitting your item.")
@@ -185,8 +192,8 @@ def update_table_data():
     try:
         # Iterate over each row in the data and update the database accordingly
         for row in data:
-            db.execute("""UPDATE items SET item_status = ?, lost_date = ?, location = ?, item_description = ?, email = ?, grade_and_section = ?, phone_number = ?, found_date = ?, found_location = ? WHERE id = ?""",
-                       row[1], row[2], row[3], row[5], row[6], row[7], row[8], row[9], row[0])
+            db.execute("""UPDATE items SET item_status = ?, lost_date = ?, found_date = ?, location = ?, found_location = ?, item_description = ?, email = ?, grade_and_section = ?, phone_number = ?, image_url = ? WHERE id = ?""",
+                       row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[0])
         return jsonify({'success': True})
     except Exception as e:
         print(f"Error updating data: {e}")
