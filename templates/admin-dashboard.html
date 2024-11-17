@@ -55,13 +55,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const hot = new Handsontable(container, {
         licenseKey: 'non-commercial-and-evaluation',  // Add this line for the license
         data: itemsData,  // Use parsed data here
-        colHeaders: ['ID', 'Status', 'Lost Date', 'Found Date', 'Lost Location', 'Found Location', 'Item Description', 'Image', 'Email', 'Student Grade & Section', 'Phone Number'],
+        colHeaders: ['ID', 'Status', 'Lost Date', 'Lost Location','Found Date', 'Found Location', 'Item Description', 'Image', 'Email', 'User Group', 'Phone Number'],
         columns: [
             { data: 'id', readOnly: true },
-            { data: 'status', type: 'dropdown', source: ['lost', 'found'] },
+            { data: 'item_status', type: 'dropdown', source: ['lost', 'found'] },
             { data: 'lost_date', type: 'date', dateFormat: 'YYYY-MM-DD' },
-            { data: 'found_date', type: 'date', dateFormat: 'YYYY-MM-DD' },
             { data: 'location' },
+            { data: 'found_date', type: 'date', dateFormat: 'YYYY-MM-DD' },
             { data: 'found_location' },
             { data: 'item_description' },
             { data: 'image_url', renderer: imageRenderer },  // Updated renderer for image
