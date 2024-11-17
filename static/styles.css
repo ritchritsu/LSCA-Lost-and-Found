@@ -182,7 +182,7 @@ h6 {
 }
 
 .navbar a {
-  color: black !important; /* Navigation link color in light mode */
+  color: rgb(255, 255, 255) !important; /* Navigation link color in light mode */
 }
 
 /* Dark mode styles */
@@ -500,7 +500,7 @@ body.dark-mode {
 
 /* Custom nav link styles */
 .custom-nav-link {
-  color: #087830;
+  color: #ffffff;
   position: relative;
   text-decoration: none;
   transition: color 0.2s ease-in-out;
@@ -514,7 +514,7 @@ body.dark-mode {
   display: block;
   margin-top: 5px;
   right: 0;
-  background: #087830;
+  background: #ffffff;
   transition: width 0.2s ease-in-out;
   -webkit-transition: width 0.2s ease-in-out;
 }
@@ -610,9 +610,11 @@ body.dark-mode {
   transition: background-color 0.3s;
 }
 
+
+
 .navbar.light-mode {
   background-color: #ffffff; /* Light background */
-  color: #000000; /* Dark text */
+  color: #ffffff; /* Dark text */
 }
 
 .navbar.dark-mode {
@@ -1069,5 +1071,9 @@ body.dark-mode {
 }
 
 li a{
+  color: white;
+}
+
+.navbar .a{
   color: white;
 }
