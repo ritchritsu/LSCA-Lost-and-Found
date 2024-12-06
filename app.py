@@ -192,7 +192,9 @@ def update_table_data():
     try:
         # Iterate over each row in the data and update the database accordingly
         for row in data:
-            db.execute("""UPDATE items SET item_status = ?, lost_date = ?, found_date = ?, location = ?, found_location = ?, item_description = ?, email = ?, grade_and_section = ?, phone_number = ?, image_url = ? WHERE id = ?""",
+            if len(row) < 13:
+                continue  # Skip rows that don't have enough columns
+            db.execute("""UPDATE items SET item_status = ?, lost_date = ?, found_date = ?, location = ?, found_location = ?, item_description = ?, image_url = ?, email = ?, grade_and_section = ?, phone_number = ? WHERE id = ?""",
                        row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[0])
         return jsonify({'success': True})
     except Exception as e:
@@ -211,4 +213,4 @@ def delete_item(item_id):
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
