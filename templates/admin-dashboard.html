@@ -6,30 +6,19 @@
 {% block main %}
 <div class="container mt-4">
     <h1 class="text-light">SHS Item Record</h1>
-    <div id="editable-table" class="table-responsive" style="width: 80vw; overflow-y: auto;"></div> <!-- Div for Handsontable -->
-
-    <!-- Button to save changes -->
-    <button id="save-changes" class="btn custom-green-btn mt-3" disabled>Save Changes</button>
+    <div id="table-container" class="table-responsive" style="width: 80vw; overflow-y: auto; margin-left: -5em;"></div> <!-- Div for Tabulator -->
 </div>
 
-<!-- Include Handsontable CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@8.4.0/dist/handsontable.full.min.css">
-<script src="https://cdn.jsdelivr.net/npm/handsontable@8.4.0/dist/handsontable.full.min.js"></script>
+<!-- Include Tabulator CDN -->
+<link rel="stylesheet" href="https://unpkg.com/tabulator-tables@5.4.4/dist/css/tabulator.min.css">
+<script src="https://unpkg.com/tabulator-tables@5.4.4/dist/js/tabulator.min.js"></script>
 
-<!-- Custom CSS for Handsontable -->
+<!-- Custom CSS for Tabulator -->
 <style>
-    .handsontable .htCore,
-    .handsontable .ht_master .wtHolder,
-    .handsontable .ht_master .wtHider,
-    .handsontable .ht_master .wtSpreader,
-    .handsontable .ht_master .wtTable,
-    .handsontable .ht_master .wtHider .wtHolder,
-    .handsontable .ht_master .wtHider .wtHolder .wtSpreader,
-    .handsontable .ht_master .wtHider .wtHolder .wtSpreader .wtTable,
-    .handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable td,
-    .handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable th {
-        background-color: #808080 !important; /* Gray background */
+    .tabulator .tabulator-tableHolder .tabulator-table {
+        background-color: rgba(128, 128, 128, 0.5) !important; /* Transparent gray background */
         color: #000000 !important; /* Black text */
+        font-weight: bold !important; /* Bold text */
     }
 
     .custom-green-btn {
@@ -76,93 +65,75 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const container = document.getElementById('editable-table');
-    
-    // Parsing the items data passed from Flask
-    const itemsData = JSON.parse(`{{ items | tojson | safe }}`);
-    console.log("Items Data:", itemsData);  // Check if itemsData is populated
+    const tableData = JSON.parse(`{{ items | tojson | safe }}`); // Flask data
 
-    const hot = new Handsontable(container, {
-        licenseKey: 'non-commercial-and-evaluation',  // Add this line for the license
-        data: itemsData,  // Use parsed data here
-        colHeaders: ['ID', 'Status', 'Lost Date', 'Found Date', 'Lost Location', 'Found Location', 'Item Description', 'Image', 'Email', 'User Group', 'Phone Number'],
+    const table = new Tabulator("#table-container", {
+        data: tableData,
+        layout: "fitColumns",
         columns: [
-            { data: 'id', readOnly: true },
-            { data: 'item_status', type: 'dropdown', source: ['lost', 'found'] },
-            { data: 'lost_date', type: 'date', dateFormat: 'YYYY-MM-DD' },
-            { data: 'found_date', type: 'date', dateFormat: 'YYYY-MM-DD' },
-            { data: 'location' },
-            { data: 'found_location' },
-            { data: 'item_description' },
-            { data: 'image_url', renderer: imageRenderer },  // Updated renderer for image
-            { data: 'email' },
-            { data: 'grade_and_section' },
-            { data: 'phone_number' }
+            { title: "ID", field: "id", width: 50, headerFilter: true, editor: false },
+            { title: "Status", field: "item_status", editor: "select", editorParams: { values: ["lost", "found"] } },
+            { title: "Lost Date", field: "lost_date", editor: "input" },
+            { title: "Found Date", field: "found_date", editor: "input" },
+            { title: "Location", field: "location", editor: "input" },
+            { title: "Found Location", field: "found_location", editor: "input" },
+            { title: "Description", field: "item_description", editor: "input" },
+            {
+                title: "Image",
+                field: "image_url",
+                formatter: "image",
+                formatterParams: { height: "50px", width: "auto" },
+            },
+            { title: "Email", field: "email", editor: "input" },
+            { title: "Grade and Section", field: "grade_and_section", editor: "input" },
+            { title: "Phone Number", field: "phone_number", editor: "input" },
+            {
+                title: "Actions",
+                formatter: "buttonCross",
+                width: 40,
+                align: "center",
+                cellClick: (e, cell) => {
+                    const itemId = cell.getRow().getData().id;
+                    markAsFound(itemId);
+                },
+            },
         ],
-        stretchH: 'all',
-        rowHeights: 50,
-        width: '100%',
-        height: 'auto',
-        autoWrapRow: true,
-        manualRowResize: true,
-        manualColumnResize: true,
-        columnSorting: true,  // Enable column sorting
-        afterChange: function(changes, source) {
-            if (source === 'loadData') return;
-            document.getElementById('save-changes').disabled = false;
-        }
+        cellEdited: (cell) => {
+            const updatedData = table.getData();
+            fetch("/update-table-data", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ data: updatedData }),
+            })
+                .then((response) => response.json())
+                .then((result) => {
+                    if (result.success) {
+                        console.log("Changes saved successfully!");
+                    } else {
+                        console.error("Error saving changes: " + result.error);
+                    }
+                })
+                .catch((error) => console.error("Error:", error));
+        },
     });
 
-    // Function to render the image column with clickable image preview
-    function imageRenderer(hotInstance, td, row, col, prop, value, cellProperties) {
-        const urlPattern = /^(ftp|http|https):\/\/[^ "]+$/;
-        td.innerHTML = '';  // Clear previous content
-
-        if (urlPattern.test(value)) {
-            const img = document.createElement('img');
-            img.src = value;
-            img.style.width = '50px';  // Small thumbnail size
-            img.style.height = 'auto';  // Maintain aspect ratio
-            img.style.cursor = 'pointer';
-
-            // Link to open the full-size image in a new tab
-            const link = document.createElement('a');
-            link.href = value;
-            link.target = '_blank';
-            link.appendChild(img);  // Embed the thumbnail within the link
-
-            td.appendChild(link);
-        } else {
-            // If no valid URL, show a placeholder image
-            const placeholderImg = document.createElement('img');
-            placeholderImg.src = '/static/default-image.jpg';  // Path to default image
-            placeholderImg.style.width = '50px';
-            placeholderImg.style.height = 'auto';
-            td.appendChild(placeholderImg);
-        }
-
-        return td;
-    }
-
-    // Save the changes made in the table
-    document.getElementById('save-changes').addEventListener('click', function() {
-        const data = hot.getData();
-        fetch('/update-table-data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: data })
+    // Function to mark an item as found
+    function markAsFound(itemId) {
+        fetch(`/mark-as-found/${itemId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
         })
         .then(response => response.json())
         .then(result => {
             if (result.success) {
-                alert('Changes saved successfully!');
-                document.getElementById('save-changes').disabled = true;
+                alert('Item marked as found successfully!');
+                location.reload();  // Reload the page to reflect changes
             } else {
-                alert('Error saving changes: ' + result.error);
+                alert('Error marking item as found: ' + result.error);
             }
         })
         .catch(error => console.error('Error:', error));
-    });
+    }
 });
 </script>
 {% endblock %}
