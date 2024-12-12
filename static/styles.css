@@ -244,3 +244,34 @@ li a, .navbar a {
         background: rgba(128, 128, 128, 0);
         color: white;
     }
+
+    .tabulator .tabulator-header .tabulator-col {
+      display: inline-flex;
+      position: relative;
+      box-sizing: border-box;
+      flex-direction: column;
+      justify-content: flex-start;
+      border-right: 1px solid #aaa;
+      background: #ffffff !important;
+      text-align: left;
+      vertical-align: bottom;
+      overflow: hidden;
+      font-weight: bold !important;
+    }
+
+    .tabulator-row .tabulator-cell{
+      background-color: #065a2b;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table {
+      white-space: nowrap;
+      color: #fffefe !important;
+    }
+
+    .tabulator .tabulator-row { border-bottom: 1px solid #8f8f8f !important; }
+
+    .alert-primary {
+      background-color: #065a2b !important;
+      color: #ffffff !important;
+      border: none;
+    }
