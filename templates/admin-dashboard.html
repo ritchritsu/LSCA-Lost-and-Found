@@ -21,6 +21,10 @@
         font-weight: bold !important; /* Bold text */
     }
 
+    .tabulator .tabulator-row {
+        border-bottom: 1px solid #ffffff !important; /* White line separating each row */
+    }
+
     .custom-green-btn {
         background-color: #087830;
         border-color: #087830;
@@ -81,13 +85,14 @@ document.addEventListener('DOMContentLoaded', function () {
             {
                 title: "Image",
                 field: "image_url",
-                formatter: "image",
-                formatterParams: { height: "50px", width: "auto" },
+                formatter: function(cell, formatterParams, onRendered) {
+                    const value = cell.getValue();
+                    return `<a href="${value}" target="_blank"><img src="${value}" style="height: 50px; width: auto;" /></a>`;
+                }
             },
             { title: "Email", field: "email", editor: "input" },
             { title: "Grade and Section", field: "grade_and_section", editor: "input" },
             { title: "Phone Number", field: "phone_number", editor: "input" },
-
             
         ],
         cellEdited: (cell) => {
@@ -95,8 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch("/update-table-data", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ data: rowData }),
-
+                body: JSON.stringify(rowData),
             })
                 .then((response) => response.json())
                 .then((result) => {

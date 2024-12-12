@@ -261,11 +261,13 @@ li a, .navbar a {
 
     .tabulator-row .tabulator-cell{
       background-color: #065a2b;
+      font-weight: bold !important;
     }
 
     .tabulator .tabulator-tableholder .tabulator-table {
       white-space: nowrap;
       color: #fffefe !important;
+      font-weight: bold !important;
     }
 
     .tabulator .tabulator-row { border-bottom: 1px solid #8f8f8f !important; }
@@ -274,4 +276,5 @@ li a, .navbar a {
       background-color: #065a2b !important;
       color: #ffffff !important;
       border: none;
+      font-weight: bold !important;
     }
