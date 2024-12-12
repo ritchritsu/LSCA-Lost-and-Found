@@ -278,3 +278,10 @@ li a, .navbar a {
       border: none;
       font-weight: bold !important;
     }
+
+    .tabulator .tabulator-tableHolder .tabulator-table .tabulator-cell {
+      white-space: nowrap;             /* Prevents text from wrapping */
+      overflow: hidden;                /* Hides any overflow */
+      text-overflow: ellipsis;         /* Adds an ellipsis (...) if text overflows */
+  }
+  
