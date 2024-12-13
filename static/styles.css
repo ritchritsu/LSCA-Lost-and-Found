@@ -286,3 +286,116 @@ th, td {
   height: auto;            /* Maintain aspect ratio */
 }
 
+/* Modern green search bar styling */
+.search-bar-wrapper {
+  width: 80vw;
+  margin-left: -5em;
+  display: flex;
+  align-items: center;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 10px 15px;
+  border: 2px solid #087830;
+  border-radius: 25px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar:focus {
+  border-color: #065a2b;
+  box-shadow: 0 4px 10px rgba(0, 128, 0, 0.4);
+}
+
+.search-bar::placeholder {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.tabulator .tabulator-tableHolder .tabulator-table {
+  background-color: rgba(128, 128, 128, 0.5) !important; /* Transparent gray background */
+  color: #000000 !important; /* Black text */
+  font-weight: bold !important; /* Bold text */
+}
+
+.custom-green-btn {
+  background-color: #087830;
+  border-color: #087830;
+  color: white;
+  font-size: 14px;
+}
+
+.custom-green-btn:hover {
+  background-color: #065a2b;
+  border-color: #065a2b;
+}
+
+.custom-nav-link {
+  color: #ffffff !important;
+  position: relative;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.custom-nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  display: block;
+  margin-top: 5px;
+  right: 0;
+  background: #ffffff;
+  transition: width 0.2s ease-in-out;
+  -webkit-transition: width 0.2s ease-in-out;
+}
+
+.custom-nav-link:hover::after {
+  width: 100%;
+  left: 0;
+  background: #ffffff;
+}
+
+.custom-nav-link:hover {
+  color: #ffffff;
+}
+
+.tabulator .tabulator-cell img {
+  display: block;           /* Make the image a block element */
+  margin-left: auto;        /* Automatically adjust the left margin */
+  margin-right: auto;       /* Automatically adjust the right margin */
+  height: 50px;             /* Fixed height for the images */
+  width: auto;              /* Keep the aspect ratio */
+  object-fit: contain;      /* Ensure image fits without distortion */
+}
+
+.tabulator .tabulator-cell {
+  display: flex;            /* Use flexbox to align content */
+  justify-content: center;  /* Center content horizontally */
+  align-items: center;      /* Center content vertically */
+}
+
+.tabulator .tabulator-row.filtered {
+  background-color: #28a745 !important; /* Custom green background */
+}
+
+   /* Style for the rows when filtered */
+   .tabulator .tabulator-row.filtered {
+    background-color: #28a745 !important; /* Custom green background */
+}
+
+/* Ensure that when rows are not filtered, they have the default background */
+.tabulator .tabulator-row {
+    background-color: #ffffff; /* Default background */
+}   /* Style for the rows when filtered */
+.tabulator .tabulator-row.filtered {
+    background-color: #28a745 !important; /* Custom green background */
+}
+
+/* Ensure that when rows are not filtered, they have the default background */
+.tabulator .tabulator-row {
+    background-color: #ffffff; /* Default background */
+}
