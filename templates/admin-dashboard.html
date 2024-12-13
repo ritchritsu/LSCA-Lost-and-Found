@@ -6,6 +6,9 @@
 {% block main %}
 <div class="container mt-4">
     <h1 class="text-light">SHS Item Record</h1>
+    <div class="search-bar-wrapper">
+        <input id="search-input" type="text" placeholder="Search..." class="form-control search-bar mb-3">
+    </div>
     <div id="table-container" class="table-responsive" style="width: 80vw; overflow-y: auto; margin-left: -5em;"></div> <!-- Div for Tabulator -->
 </div>
 
@@ -13,16 +16,39 @@
 <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@5.4.4/dist/css/tabulator.min.css">
 <script src="https://unpkg.com/tabulator-tables@5.4.4/dist/js/tabulator.min.js"></script>
 
-<!-- Custom CSS for Tabulator -->
+<!-- Custom CSS -->
 <style>
+    /* Modern green search bar styling */
+    .search-bar-wrapper {
+        width: 80vw;
+        margin-left: -5em;
+    }
+
+    .search-bar {
+        width: 100%;
+        padding: 10px 15px;
+        border: 2px solid #087830;
+        border-radius: 25px;
+        font-size: 16px;
+        outline: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-bar:focus {
+        border-color: #065a2b;
+        box-shadow: 0 4px 10px rgba(0, 128, 0, 0.4);
+    }
+
+    .search-bar::placeholder {
+        color: #6c757d;
+        font-style: italic;
+    }
+
     .tabulator .tabulator-tableHolder .tabulator-table {
         background-color: rgba(128, 128, 128, 0.5) !important; /* Transparent gray background */
         color: #000000 !important; /* Black text */
         font-weight: bold !important; /* Bold text */
-    }
-
-    .tabulator .tabulator-row {
-        border-bottom: 1px solid #ffffff !important; /* White line separating each row */
     }
 
     .custom-green-btn {
@@ -75,13 +101,13 @@ document.addEventListener('DOMContentLoaded', function () {
         data: tableData,
         layout: "fitColumns",
         columns: [
-            { title: "ID", field: "id", width: 50, headerFilter: true, editor: false },
-            { title: "Status", field: "item_status", editor: "select", editorParams: { values: ["lost", "found"] } },
-            { title: "Lost Date", field: "lost_date", editor: "input" },
-            { title: "Found Date", field: "found_date", editor: "input" },
-            { title: "Location", field: "location", editor: "input" },
-            { title: "Found Location", field: "found_location", editor: "input" },
-            { title: "Description", field: "item_description", editor: "input" },
+            { title: "ID", field: "id", width: 50 },
+            { title: "Status", field: "item_status" },
+            { title: "Lost Date", field: "lost_date" },
+            { title: "Found Date", field: "found_date" },
+            { title: "Lost Location", field: "location" },
+            { title: "Found Location", field: "found_location" },
+            { title: "Description", field: "item_description" },
             {
                 title: "Image",
                 field: "image_url",
@@ -90,47 +116,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     return `<a href="${value}" target="_blank"><img src="${value}" style="height: 50px; width: auto;" /></a>`;
                 }
             },
-            { title: "Email", field: "email", editor: "input" },
-            { title: "Grade and Section", field: "grade_and_section", editor: "input" },
-            { title: "Phone Number", field: "phone_number", editor: "input" },
-            
+            { title: "Email", field: "email" },
+            { title: "Grade and Section", field: "grade_and_section" },
+            { title: "Phone Number", field: "phone_number" },
         ],
-        cellEdited: (cell) => {
-            const rowData = cell.getRow().getData();
-            fetch("/update-table-data", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(rowData),
-            })
-                .then((response) => response.json())
-                .then((result) => {
-                    if (result.success) {
-                        console.log("Changes saved successfully!");
-                    } else {
-                        console.error("Error saving changes: " + result.error);
-                    }
-                })
-                .catch((error) => console.error("Error:", error));
-        },
     });
 
-    // Function to mark an item as found
-    function markAsFound(itemId) {
-        fetch(`/mark-as-found/${itemId}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" }
-        })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                alert('Item marked as found successfully!');
-                location.reload();  // Reload the page to reflect changes
-            } else {
-                alert('Error marking item as found: ' + result.error);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
+    // Add event listener to the search input
+    document.getElementById('search-input').addEventListener('input', function (e) {
+        const value = e.target.value.toLowerCase(); // Convert search input to lowercase for case-insensitive matching
+        table.setFilter(function (data) {
+            // Check if any field contains the search value
+            return Object.values(data).some(val =>
+                String(val).toLowerCase().includes(value)
+            );
+        });
+    });
 });
 </script>
 {% endblock %}
