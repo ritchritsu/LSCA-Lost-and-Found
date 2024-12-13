@@ -4,6 +4,9 @@ from flask import Flask, flash, redirect, render_template, request, session, jso
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import login_required
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Configure application
 app = Flask(__name__)
@@ -26,7 +29,54 @@ def after_request(response):
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
+@app.route("/mark-found/<int:item_id>", methods=["POST"])
+@login_required
+def mark_found(item_id):
+    """Mark item as found and send email notification"""
+    try:
+        # Fetch the item details from the database
+        item = db.execute("SELECT * FROM items WHERE id = ?", item_id)
+        if not item:
+            return jsonify({'success': False, 'error': 'Item not found'})
 
+        item = item[0]
+
+        # Update the item status to 'found'
+        db.execute("UPDATE items SET item_status = ?, found_date = ? WHERE id = ?",
+                   'found', str(datetime.date.today()), item_id)
+
+        # Send email notification
+        send_email(item['email'], item['item_description'])
+
+        return jsonify({'success': True})
+
+    except Exception as e:
+        print(f"Error marking item as found: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+def send_email(recipient_email, item_description):
+    """Send email to the person who reported the item as lost"""
+    sender_email = "your_email@example.com"
+    password = "your_email_password"
+
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    msg['Subject'] = "Item Found - Notification"
+
+    body = f"Dear Student,\n\nYour item '{item_description}' has been marked as found.\n\nThank you."
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        # Set up the SMTP server
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, password)
+        server.sendmail(sender_email, recipient_email, msg.as_string())
+        server.quit()
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        
 @app.route("/")
 @login_required
 def index():
@@ -201,6 +251,17 @@ def update_table_data():
         print(f"Error updating data: {e}")
         return jsonify({'success': False, 'error': str(e)})
     
+@app.route("/mark-found/<int:item_id>", methods=["POST"])
+@login_required
+def mark_found(item_id):
+    """Mark an item as found"""
+    try:
+        db.execute("UPDATE items SET item_status = 'found', found_date = CURRENT_DATE WHERE id = ?", item_id)
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error marking item as found: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 @app.route("/delete-item/<int:item_id>", methods=["DELETE"])
 @login_required
 def delete_item(item_id):
