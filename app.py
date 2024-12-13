@@ -251,27 +251,6 @@ def update_table_data():
         print(f"Error updating data: {e}")
         return jsonify({'success': False, 'error': str(e)})
     
-@app.route("/mark-found/<int:item_id>", methods=["POST"])
-@login_required
-def mark_found(item_id):
-    """Mark an item as found"""
-    try:
-        db.execute("UPDATE items SET item_status = 'found', found_date = CURRENT_DATE WHERE id = ?", item_id)
-        return jsonify({'success': True})
-    except Exception as e:
-        print(f"Error marking item as found: {e}")
-        return jsonify({'success': False, 'error': str(e)})
-
-@app.route("/delete-item/<int:item_id>", methods=["DELETE"])
-@login_required
-def delete_item(item_id):
-    """Delete an item from the database"""
-    try:
-        db.execute("DELETE FROM items WHERE id = ?", item_id)
-        return jsonify({'success': True})
-    except Exception as e:
-        print(f"Error deleting item: {e}")
-        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)
