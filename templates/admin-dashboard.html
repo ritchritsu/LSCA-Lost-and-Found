@@ -84,16 +84,21 @@ document.addEventListener('DOMContentLoaded', function () {
             { title: "Grade and Section", field: "grade_and_section" },
             { title: "Phone Number", field: "phone_number" },
             {
-                title: "Actions", field: "actions", formatter: function(cell, formatterParams, onRendered) {
-                    const rowData = cell.getRow().getData();
-                    if (rowData.item_status === 'lost') {
-                        return `<button class="btn btn-success mark-found-btn">Mark Found</button>`;
-                    } else if (rowData.item_status === 'found') {
-                        return `<button class="btn btn-danger confirm-delete-btn">Confirm Found</button>`;
-                    }
-                    return '';
-                }
-            }
+    title: "Actions", 
+    field: "actions", 
+    hozAlign: "center", // Align content horizontally to center
+    formatter: function(cell, formatterParams, onRendered) {
+        const rowData = cell.getRow().getData();
+        if (rowData.item_status === 'lost') {
+            return `<button class="btn btn-success btn-sm mark-found-btn">Mark Found</button>`;
+        } else if (rowData.item_status === 'found') {
+            return `<button class="btn btn-danger btn-sm confirm-delete-btn">Confirm Found</button>`;
+        }
+        return '';
+    }
+}
+
+
         ],
 
         rowClick: function (e, row) {
