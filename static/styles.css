@@ -399,3 +399,18 @@ th, td {
 .tabulator .tabulator-row {
     background-color: #ffffff; /* Default background */
 }
+
+
+/* Make sure text inside Tabulator cells wraps */
+.tabulator-cell {
+    white-space: normal; /* Allow text to wrap */
+    word-wrap: break-word; /* Break long words to wrap to the next line */
+    overflow: visible; /* Ensure no hidden text */
+}
+
+/* Adjust table width for better responsiveness */
+#table-container {
+    width: 100%; /* Ensure the table takes up available space */
+    overflow-x: auto; /* Enable horizontal scrolling if necessary */
+}
+
