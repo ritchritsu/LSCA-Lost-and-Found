@@ -11,7 +11,7 @@
         <!-- Reset Button -->
         <button id="reset-btn" class="btn custom-green-btn mb-3 ml-2">Reset</button>
     </div>
-    <div id="table-container" class="table-responsive" style="width: 80vw; overflow-y: auto; margin-left: -5em;"></div> <!-- Div for Tabulator -->
+    <div id="table-container" class="table-responsive" style="width: 90vw; overflow-y: auto; margin-left: -10em;"></div> <!-- Div for Tabulator -->
 </div>
 
 <!-- Include Tabulator CDN -->
@@ -63,14 +63,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const table = new Tabulator("#table-container", {
         data: tableData,
         layout: "fitColumns",
-        height: "500px",  // Set a fixed height for the table container
+        height: "65vh",  // Set a fixed height for the table container
         columns: [
             { title: "ID", field: "id", width: 50 },
-            { title: "Status", field: "item_status" },
-            { title: "Lost Date", field: "lost_date" },
-            { title: "Found Date", field: "found_date" },
-            { title: "Lost Location", field: "location" },
-            { title: "Found Location", field: "found_location" },
+            { title: "Status", field: "item_status",  width: 60 },
+            { title: "Lost Date", field: "lost_date" ,  width: 90  },
+            { title: "Found Date", field: "found_date" ,  width: 90 },
+            { title: "Lost Location", field: "location" ,  width: 160 },
+            { title: "Found Location", field: "found_location" ,  width: 150 },
             { title: "Description", field: "item_description" },
             {
                 title: "Image",
@@ -79,10 +79,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     const value = cell.getValue();
                     return `<a href="${value}" target="_blank"><img src="${value}" style="height: 50px; width: auto;" /></a>`;
                 }
-            },
-            { title: "Email", field: "email" },
-            { title: "Grade and Section", field: "grade_and_section" },
-            { title: "Phone Number", field: "phone_number" },
+                ,  width: 100  },
+            { title: "Email", field: "email" ,  width: 200 },
+            { title: "Group", field: "grade_and_section" ,  width: 80  },
+            { title: "Phone Number", field: "phone_number" ,  width: 100 },
             {
     title: "Actions", 
     field: "actions", 
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return '';
     }
-}
+    ,  width: 120 }
 
 
         ],
