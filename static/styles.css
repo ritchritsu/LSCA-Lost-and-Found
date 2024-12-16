@@ -276,3 +276,8 @@ li a, .navbar a {
       color: #ffffff !important;
       border: none;
     }
+
+    .mb-3 {
+      margin-bottom: 1rem !important;
+      margin-left: 10px;
+    }
