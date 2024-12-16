@@ -261,6 +261,7 @@ li a, .navbar a {
 
     .tabulator-row .tabulator-cell{
       background-color: #065a2b;
+      font-weight: bold;
     }
 
     .tabulator .tabulator-tableholder .tabulator-table {
