@@ -6,10 +6,10 @@
 {% block main %}
 <div class="container mt-4">
     <h1 class="text-light">SHS Item Record</h1>
-    <div class="search-bar-wrapper">
+    <div class="search-bar-wrapper d-flex">
         <input id="search-input" type="text" placeholder="Search..." class="form-control search-bar mb-3">
         <!-- Reset Button -->
-        <button id="reset-btn" class="btn custom-green-btn mb-3 ml-2">Reset</button>
+        <button id="reset-btn" class="btn custom-green-btn mb-3 ml-10">Reset</button>
     </div>
     <div id="table-container" class="table-responsive" style="width: 90vw; overflow-y: auto; margin-left: -10em;"></div> <!-- Div for Tabulator -->
 </div>
@@ -73,13 +73,18 @@ document.addEventListener('DOMContentLoaded', function () {
             { title: "Found Location", field: "found_location" ,  width: 150 },
             { title: "Description", field: "item_description" },
             {
-                title: "Image",
-                field: "image_url",
-                formatter: function(cell) {
-                    const value = cell.getValue();
-                    return `<a href="${value}" target="_blank"><img src="${value}" style="height: 50px; width: auto;" /></a>`;
-                }
-                ,  width: 100  },
+    title: "Image",
+    field: "image_url",
+    formatter: function(cell) {
+        const value = cell.getValue();
+        return `<div style="text-align: center;">
+                    <a href="${value}" target="_blank">
+                        <img src="${value}" style="height: 50px; width: auto;" />
+                    </a>
+                </div>`;
+    },
+    width: 100
+},
             { title: "Email", field: "email" ,  width: 200 },
             { title: "Group", field: "grade_and_section" ,  width: 80  },
             { title: "Phone Number", field: "phone_number" ,  width: 100 },
