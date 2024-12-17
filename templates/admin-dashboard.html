@@ -28,11 +28,11 @@ document.addEventListener('DOMContentLoaded', function () {
         height: "65vh",  // Set a fixed height for the table container
         columns: [
             { title: "ID", field: "id", width: 50 },
-            { title: "Status", field: "item_status",  width: 60 },
-            { title: "Lost Date", field: "lost_date" ,  width: 90  },
-            { title: "Found Date", field: "found_date" ,  width: 90 },
-            { title: "Lost Location", field: "location" ,  width: 160 },
-            { title: "Found Location", field: "found_location" ,  width: 150 },
+            { title: "Status", field: "item_status", width: 60 },
+            { title: "Lost Date", field: "lost_date", width: 90 },
+            { title: "Found Date", field: "found_date", width: 90 },
+            { title: "Lost Location", field: "location", width: 160 },
+            { title: "Found Location", field: "found_location", width: 150 },
             { title: "Description", field: "item_description" },
             {
                 title: "Image",
@@ -47,15 +47,77 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 width: 100
             },
-            { title: "Email", field: "email" ,  width: 200 },
-            { title: "Group", field: "grade_and_section" ,  width: 80  },
-            { title: "Phone Number", field: "phone_number" ,  width: 100 },
+            {
+    title: "Email",
+    field: "email",
+    width: 200,
+    formatter: function(cell, formatterParams, onRendered) {
+        const email = cell.getValue();
+        const rowData = cell.getRow().getData(); // Get row data
+        const itemStatus = rowData.item_status;
+        const itemDescription = rowData.item_description;
+        const location = rowData.location;
+        const foundLocation = rowData.found_location;
+        const lostDate = rowData.lost_date;
+        const foundDate = rowData.found_date;
+
+        // Customize the subject and body based on the item status or additional instructions
+        const subject = `Re: Lost Item Report - ${itemDescription}`;
+
+        // Dynamic body based on item status and admin input
+        let body = `
+            Hello,
+
+            This is a response regarding your lost item report. Here are the details of the item:
+
+            - Item Status: ${itemStatus}
+            - Item Description: ${itemDescription}
+            - Lost Location: ${location}
+            - Found Location: ${foundLocation || 'N/A'}
+            - Lost Date: ${lostDate || 'N/A'}
+            - Found Date: ${foundDate || 'N/A'}
+
+            `;
+        
+        // Add condition based on item status to customize the message
+        if (itemStatus.toLowerCase() === 'lost') {
+            body += `
+                Unfortunately, the item is still listed as lost. Please feel free to provide any additional details, and we'll continue our search.
+            `;
+        } else if (itemStatus.toLowerCase() === 'found') {
+            body += `
+                Great news! The item has been found. Please confirm if you'd like to pick it up or need further assistance.
+            `;
+        }
+
+        // Additional message section if the admin needs to ask for more details
+        body += `
+            If you have any additional questions or information, feel free to reach out.
+
+            Best regards,
+            [Name]
+        `;
+
+        // Encode the subject and body to ensure they are URL-safe
+        const encodedSubject = encodeURIComponent(subject);
+        const encodedBody = encodeURIComponent(body);
+
+        // Construct the Gmail compose URL with the encoded subject and body
+        const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodedSubject}&body=${encodedBody}`;
+
+        // Return the hyperlink with Gmail redirection
+        return `<a href="${gmailComposeUrl}" style="color: white; text-decoration: underline;" target="_blank">${email}</a>`;
+    }
+},
+
+            { title: "Group", field: "grade_and_section", width: 80 },
+            { title: "Phone Number", field: "phone_number", width: 100 },
             {
                 title: "Actions", 
                 field: "actions", 
                 hozAlign: "center", // Align content horizontally to center
                 formatter: function(cell, formatterParams, onRendered) {
-                    return '';
+                    return ''; // Placeholder for future actions (e.g., Mark Found)
                 },
                 width: 120
             }
@@ -109,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
 </script>
 
 {% endblock %}
