@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
             { title: "Status", field: "item_status", width: 60 },
             { title: "Lost Date", field: "lost_date", width: 90 },
             { title: "Found Date", field: "found_date", width: 90 },
-            { title: "Lost Location", field: "location", width: 160 },
+            { title: "Lost Location", field: "location", width: 200 },
             { title: "Found Location", field: "found_location", width: 150 },
             { title: "Description", field: "item_description" },
             {
@@ -112,15 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             { title: "Group", field: "grade_and_section", width: 80 },
             { title: "Phone Number", field: "phone_number", width: 100 },
-            {
-                title: "Actions", 
-                field: "actions", 
-                hozAlign: "center", // Align content horizontally to center
-                formatter: function(cell, formatterParams, onRendered) {
-                    return ''; // Placeholder for future actions (e.g., Mark Found)
-                },
-                width: 120
-            }
+            
         ],
 
         rowClick: function (e, row) {
