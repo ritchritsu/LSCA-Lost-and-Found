@@ -28,13 +28,11 @@
             <label for="location">Location Lost/Found:</label>
             <input type="text" class="form-control custom-input" name="location" placeholder="Enter location where the item was lost/found" required>
         </div>
-        <div class="form-group">
-            <label for="email">Your School Email:</label>
-            <input type="email" class="form-control custom-input" name="email" placeholder="Enter your email" required pattern=".+@lsca\.edu\.ph" title="Valid LSCA email address (e.g., example@lsca.edu.ph)">
-        </div>
+
+        <!-- Group Selection (moved above the email field) -->
         <div class="form-group mb-3">
             <label for="grade_and_section" class="form-label">Your Group:</label>
-            <select class="form-select custom-input custom-dropdown" name="grade_and_section" required>
+            <select class="form-select custom-input custom-dropdown" name="grade_and_section" id="grade_and_section" required onchange="toggleEmailField()">
                 <option value="" disabled selected class="placeholder-option">Select your group</option>
                 <optgroup label="Grade 11">
                     <option value="11A">11A</option>
@@ -61,8 +59,20 @@
                 </optgroup>
                 <optgroup label="Other">
                     <option value="Staff">Staff</option>
+                    <option value="Other">Other</option>
                 </optgroup>
             </select>
+        </div>
+
+        <!-- Email Field (label changes based on group selection) -->
+        <div class="form-group">
+            <label for="email" id="email_label">Your school email:</label>
+            <input type="email" class="form-control custom-input" name="email" id="email" placeholder="Enter your school email" required pattern=".+@lsca\.edu\.ph" title="Valid LSCA email address (e.g., example@lsca.edu.ph)">
+        </div>
+
+        <div class="form-group" id="other_group_container" style="display: none;">
+            <label for="other_group">Please specify your role:</label>
+            <input type="text" class="form-control custom-input" name="other_group" placeholder="Enter your role (e.g., parent, driver)">
         </div>
         <div class="form-group">
             <label for="phone">Your Phone Number:</label>
@@ -99,7 +109,6 @@
         box-shadow: none;
         color: #ffffff; /* Ensure text remains white on focus */
     }
-
 
     .custom-dropdown {
         color: #d0d0d0; /* White text for dropdown */
@@ -144,6 +153,32 @@
             return false;
         }
         return true;
+    }
+
+    function toggleEmailField() {
+        var groupSelect = document.getElementById('grade_and_section');
+        var emailField = document.getElementById('email');
+        var emailLabel = document.getElementById('email_label');
+        var parentEmailContainer = document.getElementById('parent_email_container');
+        var parentEmailInput = document.getElementById('parent_email');
+
+        var selectedValue = groupSelect.value;
+
+        if (selectedValue === 'Other') {
+            // Change the email field to a personal email field
+            emailLabel.innerText = 'Your personal email:';
+            emailField.setAttribute('placeholder', 'Enter your personal email');
+            emailField.removeAttribute('pattern');
+            emailField.setAttribute('title', 'Enter your personal email address');
+            parentEmailContainer.style.display = 'none'; // Hide redundant personal email field
+        } else {
+            // Change the email field back to the school email
+            emailLabel.innerText = 'Your school email:';
+            emailField.setAttribute('placeholder', 'Enter your school email');
+            emailField.setAttribute('pattern', '.+@lsca\\.edu\\.ph');
+            emailField.setAttribute('title', 'Valid LSCA email address (e.g., example@lsca.edu.ph)');
+            parentEmailContainer.style.display = 'none'; // Hide personal email field if not "Other"
+        }
     }
 </script>
 {% endblock %}
