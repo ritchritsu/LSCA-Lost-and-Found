@@ -231,16 +231,35 @@ def lost_items():
 @login_required
 def update_table_data():
     """Update the table data in the database"""
-    data = request.json['data']
-    
     try:
-        # Iterate over each row in the data and update the database accordingly
-        for row in data:
-            if len(row) < 13:
-                continue  # Skip rows that don't have enough columns
-            db.execute("""UPDATE items SET item_status = ?, lost_date = ?, found_date = ?, location = ?, found_location = ?, item_description = ?, image_url = ?, email = ?, grade_and_section = ?, phone_number = ? WHERE id = ?""",
-                       row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[0])
+        # Access the data sent in the request
+        data = request.json  # request.json should contain [{id, field, value}, ...]
+        
+        # List of valid field names to prevent SQL injection
+        valid_fields = ["item_status", "lost_date", "found_date", "item_description", 
+                        "location", "found_location", "email", "grade_and_section", 
+                        "phone_number", "image_url"]
+
+        for entry in data['data']:
+            id = entry['id']
+            field = entry['field']
+            value = entry['value']
+
+            # Check if the field is valid
+            if field not in valid_fields:
+                return jsonify({'success': False, 'error': f"Invalid field: {field}"})
+            
+            # Debugging: Print the data before running the query
+            print(f"Updating record with ID: {id}, Field: {field}, Value: {value}")
+
+            # Construct the query dynamically
+            query = f"UPDATE items SET {field} = ? WHERE id = ?"
+
+            # Execute the query with the correct parameters (value, id)
+            db.execute(query, (value, id))  # This is correct: a tuple of two values
+
         return jsonify({'success': True})
+    
     except Exception as e:
         print(f"Error updating data: {e}")
         return jsonify({'success': False, 'error': str(e)})
@@ -255,12 +274,13 @@ def update_status():
         item_status = data.get("item_status")
 
         if not item_id or not item_status:
-            return jsonify({'success': False, 'error': 'Invalid data'})
+            return jsonify({'success': False, 'error': 'Invalid request'})
 
-        # Update the status in the database
+        # Update the item status in the database
         db.execute("UPDATE items SET item_status = ? WHERE id = ?", item_status, item_id)
-        return jsonify({'success': True})
 
+        return jsonify({'success': True})
+    
     except Exception as e:
         print(f"Error updating status: {e}")
         return jsonify({'success': False, 'error': str(e)})
