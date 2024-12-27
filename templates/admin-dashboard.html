@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
             {
                 title: "Status", 
                 field: "item_status", 
-                width: 100, 
+                width: 120, 
                 editor: "select", 
                 editorParams: {
                     values: ["Lost", "Found", "Confirmed"]
@@ -65,11 +65,12 @@ document.addEventListener('DOMContentLoaded', function () {
             iconClass = 'fa fa-circle';
             iconColor = 'black'; // Default icon color
     }
-    return `<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <span>${value}</span>
-                <i class="${iconClass}" style="margin-left: 5px; color: ${iconColor}; margin-left: auto;"></i>
+    return `<div style="display: flex; align-items: center; width: 100%;">
+                <i class="${iconClass}" style="margin-right: 10px; color: ${iconColor};"></i>
+                <span style="flex-grow: 1;">${value}</span>
             </div>`;
-},
+}
+,
                 cellEdited: function(cell) {
                     const rowData = cell.getRow().getData();
                     const newStatus = cell.getValue(); // New value after the change
