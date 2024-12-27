@@ -281,3 +281,22 @@ li a, .navbar a {
       margin-bottom: 1rem !important;
       margin-left: 10px;
     }
+
+    /* Style for status cell */
+.status-cell {
+  display: flex;
+  justify-content: space-between; /* This will push the text to the left and the icon to the right */
+  align-items: center;
+  padding: 5px;
+}
+
+/* Style for the status text */
+.status-text {
+  font-size: 1em;
+}
+
+/* Style for the dropdown icon */
+.dropdown-icon {
+  font-size: 1.2em;
+  margin-left: 5px;
+}
