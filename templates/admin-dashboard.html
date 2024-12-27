@@ -17,6 +17,7 @@
 <!-- Include Tabulator CDN -->
 <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@5.4.4/dist/css/tabulator.min.css">
 <script src="https://unpkg.com/tabulator-tables@5.4.4/dist/js/tabulator.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -34,38 +35,65 @@ document.addEventListener('DOMContentLoaded', function () {
         height: "65vh",
         columns: [
             { title: "ID", field: "id", width: 50, editor: false },
-            { 
-                title: "Status", 
-                field: "item_status", 
-                width: 100, 
-                editor: "select", 
-                editorParams: {
-                    values: ["Lost", "Found", "Confirmed"]
-                },
-                cellEdited: function(cell) {
-                    // When the cell is edited, update the database
-                    const rowData = cell.getRow().getData();
-                    fetch('/update-status', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            id: rowData.id,
-                            item_status: cell.getValue()
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.success) {
-                            alert("Error updating status: " + data.error);
-                            cell.restoreOldValue(); // Revert to old value if update fails
-                        }
-                    })
-                    .catch(err => {
-                        alert("An error occurred: " + err);
-                        cell.restoreOldValue();
-                    });
-                }
-            },
+            {
+    title: "Status", 
+    field: "item_status", 
+    width: 100, 
+    editor: "select", 
+    editorParams: {
+        values: ["Lost", "Found", "Confirmed"]
+    },
+    formatter: function(cell) {
+        const value = cell.getValue();
+        // Map status values to icons
+        let iconClass = '';
+        switch(value) {
+            case 'Lost':
+                iconClass = 'fa fa-exclamation-circle'; // Red icon for Lost
+                break;
+            case 'Found':
+                iconClass = 'fa fa-check-circle'; // Green icon for Found
+                break;
+            case 'Confirmed':
+                iconClass = 'fa fa-thumbs-up'; // Blue icon for Confirmed
+                break;
+            default:
+                iconClass = 'fa fa-circle'; // Default icon
+        }
+        return `<div style="display: flex; align-items: center;">
+                    <span>${value}</span>
+                    <i class="${iconClass}" style="margin-left: 5px;"></i>
+                </div>`;
+    },
+    cellEdited: function(cell) {
+        const rowData = cell.getRow().getData();
+        const newStatus = cell.getValue(); // New value after the change
+
+        // Update the database
+        fetch('/update-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: rowData.id,
+                item_status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                alert("Error updating status: " + data.error);
+                cell.restoreOldValue(); // Revert to old value if update fails
+            } else {
+                // If the update is successful, reload the page to reflect the updated data
+                location.reload();  // Reload the page to get the updated data
+            }
+        })
+        .catch(err => {
+            alert("An error occurred: " + err);
+            cell.restoreOldValue();
+        });
+    }
+},
             { title: "Lost Date", field: "lost_date", width: 90 },
             { title: "Found Date", field: "found_date", width: 90 },
             { title: "Lost Location", field: "location", width: 200 },
@@ -85,57 +113,57 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: 100
             },
             {
-    title: "Email",
-    field: "email",
-    width: 200,
-    formatter: function(cell, formatterParams, onRendered) {
-        const email = cell.getValue();
-        const rowData = cell.getRow().getData();
-        const itemStatus = rowData.item_status;
-        const itemDescription = rowData.item_description;
-        const location = rowData.location || 'N/A'; // Fallback to 'N/A' if not provided
-        const foundLocation = rowData.found_location || 'N/A'; // Fallback to 'N/A' if not provided
-        const lostDate = rowData.lost_date || 'N/A'; // Fallback to 'N/A' if not provided
-        const foundDate = rowData.found_date || 'N/A'; // Fallback to 'N/A' if not provided
+                title: "Email",
+                field: "email",
+                width: 200,
+                formatter: function(cell, formatterParams, onRendered) {
+                    const email = cell.getValue();
+                    const rowData = cell.getRow().getData();
+                    const itemStatus = rowData.item_status;
+                    const itemDescription = rowData.item_description;
+                    const location = rowData.location || 'N/A'; // Fallback to 'N/A' if not provided
+                    const foundLocation = rowData.found_location || 'N/A'; // Fallback to 'N/A' if not provided
+                    const lostDate = rowData.lost_date || 'N/A'; // Fallback to 'N/A' if not provided
+                    const foundDate = rowData.found_date || 'N/A'; // Fallback to 'N/A' if not provided
 
-        const subject = `Re: Lost Item Report - ${itemDescription}`;
-        let body = `
-            Hello,
+                    const subject = `Re: Lost Item Report - ${itemDescription}`;
+                    let body = `
+                        Hello,
 
-            This is a response regarding your lost item report. Here are the details of the item:
+                        This is a response regarding your lost item report. Here are the details of the item:
 
-            - Item Status: ${itemStatus}
-            - Item Description: ${itemDescription}
-            - Lost Location: ${location}
-            - Found Location: ${foundLocation}
-            - Lost Date: ${lostDate}
-            - Found Date: ${foundDate}
-        `;
+                        - Item Status: ${itemStatus}
+                        - Item Description: ${itemDescription}
+                        - Lost Location: ${location}
+                        - Found Location: ${foundLocation}
+                        - Lost Date: ${lostDate}
+                        - Found Date: ${foundDate}
+                    `;
 
-        // Add condition based on item status to customize the message
-        if (itemStatus === 'Lost') {
-            body += `
-                Unfortunately, the item is still listed as lost. Please feel free to provide any additional details, and we'll continue our search.
-            `;
-        } else if (itemStatus === 'Found') {
-            body += `
-                Great news! The item has been found. You may collect this item from the Senior High School faculty room at your convenience. 
-            `;
-        }
+                    // Add condition based on item status to customize the message
+                    if (itemStatus === 'Lost') {
+                        body += `
+                            Unfortunately, the item is still listed as lost. Please feel free to provide any additional details, and we'll continue our search.
+                        `;
+                    } else if (itemStatus === 'Found') {
+                        body += `
+                            Great news! The item has been found. You may collect this item from the Senior High School faculty room at your convenience. 
+                        `;
+                    }
 
-        // Additional message section if the admin needs to ask for more details
-        body += `
-            If you have any additional questions or information, feel free to reach out.
+                    // Additional message section if the admin needs to ask for more details
+                    body += `
+                        If you have any additional questions or information, feel free to reach out.
 
-            Best regards,
-            [Name]
-        `;
+                        Best regards,
+                        [Name]
+                    `;
 
-        const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-        return `<a href="${gmailComposeUrl}" style="color: white; text-decoration: underline;" target="_blank">${email}</a>`;
-    }
-},
+                    return `<a href="${gmailComposeUrl}" style="color: white; text-decoration: underline;" target="_blank">${email}</a>`;
+                }
+            },
             { title: "Group", field: "grade_and_section", width: 80 },
             { title: "Phone Number", field: "phone_number", width: 100 },
         ],
