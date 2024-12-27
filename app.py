@@ -82,11 +82,22 @@ def send_email(recipient_email, item_description):
 def index():
     """Show submission form or admin dashboard based on user"""
     try:
-        items = db.execute("SELECT * FROM items")
-        return render_template("admin-dashboard.html", items=items)
+        # Fetch the current user's email from the session
+        user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
+        
+        # Check if the user is the specific admin
+        if user_email == "ritchangelo.dacanay@lsca.edu.ph":
+            # Fetch all items for the admin dashboard
+            items = db.execute("SELECT * FROM items")
+            return render_template("admin-dashboard.html", items=items)
+        else:
+            # Redirect non-admin users to the submission page
+            return redirect("/submit")
+    
     except Exception as e:
         print(f"Error fetching items: {e}")
         return render_template("admin-dashboard.html", items=[])
+
 
 @app.route("/submit", methods=["POST"])
 @login_required
