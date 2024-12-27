@@ -20,15 +20,52 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const tableData = JSON.parse(`{{ items | tojson | safe }}`); // Flask data
+    let tableData;
+    try {
+        tableData = JSON.parse(`{{ items | tojson | safe }}`);
+    } catch (e) {
+        console.error("Error parsing JSON:", e);
+        tableData = [];
+    }
 
     const table = new Tabulator("#table-container", {
         data: tableData,
         layout: "fitColumns",
-        height: "65vh",  // Set a fixed height for the table container
+        height: "65vh",
         columns: [
-            { title: "ID", field: "id", width: 50 },
-            { title: "Status", field: "item_status", width: 60 },
+            { title: "ID", field: "id", width: 50, editor: false },
+            { 
+                title: "Status", 
+                field: "item_status", 
+                width: 100, 
+                editor: "select", 
+                editorParams: {
+                    values: ["Lost", "Found", "Confirmed"]
+                },
+                cellEdited: function(cell) {
+                    // When the cell is edited, update the database
+                    const rowData = cell.getRow().getData();
+                    fetch('/update-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: rowData.id,
+                            item_status: cell.getValue()
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            alert("Error updating status: " + data.error);
+                            cell.restoreOldValue(); // Revert to old value if update fails
+                        }
+                    })
+                    .catch(err => {
+                        alert("An error occurred: " + err);
+                        cell.restoreOldValue();
+                    });
+                }
+            },
             { title: "Lost Date", field: "lost_date", width: 90 },
             { title: "Found Date", field: "found_date", width: 90 },
             { title: "Lost Location", field: "location", width: 200 },
@@ -48,101 +85,43 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: 100
             },
             {
-    title: "Email",
-    field: "email",
-    width: 200,
-    formatter: function(cell, formatterParams, onRendered) {
-        const email = cell.getValue();
-        const rowData = cell.getRow().getData(); // Get row data
-        const itemStatus = rowData.item_status;
-        const itemDescription = rowData.item_description;
-        const location = rowData.location;
-        const foundLocation = rowData.found_location;
-        const lostDate = rowData.lost_date;
-        const foundDate = rowData.found_date;
+                title: "Email",
+                field: "email",
+                width: 200,
+                formatter: function(cell, formatterParams, onRendered) {
+                    const email = cell.getValue();
+                    const rowData = cell.getRow().getData();
+                    const itemStatus = rowData.item_status;
+                    const itemDescription = rowData.item_description;
 
-        // Customize the subject and body based on the item status or additional instructions
-        const subject = `Re: Lost Item Report - ${itemDescription}`;
+                    const subject = `Re: Lost Item Report - ${itemDescription}`;
+                    let body = `Hello,\n\nThis is a response regarding your lost item report. Details:\n\nItem Status: ${itemStatus}\nItem Description: ${itemDescription}\n\nBest regards,\n[Name]`;
 
-        // Dynamic body based on item status and admin input
-        let body = `
-            Hello,
+                    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-            This is a response regarding your lost item report. Here are the details of the item:
-
-            - Item Status: ${itemStatus}
-            - Item Description: ${itemDescription}
-            - Lost Location: ${location}
-            - Found Location: ${foundLocation || 'N/A'}
-            - Lost Date: ${lostDate || 'N/A'}
-            - Found Date: ${foundDate || 'N/A'}
-
-            `;
-        
-        // Add condition based on item status to customize the message
-        if (itemStatus.toLowerCase() === 'lost') {
-            body += `
-                Unfortunately, the item is still listed as lost. Please feel free to provide any additional details, and we'll continue our search.
-            `;
-        } else if (itemStatus.toLowerCase() === 'found') {
-            body += `
-                Great news! The item has been found. You may collect this item from the Senior High School faculty room at your convenience. 
-            `;
-        }
-
-        // Additional message section if the admin needs to ask for more details
-        body += `
-            If you have any additional questions or information, feel free to reach out.
-
-            Best regards,
-            [Name]
-        `;
-
-        // Encode the subject and body to ensure they are URL-safe
-        const encodedSubject = encodeURIComponent(subject);
-        const encodedBody = encodeURIComponent(body);
-
-        // Construct the Gmail compose URL with the encoded subject and body
-        const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodedSubject}&body=${encodedBody}`;
-
-        // Return the hyperlink with Gmail redirection
-        return `<a href="${gmailComposeUrl}" style="color: white; text-decoration: underline;" target="_blank">${email}</a>`;
-    }
-},
-
+                    return `<a href="${gmailComposeUrl}" style="color: white; text-decoration: underline;" target="_blank">${email}</a>`;
+                }
+            },
             { title: "Group", field: "grade_and_section", width: 80 },
             { title: "Phone Number", field: "phone_number", width: 100 },
-            
         ],
 
-        rowClick: function (e, row) {
-            const rowData = row.getData(); // Get the row data
-            console.log("Row clicked, data:", rowData); // Log clicked row data
-        },
-    });
-
-    // Cell Click Event for Filtering
-    document.getElementById('table-container').addEventListener('click', function(e) {
-        const cell = e.target.closest('.tabulator-cell'); // Find the closest tabulator cell
-        if (cell) {
-            const value = cell.textContent.trim().toLowerCase(); // Get the cell value
-            console.log("Cell clicked, value:", value); // Log the clicked value
-
-            // Filter the table based on the clicked cell's value
-            table.clearFilter(); // Clear previous filters
-            table.setFilter(function(data) {
-                // Check if any field contains the clicked value (partial match)
-                return Object.values(data).some(val =>
-                    String(val).toLowerCase().includes(value)
-                );
-            });
+        // Enable the cell click event
+        cellClick: function(e, cell) {
+            // Get the value of the clicked cell
+            const clickedValue = cell.getValue();
+            
+            // Apply a filter based on the clicked cell value (for example, filter by status)
+            if (clickedValue) {
+                table.setFilter(cell.getColumn().getField(), "=", clickedValue);
+            }
         }
     });
 
     // Search input event
     document.getElementById('search-input').addEventListener('input', function (e) {
         const value = e.target.value.toLowerCase();
-        table.clearFilter(); // Clear previous filters
+        table.clearFilter();
         table.setFilter(function (data) {
             return Object.values(data).some(val =>
                 String(val).toLowerCase().includes(value)
@@ -152,18 +131,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Reset Button Event
     document.getElementById('reset-btn').addEventListener('click', function () {
-        table.clearFilter(); // Clear all filters and show all rows
-    });
-
-    // Reset on Click Outside Table
-    document.addEventListener('click', function(e) {
-        if (!document.getElementById('table-container').contains(e.target) &&
-            !document.getElementById('search-input').contains(e.target)) {
-            table.clearFilter(); // Reset table if clicked outside the table or search input
-        }
+        table.clearFilter();
     });
 });
 
-</script>
 
+</script>
 {% endblock %}

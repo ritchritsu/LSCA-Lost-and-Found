@@ -82,17 +82,11 @@ def send_email(recipient_email, item_description):
 def index():
     """Show submission form or admin dashboard based on user"""
     try:
-        user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
-    except IndexError:
-        flash("User not found.")
-        return redirect("/logout")
-
-    # Display admin dashboard if the user is an admin
-    if user_email == "ritchangelo.dacanay@lsca.edu.ph":
         items = db.execute("SELECT * FROM items")
         return render_template("admin-dashboard.html", items=items)
-    else:
-        return render_template("submission.html")
+    except Exception as e:
+        print(f"Error fetching items: {e}")
+        return render_template("admin-dashboard.html", items=[])
 
 @app.route("/submit", methods=["POST"])
 @login_required
@@ -251,6 +245,27 @@ def update_table_data():
         print(f"Error updating data: {e}")
         return jsonify({'success': False, 'error': str(e)})
     
+@app.route("/update-status", methods=["POST"])
+@login_required
+def update_status():
+    """Update the item status in the database"""
+    try:
+        data = request.json
+        item_id = data.get("id")
+        item_status = data.get("item_status")
+
+        if not item_id or not item_status:
+            return jsonify({'success': False, 'error': 'Invalid data'})
+
+        # Update the status in the database
+        db.execute("UPDATE items SET item_status = ? WHERE id = ?", item_status, item_id)
+        return jsonify({'success': True})
+
+    except Exception as e:
+        print(f"Error updating status: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)
