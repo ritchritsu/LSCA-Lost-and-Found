@@ -85,23 +85,57 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: 100
             },
             {
-                title: "Email",
-                field: "email",
-                width: 200,
-                formatter: function(cell, formatterParams, onRendered) {
-                    const email = cell.getValue();
-                    const rowData = cell.getRow().getData();
-                    const itemStatus = rowData.item_status;
-                    const itemDescription = rowData.item_description;
+    title: "Email",
+    field: "email",
+    width: 200,
+    formatter: function(cell, formatterParams, onRendered) {
+        const email = cell.getValue();
+        const rowData = cell.getRow().getData();
+        const itemStatus = rowData.item_status;
+        const itemDescription = rowData.item_description;
+        const location = rowData.location || 'N/A'; // Fallback to 'N/A' if not provided
+        const foundLocation = rowData.found_location || 'N/A'; // Fallback to 'N/A' if not provided
+        const lostDate = rowData.lost_date || 'N/A'; // Fallback to 'N/A' if not provided
+        const foundDate = rowData.found_date || 'N/A'; // Fallback to 'N/A' if not provided
 
-                    const subject = `Re: Lost Item Report - ${itemDescription}`;
-                    let body = `Hello,\n\nThis is a response regarding your lost item report. Details:\n\nItem Status: ${itemStatus}\nItem Description: ${itemDescription}\n\nBest regards,\n[Name]`;
+        const subject = `Re: Lost Item Report - ${itemDescription}`;
+        let body = `
+            Hello,
 
-                    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            This is a response regarding your lost item report. Here are the details of the item:
 
-                    return `<a href="${gmailComposeUrl}" style="color: white; text-decoration: underline;" target="_blank">${email}</a>`;
-                }
-            },
+            - Item Status: ${itemStatus}
+            - Item Description: ${itemDescription}
+            - Lost Location: ${location}
+            - Found Location: ${foundLocation}
+            - Lost Date: ${lostDate}
+            - Found Date: ${foundDate}
+        `;
+
+        // Add condition based on item status to customize the message
+        if (itemStatus === 'Lost') {
+            body += `
+                Unfortunately, the item is still listed as lost. Please feel free to provide any additional details, and we'll continue our search.
+            `;
+        } else if (itemStatus === 'Found') {
+            body += `
+                Great news! The item has been found. You may collect this item from the Senior High School faculty room at your convenience. 
+            `;
+        }
+
+        // Additional message section if the admin needs to ask for more details
+        body += `
+            If you have any additional questions or information, feel free to reach out.
+
+            Best regards,
+            [Name]
+        `;
+
+        const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+        return `<a href="${gmailComposeUrl}" style="color: white; text-decoration: underline;" target="_blank">${email}</a>`;
+    }
+},
             { title: "Group", field: "grade_and_section", width: 80 },
             { title: "Phone Number", field: "phone_number", width: 100 },
         ],
@@ -134,7 +168,5 @@ document.addEventListener('DOMContentLoaded', function () {
         table.clearFilter();
     });
 });
-
-
 </script>
 {% endblock %}
