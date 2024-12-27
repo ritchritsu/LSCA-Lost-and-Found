@@ -36,64 +36,69 @@ document.addEventListener('DOMContentLoaded', function () {
         columns: [
             { title: "ID", field: "id", width: 50, editor: false },
             {
-    title: "Status", 
-    field: "item_status", 
-    width: 100, 
-    editor: "select", 
-    editorParams: {
-        values: ["Lost", "Found", "Confirmed"]
-    },
-    formatter: function(cell) {
-        const value = cell.getValue();
-        // Map status values to icons
-        let iconClass = '';
-        switch(value) {
-            case 'Lost':
-                iconClass = 'fa fa-exclamation-circle'; // Red icon for Lost
-                break;
-            case 'Found':
-                iconClass = 'fa fa-check-circle'; // Green icon for Found
-                break;
-            case 'Confirmed':
-                iconClass = 'fa fa-thumbs-up'; // Blue icon for Confirmed
-                break;
-            default:
-                iconClass = 'fa fa-circle'; // Default icon
-        }
-        return `<div style="display: flex; align-items: center;">
-                    <span>${value}</span>
-                    <i class="${iconClass}" style="margin-left: 5px;"></i>
-                </div>`;
-    },
-    cellEdited: function(cell) {
-        const rowData = cell.getRow().getData();
-        const newStatus = cell.getValue(); // New value after the change
-
-        // Update the database
-        fetch('/update-status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id: rowData.id,
-                item_status: newStatus
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                alert("Error updating status: " + data.error);
-                cell.restoreOldValue(); // Revert to old value if update fails
-            } else {
-                // If the update is successful, reload the page to reflect the updated data
-                location.reload();  // Reload the page to get the updated data
-            }
-        })
-        .catch(err => {
-            alert("An error occurred: " + err);
-            cell.restoreOldValue();
-        });
+                title: "Status", 
+                field: "item_status", 
+                width: 100, 
+                editor: "select", 
+                editorParams: {
+                    values: ["Lost", "Found", "Confirmed"]
+                },
+                formatter: function(cell) {
+    const value = cell.getValue();
+    // Map status values to icons and colors
+    let iconClass = '';
+    let iconColor = '';
+    switch(value) {
+        case 'Lost':
+            iconClass = 'fa fa-exclamation-circle';
+            iconColor = 'red'; // Red icon for Lost
+            break;
+        case 'Found':
+            iconClass = 'fa fa-check-circle';
+            iconColor = 'yellow'; // Yellow icon for Found
+            break;
+        case 'Confirmed':
+            iconClass = 'fa fa-thumbs-up';
+            iconColor = '#90EE90'; // Green icon for Confirmed
+            break;
+        default:
+            iconClass = 'fa fa-circle';
+            iconColor = 'black'; // Default icon color
     }
+    return `<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <span>${value}</span>
+                <i class="${iconClass}" style="margin-left: 5px; color: ${iconColor}; margin-left: auto;"></i>
+            </div>`;
 },
+                cellEdited: function(cell) {
+                    const rowData = cell.getRow().getData();
+                    const newStatus = cell.getValue(); // New value after the change
+
+                    // Update the database
+                    fetch('/update-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: rowData.id,
+                            item_status: newStatus
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            alert("Error updating status: " + data.error);
+                            cell.restoreOldValue(); // Revert to old value if update fails
+                        } else {
+                            // If the update is successful, reload the page to reflect the updated data
+                            location.reload();  // Reload the page to get the updated data
+                        }
+                    })
+                    .catch(err => {
+                        alert("An error occurred: " + err);
+                        cell.restoreOldValue();
+                    });
+                }
+            },
             { title: "Lost Date", field: "lost_date", width: 90 },
             { title: "Found Date", field: "found_date", width: 90 },
             { title: "Lost Location", field: "location", width: 200 },
