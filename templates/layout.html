@@ -143,6 +143,17 @@
             max-height: 70px; /* Adjust as needed */
             width: auto;
         }
+
+        .navbar-toggler {
+  padding: var(--bs-navbar-toggler-padding-y) var(--bs-navbar-toggler-padding-x);
+  font-size: var(--bs-navbar-toggler-font-size);
+  line-height: 1;
+  color: rgb(0, 0, 0);
+  background-color: transparent;
+  border: var(--bs-border-width) solid rgb(255, 255, 255);
+  border-radius: var(--bs-navbar-toggler-border-radius);
+  transition: var(--bs-navbar-toggler-transition);
+}
     </style>
 </head>
 <body>
@@ -155,7 +166,7 @@
                 <img src="/static/lost and found logo.png" alt="LSCA Lost and Found">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon" style="color: white; filter: invert(1);"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbar">
                 {% if session["user_id"] %}
