@@ -118,8 +118,9 @@
 
         // Password validation
         const password = document.getElementById("password").value;
-        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
-        if (!passwordPattern.test(password)) {
+        
+        // Password validation
+        if (password.length < 8) {
             document.getElementById("password-error").style.display = "block";
             return false;
         } else {
