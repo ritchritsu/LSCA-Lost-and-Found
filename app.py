@@ -29,53 +29,7 @@ def after_request(response):
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
-@app.route("/mark-found/<int:item_id>", methods=["POST"])
-@login_required
-def mark_found(item_id):
-    """Mark item as found and send email notification"""
-    try:
-        # Fetch the item details from the database
-        item = db.execute("SELECT * FROM items WHERE id = ?", item_id)
-        if not item:
-            return jsonify({'success': False, 'error': 'Item not found'})
 
-        item = item[0]
-
-        # Update the item status to 'found'
-        db.execute("UPDATE items SET item_status = ?, found_date = ? WHERE id = ?",
-                   'found', str(datetime.date.today()), item_id)
-
-        # Send email notification
-        send_email(item['email'], item['item_description'])
-
-        return jsonify({'success': True})
-
-    except Exception as e:
-        print(f"Error marking item as found: {e}")
-        return jsonify({'success': False, 'error': str(e)})
-
-def send_email(recipient_email, item_description):
-    """Send email to the person who reported the item as lost"""
-    sender_email = "your_email@example.com"
-    password = "your_email_password"
-
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = recipient_email
-    msg['Subject'] = "Item Found - Notification"
-
-    body = f"Dear Student,\n\nYour item '{item_description}' has been marked as found.\n\nThank you."
-    msg.attach(MIMEText(body, 'plain'))
-
-    try:
-        # Set up the SMTP server
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(sender_email, password)
-        server.sendmail(sender_email, recipient_email, msg.as_string())
-        server.quit()
-    except Exception as e:
-        print(f"Error sending email: {e}")
         
 @app.route("/")
 @login_required
@@ -117,17 +71,15 @@ def submit_item():
         flash("Please fill in all required fields.")
         return redirect("/")
 
-    # Determine the correct date and location fields based on item_status
-    lost_date = date if item_status == "lost" else ""
-    found_date = date if item_status == "found" else ""
-    lost_location = location if item_status == "lost" else ""
-    found_location = location if item_status == "found" else ""
+    # Initialize date fields based on item status
+    lost_date = date if item_status == "Lost" else None
+    found_date = date if item_status == "Found" else None
 
     # Insert data into the database
     try:
         db.execute(
-            "INSERT INTO items (item_status, lost_date, found_date, item_description, location, found_location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            item_status, lost_date, found_date, item_description, lost_location, found_location, email, grade_and_section, phone_number, image_url
+            "INSERT INTO items (item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url
         )
     except Exception as e:
         flash("An error occurred while submitting your item.")
@@ -136,6 +88,7 @@ def submit_item():
 
     flash("Your item has been submitted successfully!")
     return redirect("/")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():

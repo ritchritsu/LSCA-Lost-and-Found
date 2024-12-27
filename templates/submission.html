@@ -1,184 +1,260 @@
-{% extends "layout.html" %}
-
-{% block title %}
-    Item Submission
-{% endblock %}
-
-{% block main %}
+{% extends "layout.html" %} {% block title %} Item Submission {% endblock %} {%
+block main %}
 <div class="container mt-4">
-    <h1>Submit a Lost/Found Item</h1>
-    <form action="/submit" method="post">
-        <div class="form-group">
-            <label for="item_status">Item Status:</label>
-            <select class="form-select custom-input custom-dropdown" name="item_status" required>
-                <option value="" disabled selected class="placeholder-option">Select status</option>
-                <option value="Lost">Lost</option>
-                <option value="Found">Found</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="date">Date Lost/Found:</label>
-            <input type="date" class="form-control custom-input" name="date" required>
-        </div>
-        <div class="form-group">
-            <label for="item_description">Item Description:</label>
-            <input type="text" class="form-control custom-input" name="item_description" required placeholder="Enter item description">
-        </div>
-        <div class="form-group">
-            <label for="location">Location Lost/Found:</label>
-            <input type="text" class="form-control custom-input" name="location" placeholder="Enter location where the item was lost/found" required>
-        </div>
+  <h1>Submit a Lost/Found Item</h1>
+  <form action="/submit" method="post">
+    <div class="form-group">
+      <label for="item_status">Item Status:</label>
+      <select
+        class="form-select custom-input custom-dropdown"
+        name="item_status"
+        required
+      >
+        <option value="" disabled selected class="placeholder-option">
+          Select status
+        </option>
+        <option value="Lost">Lost</option>
+        <option value="Found">Found</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="date" id="date_label">Date Lost/Found:</label>
+      <input
+        type="date"
+        class="form-control custom-input"
+        name="date"
+        required
+      />
+    </div>
 
-        <!-- Group Selection (moved above the email field) -->
-        <div class="form-group mb-3">
-            <label for="grade_and_section" class="form-label">Your Group:</label>
-            <select class="form-select custom-input custom-dropdown" name="grade_and_section" id="grade_and_section" required onchange="toggleEmailField()">
-                <option value="" disabled selected class="placeholder-option">Select your group</option>
-                <optgroup label="Grade 11">
-                    <option value="11A">11A</option>
-                    <option value="11B">11B</option>
-                    <option value="11C">11C</option>
-                    <option value="11D">11D</option>
-                    <option value="11E">11E</option>
-                    <option value="11F">11F</option>
-                    <option value="11G">11G</option>
-                    <option value="11H">11H</option>
-                    <option value="11I">11I</option>
-                    <option value="11J">11J</option>
-                </optgroup>
-                <optgroup label="Grade 12">
-                    <option value="12A">12A</option>
-                    <option value="12B">12B</option>
-                    <option value="12C">12C</option>
-                    <option value="12D">12D</option>
-                    <option value="12E">12E</option>
-                    <option value="12F">12F</option>
-                    <option value="12G">12G</option>
-                    <option value="12H">12H</option>
-                    <option value="12I">12I</option>
-                </optgroup>
-                <optgroup label="Other">
-                    <option value="Staff">Staff</option>
-                    <option value="Other">Other</option>
-                </optgroup>
-            </select>
-        </div>
+    <div class="form-group">
+      <label for="item_description">Item Description:</label>
+      <input
+        type="text"
+        class="form-control custom-input"
+        name="item_description"
+        required
+        placeholder="Enter item description"
+      />
+    </div>
+    <div class="form-group">
+      <label for="location">Location Lost/Found:</label>
+      <input
+        type="text"
+        class="form-control custom-input"
+        name="location"
+        placeholder="Enter location where the item was lost/found"
+        required
+      />
+    </div>
 
-        <!-- Email Field (label changes based on group selection) -->
-        <div class="form-group">
-            <label for="email" id="email_label">Your school email:</label>
-            <input type="email" class="form-control custom-input" name="email" id="email" placeholder="Enter your school email" required pattern=".+@lsca\.edu\.ph" title="Valid LSCA email address (e.g., example@lsca.edu.ph)">
-        </div>
+    <!-- Group Selection (moved above the email field) -->
+    <div class="form-group mb-3">
+      <label for="grade_and_section" class="form-label">Your Group:</label>
+      <select
+        class="form-select custom-input custom-dropdown"
+        name="grade_and_section"
+        id="grade_and_section"
+        required
+        onchange="toggleEmailField()"
+      >
+        <option value="" disabled selected class="placeholder-option">
+          Select your group
+        </option>
+        <optgroup label="Grade 11">
+          <option value="11A">11A</option>
+          <option value="11B">11B</option>
+          <option value="11C">11C</option>
+          <option value="11D">11D</option>
+          <option value="11E">11E</option>
+          <option value="11F">11F</option>
+          <option value="11G">11G</option>
+          <option value="11H">11H</option>
+          <option value="11I">11I</option>
+          <option value="11J">11J</option>
+        </optgroup>
+        <optgroup label="Grade 12">
+          <option value="12A">12A</option>
+          <option value="12B">12B</option>
+          <option value="12C">12C</option>
+          <option value="12D">12D</option>
+          <option value="12E">12E</option>
+          <option value="12F">12F</option>
+          <option value="12G">12G</option>
+          <option value="12H">12H</option>
+          <option value="12I">12I</option>
+        </optgroup>
+        <optgroup label="Other">
+          <option value="Staff">Staff</option>
+          <option value="Other">Other</option>
+        </optgroup>
+      </select>
+    </div>
 
-        <div class="form-group" id="other_group_container" style="display: none;">
-            <label for="other_group">Please specify your role:</label>
-            <input type="text" class="form-control custom-input" name="other_group" placeholder="Enter your role (e.g., parent, driver)">
-        </div>
-        <div class="form-group">
-            <label for="phone">Your Phone Number:</label>
-            <input type="text" class="form-control custom-input" name="phone_number" 
-                   placeholder="Enter your phone number" 
-                   pattern="^(?:\+639|09)\d{9}$" 
-                   title="Format: 639xxxxxxxxx or 09xxxxxxxxx" required>
-        </div>
-        <div class="form-group">
-            <label for="image_url">Optional Image Link of Item:</label>
-            <input type="text" class="form-control custom-input" name="image_url" placeholder="Enter image URL (optional)">
-        </div>
-        <button type="submit" class="btn custom-green-btn mt-3" onclick="return validatePhoneNumber()">Submit Item</button>    
-    </form>
+    <!-- Email Field (label changes based on group selection) -->
+    <div class="form-group">
+      <label for="email" id="email_label">Your school email:</label>
+      <input
+        type="email"
+        class="form-control custom-input"
+        name="email"
+        id="email"
+        placeholder="Enter your school email"
+        required
+        pattern=".+@lsca\.edu\.ph"
+        title="Valid LSCA email address (e.g., example@lsca.edu.ph)"
+      />
+    </div>
+
+    <div class="form-group" id="other_group_container" style="display: none">
+      <label for="other_group">Please specify your role:</label>
+      <input
+        type="text"
+        class="form-control custom-input"
+        name="other_group"
+        placeholder="Enter your role (e.g., parent, driver)"
+      />
+    </div>
+    <div class="form-group">
+      <label for="phone">Your Phone Number:</label>
+      <input
+        type="text"
+        class="form-control custom-input"
+        name="phone_number"
+        placeholder="Enter your phone number"
+        pattern="^(?:\+639|09)\d{9}$"
+        title="Format: 639xxxxxxxxx or 09xxxxxxxxx"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="image_url">Optional Image Link of Item:</label>
+      <input
+        type="text"
+        class="form-control custom-input"
+        name="image_url"
+        placeholder="Enter image URL (optional)"
+      />
+    </div>
+    <button
+      type="submit"
+      class="btn custom-green-btn mt-3"
+      onclick="return validatePhoneNumber()"
+    >
+      Submit Item
+    </button>
+  </form>
 </div>
 
 <style>
-    .custom-input {
-        background-color: transparent;
-        border: none;
-        border-bottom: 2px solid #86C232;
-        color: #ffffff; /* White text */
-        transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-    }
+  .custom-input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid #86c232;
+    color: #ffffff; /* White text */
+    transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+  }
 
-    .custom-input::placeholder {
-        color: #ffffff; /* White placeholder text */
-        opacity: 0.7; /* Slightly transparent */
-    }
+  .custom-input::placeholder {
+    color: #ffffff; /* White placeholder text */
+    opacity: 0.7; /* Slightly transparent */
+  }
 
-    .custom-input:focus {
-        background-color: transparent;
-        border-bottom: 2px solid #087830;
-        box-shadow: none;
-        color: #ffffff; /* Ensure text remains white on focus */
-    }
+  .custom-input:focus {
+    background-color: transparent;
+    border-bottom: 2px solid #087830;
+    box-shadow: none;
+    color: #ffffff; /* Ensure text remains white on focus */
+  }
 
-    .custom-dropdown {
-        color: #d0d0d0; /* White text for dropdown */
-    }
+  .custom-dropdown {
+    color: #d0d0d0; /* White text for dropdown */
+  }
 
-    .custom-dropdown optgroup,
-    .custom-dropdown option {
-        color: #036630; /* Black text for dropdown options */
-    }
+  .custom-dropdown optgroup,
+  .custom-dropdown option {
+    color: #036630; /* Black text for dropdown options */
+  }
 
-    .custom-dropdown .placeholder-option {
-        color: #ffffff !important; /* White text for the "Select your group" option */
-    }
+  .custom-dropdown .placeholder-option {
+    color: #ffffff !important; /* White text for the "Select your group" option */
+  }
 
-    .custom-green-btn {
-        background-color: #087830;
-        border-color: #087830;
-        color: white;
-        transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
-    }
+  .custom-green-btn {
+    background-color: #087830;
+    border-color: #087830;
+    color: white;
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  }
 
-    .custom-green-btn:hover {
-        background-color: #065a2b;
-        border-color: #065a2b;
-        transform: scale(1.05); /* Slightly increase size */
-    }
+  .custom-green-btn:hover {
+    background-color: #065a2b;
+    border-color: #065a2b;
+    transform: scale(1.05); /* Slightly increase size */
+  }
 
-    .custom-green-btn:active {
-        transform: scale(1.1); /* Slightly increase size when clicked */
-    }
+  .custom-green-btn:active {
+    transform: scale(1.1); /* Slightly increase size when clicked */
+  }
 </style>
 
 <script>
-    function validatePhoneNumber() {
-        var phoneInput = document.querySelector('input[name="phone_number"]');
-        var phoneValue = phoneInput.value;
-        var phonePattern = /^(?:\+639|09)\d{9}$/;
+  function validatePhoneNumber() {
+    var phoneInput = document.querySelector('input[name="phone_number"]');
+    var phoneValue = phoneInput.value;
+    var phonePattern = /^(?:\+639|09)\d{9}$/;
 
-        if (!phonePattern.test(phoneValue)) {
-            alert("Please enter a valid Philippine phone number in the format: 639xxxxxxxxx or 09xxxxxxxxx");
-            phoneInput.focus();
-            return false;
-        }
-        return true;
+    if (!phonePattern.test(phoneValue)) {
+      alert(
+        "Please enter a valid Philippine phone number in the format: 639xxxxxxxxx or 09xxxxxxxxx"
+      );
+      phoneInput.focus();
+      return false;
     }
+    return true;
+  }
 
-    function toggleEmailField() {
-        var groupSelect = document.getElementById('grade_and_section');
-        var emailField = document.getElementById('email');
-        var emailLabel = document.getElementById('email_label');
-        var parentEmailContainer = document.getElementById('parent_email_container');
-        var parentEmailInput = document.getElementById('parent_email');
+  function toggleEmailField() {
+    var groupSelect = document.getElementById("grade_and_section");
+    var emailField = document.getElementById("email");
+    var emailLabel = document.getElementById("email_label");
+    var parentEmailContainer = document.getElementById(
+      "parent_email_container"
+    );
+    var parentEmailInput = document.getElementById("parent_email");
 
-        var selectedValue = groupSelect.value;
+    var selectedValue = groupSelect.value;
 
-        if (selectedValue === 'Other') {
-            // Change the email field to a personal email field
-            emailLabel.innerText = 'Your personal email:';
-            emailField.setAttribute('placeholder', 'Enter your personal email');
-            emailField.removeAttribute('pattern');
-            emailField.setAttribute('title', 'Enter your personal email address');
-            parentEmailContainer.style.display = 'none'; // Hide redundant personal email field
-        } else {
-            // Change the email field back to the school email
-            emailLabel.innerText = 'Your school email:';
-            emailField.setAttribute('placeholder', 'Enter your school email');
-            emailField.setAttribute('pattern', '.+@lsca\\.edu\\.ph');
-            emailField.setAttribute('title', 'Valid LSCA email address (e.g., example@lsca.edu.ph)');
-            parentEmailContainer.style.display = 'none'; // Hide personal email field if not "Other"
-        }
+    if (selectedValue === "Other") {
+      // Change the email field to a personal email field
+      emailLabel.innerText = "Your personal email:";
+      emailField.setAttribute("placeholder", "Enter your personal email");
+      emailField.removeAttribute("pattern");
+      emailField.setAttribute("title", "Enter your personal email address");
+      parentEmailContainer.style.display = "none"; // Hide redundant personal email field
+    } else {
+      // Change the email field back to the school email
+      emailLabel.innerText = "Your school email:";
+      emailField.setAttribute("placeholder", "Enter your school email");
+      emailField.setAttribute("pattern", ".+@lsca\\.edu\\.ph");
+      emailField.setAttribute(
+        "title",
+        "Valid LSCA email address (e.g., example@lsca.edu.ph)"
+      );
+      parentEmailContainer.style.display = "none"; // Hide personal email field if not "Other"
     }
+  }
+  document
+    .querySelector('select[name="item_status"]')
+    .addEventListener("change", function () {
+      var itemStatus = this.value;
+      var dateLabel = document.getElementById("date_label");
+
+      if (itemStatus === "Lost") {
+        dateLabel.innerText = "Date Lost:";
+      } else if (itemStatus === "Found") {
+        dateLabel.innerText = "Date Found:";
+      }
+    });
 </script>
 {% endblock %}
