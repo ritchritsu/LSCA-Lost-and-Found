@@ -37,7 +37,7 @@ SQLAlchemy==2.0.35
 sqlparse==0.5.1
 Werkzeug==3.0.4
 zipp==1.0.0
-PyYAML==5.4.1
+PyYAML==6.0.1
 Cython==0.29.35
 
 
