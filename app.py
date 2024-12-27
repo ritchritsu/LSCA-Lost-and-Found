@@ -92,12 +92,11 @@ def index():
             return render_template("admin-dashboard.html", items=items)
         else:
             # Redirect non-admin users to the submission page
-            return redirect("/submit")
+            return render_template("submission.html")
     
     except Exception as e:
         print(f"Error fetching items: {e}")
         return render_template("admin-dashboard.html", items=[])
-
 
 @app.route("/submit", methods=["POST"])
 @login_required
