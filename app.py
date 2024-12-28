@@ -393,7 +393,7 @@ def resend_confirmation():
     
     send_confirmation_email(user["email"])
     flash('A new confirmation email has been sent.', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('unconfirmed'))
 
 def check_confirmed(func):
     @wraps(func)
