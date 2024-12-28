@@ -255,36 +255,44 @@ def forgot_password():
         email = request.form.get("email")
         
         if not email or not email.endswith("@lsca.edu.ph"):
-            flash("Invalid email. Please use your LSCA email.")
+            flash("Invalid email. Please use your LSCA email.", "error")
             return render_template("forgot-password.html")
             
-        # Check if user exists
+        # Check if user exists and is confirmed
         user = db.execute("SELECT * FROM users WHERE email = ?", email)
         if not user:
-            flash("No account found with that email address.")
+            flash("No account found with that email address.", "error")
             return render_template("forgot-password.html")
+        
+        # Check if email is confirmed
+        if not user[0]["is_confirmed"]:
+            flash("Please confirm your email address first. Check your inbox for the confirmation link.", "warning")
+            return redirect(url_for('unconfirmed'))
             
-        # Generate password reset token
-        token = generate_token(email)
-        reset_url = url_for('reset_password', token=token, _external=True)
-        
-        # Send reset email
-        html = render_template('reset_password_email.html', reset_url=reset_url)
-        subject = "Password Reset Request"
-        msg = Message(
-            subject,
-            recipients=[email],
-            html=html,
-            sender=app.config['MAIL_DEFAULT_SENDER']
-        )
-        
         try:
+            # Generate password reset token
+            token = generate_token(email)
+            reset_url = url_for('reset_password', token=token, _external=True)
+            
+            # Send reset email
+            html = render_template('reset_password_email.html', reset_url=reset_url)
+            subject = "Password Reset Request"
+            msg = Message(
+                subject,
+                recipients=[email],
+                html=html,
+                sender=app.config['MAIL_DEFAULT_SENDER']
+            )
+            
             mail.send(msg)
-            flash("Password reset instructions have been sent to your email. Please check your email.")
+            
+            # Store success message in session
+            flash("Password reset instructions have been sent to your email. Please check your inbox.", "success")
             return redirect(url_for('login'))
+            
         except Exception as e:
             print(f"Error sending email: {e}")
-            flash("Error sending reset email. Please try again later.")
+            flash("Error sending reset email. Please try again later.", "error")
             return render_template("forgot-password.html")
             
     return render_template("forgot-password.html")
