@@ -40,4 +40,5 @@ zipp==1.0.0
 PyYAML==6.0.1
 Cython==0.29.35
 Flask-Mail==0.9.1
+python-dotenv==1.0.0
 
