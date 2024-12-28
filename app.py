@@ -1,20 +1,40 @@
 import re
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session, jsonify
+from flask import Flask, flash, redirect, render_template, request, session, jsonify, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import login_required
-import smtplib
-from email.mime.text import MIMEText
+from functools import wraps
 from email.mime.multipart import MIMEMultipart
+from datetime import datetime
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Configure application
 app = Flask(__name__)
 
+# Add security configurations
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
+app.config['SECURITY_PASSWORD_SALT'] = os.getenv('SECURITY_PASSWORD_SALT', 'your-security-salt-here')
+
 # Ensure templates auto-reload
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-# Configure session to use filesystem (instead of signed cookies)
+# Mail configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = os.getenv('EMAIL_USER')
+app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('EMAIL_USER')
+
+mail = Mail(app)
+
+# Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
@@ -30,76 +50,32 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
-        
 @app.route("/")
 @login_required
 def index():
     """Show submission form or admin dashboard based on user"""
     try:
-        # Fetch the current user's email from the session
         user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
         
-        # Check if the user is the specific admin
         if user_email == "ritchangelo.dacanay@lsca.edu.ph":
-            # Fetch all items for the admin dashboard
             items = db.execute("SELECT * FROM items")
             return render_template("admin-dashboard.html", items=items)
         else:
-            # Redirect non-admin users to the submission page
             return render_template("submission.html")
     
     except Exception as e:
         print(f"Error fetching items: {e}")
         return render_template("admin-dashboard.html", items=[])
 
-@app.route("/submit", methods=["POST"])
-@login_required
-def submit_item():
-    """Submit a lost or found item"""
-    # Get form data
-    item_status = request.form.get("item_status")
-    date = request.form.get("date")
-    item_description = request.form.get("item_description")
-    location = request.form.get("location")
-    email = request.form.get("email")
-    grade_and_section = request.form.get("grade_and_section")
-    phone_number = request.form.get("phone_number")
-    image_url = request.form.get("image_url")
-
-    # Check for required fields
-    if not all([item_status, date, item_description, location, email, grade_and_section, phone_number]):
-        flash("Please fill in all required fields.")
-        return redirect("/")
-
-    # Initialize date fields based on item status
-    lost_date = date if item_status == "Lost" else None
-    found_date = date if item_status == "Found" else None
-
-    # Insert data into the database
-    try:
-        db.execute(
-            "INSERT INTO items (item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url
-        )
-    except Exception as e:
-        flash("An error occurred while submitting your item.")
-        print(f"Error inserting item: {e}")
-        return redirect("/")
-
-    flash("Your item has been submitted successfully!")
-    return redirect("/")
-
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
-    session.clear()  # Clear any existing user session
+    session.clear()
 
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
 
-        # Validate email format
         if not email or not email.endswith("@lsca.edu.ph"):
             flash("Invalid email. Please use your LSCA email.")
             return render_template("login.html")
@@ -111,12 +87,10 @@ def login():
             print(f"Error fetching user: {e}")
             return render_template("login.html")
 
-        # Validate password
         if not password:
             flash("Please provide a password")
             return render_template("login.html")
 
-        # Check user credentials
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
             flash("Invalid email or password")
             return render_template("login.html")
@@ -142,12 +116,10 @@ def register():
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
 
-        # Validate email format
         if not email or not re.match(r"[^@]+@lsca\.edu\.ph$", email):
             flash("Invalid email format. Please use your LSCA email.")
             return render_template("register.html")
 
-        # Validate password
         if not password or len(password) < 8:
             flash("Password must be at least 8 characters long")
             return render_template("register.html")
@@ -156,25 +128,67 @@ def register():
             flash("Password and confirmation do not match")
             return render_template("register.html")
 
-        # Check if email is already registered
-        rows = db.execute("SELECT * FROM users WHERE email = ?", email)
-        if len(rows) > 0:
-            flash("This email is already registered")
-            return render_template("register.html")
-
-        # Hash password and insert new user into database
-        hashed_password = generate_password_hash(password)
-
         try:
-            db.execute("INSERT INTO users (email, hash) VALUES (?, ?)", email, hashed_password)
-            flash("Registration successful!")
-            return redirect("/login")
+            # Check if email already exists
+            rows = db.execute("SELECT * FROM users WHERE email = ?", email)
+            
+            if rows and len(rows) > 0:
+                flash("This email is already registered")
+                return render_template("register.html")
+
+            # Hash password and insert new user
+            hashed_password = generate_password_hash(password)
+            user_id = db.execute(
+                "INSERT INTO users (email, hash, is_confirmed) VALUES (?, ?, FALSE)", 
+                email, hashed_password
+            )
+            
+            # Log the user in and send confirmation email
+            session["user_id"] = user_id
+            send_confirmation_email(email)
+            
+            flash("Registration successful! Please check your email to confirm your account.")
+            return redirect(url_for('unconfirmed'))
+            
         except Exception as e:
             print(f"Error during registration: {e}")
             flash("An error occurred during registration")
             return render_template("register.html")
 
     return render_template("register.html")
+
+@app.route("/submit", methods=["POST"])
+@login_required
+def submit_item():
+    """Submit a lost or found item"""
+    item_status = request.form.get("item_status")
+    date = request.form.get("date")
+    item_description = request.form.get("item_description")
+    location = request.form.get("location")
+    email = request.form.get("email")
+    grade_and_section = request.form.get("grade_and_section")
+    phone_number = request.form.get("phone_number")
+    image_url = request.form.get("image_url")
+
+    if not all([item_status, date, item_description, location, email, grade_and_section, phone_number]):
+        flash("Please fill in all required fields.")
+        return redirect("/")
+
+    lost_date = date if item_status == "Lost" else None
+    found_date = date if item_status == "Found" else None
+
+    try:
+        db.execute(
+            "INSERT INTO items (item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url
+        )
+    except Exception as e:
+        flash("An error occurred while submitting your item.")
+        print(f"Error inserting item: {e}")
+        return redirect("/")
+
+    flash("Your item has been submitted successfully!")
+    return redirect("/")
 
 @app.route("/found")
 @login_required
@@ -195,38 +209,28 @@ def lost_items():
 def update_table_data():
     """Update the table data in the database"""
     try:
-        # Access the data sent in the request
-        data = request.json  # request.json should contain [{id, field, value}, ...]
-        
-        # List of valid field names to prevent SQL injection
+        data = request.json
         valid_fields = ["item_status", "lost_date", "found_date", "item_description", 
-                        "location", "found_location", "email", "grade_and_section", 
-                        "phone_number", "image_url"]
+                       "location", "found_location", "email", "grade_and_section", 
+                       "phone_number", "image_url"]
 
         for entry in data['data']:
             id = entry['id']
             field = entry['field']
             value = entry['value']
 
-            # Check if the field is valid
             if field not in valid_fields:
                 return jsonify({'success': False, 'error': f"Invalid field: {field}"})
-            
-            # Debugging: Print the data before running the query
-            print(f"Updating record with ID: {id}, Field: {field}, Value: {value}")
 
-            # Construct the query dynamically
             query = f"UPDATE items SET {field} = ? WHERE id = ?"
-
-            # Execute the query with the correct parameters (value, id)
-            db.execute(query, (value, id))  # This is correct: a tuple of two values
+            db.execute(query, value, id)
 
         return jsonify({'success': True})
     
     except Exception as e:
         print(f"Error updating data: {e}")
         return jsonify({'success': False, 'error': str(e)})
-    
+
 @app.route("/update-status", methods=["POST"])
 @login_required
 def update_status():
@@ -239,16 +243,101 @@ def update_status():
         if not item_id or not item_status:
             return jsonify({'success': False, 'error': 'Invalid request'})
 
-        # Update the item status in the database
         db.execute("UPDATE items SET item_status = ? WHERE id = ?", item_status, item_id)
-
         return jsonify({'success': True})
     
     except Exception as e:
         print(f"Error updating status: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+def generate_token(email):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
 
+def confirm_token(token, expiration=3600):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    try:
+        email = serializer.loads(
+            token,
+            salt=app.config['SECURITY_PASSWORD_SALT'],
+            max_age=expiration
+        )
+        return email
+    except:
+        return False
+
+def send_confirmation_email(user_email):
+    token = generate_token(user_email)
+    confirm_url = url_for('confirm_email', token=token, _external=True)
+    html = render_template('confirm_email.html', confirm_url=confirm_url)
+    subject = "Please confirm your email"
+    
+    msg = Message(
+        subject,
+        recipients=[user_email],
+        html=html,
+        sender=app.config['MAIL_DEFAULT_SENDER']
+    )
+    mail.send(msg)
+
+@app.route('/confirm/<token>')
+@login_required
+def confirm_email(token):
+    try:
+        email = confirm_token(token)
+    except:
+        flash('The confirmation link is invalid or has expired.', 'danger')
+        return redirect(url_for('index'))
+    
+    user_id = session["user_id"]
+    user = db.execute("SELECT * FROM users WHERE id = ?", user_id)[0]
+    
+    if user["is_confirmed"]:
+        flash('Account already confirmed.', 'success')
+    else:
+        db.execute(
+            "UPDATE users SET is_confirmed = TRUE, confirmed_on = ? WHERE id = ?",
+            datetime.now(), user_id
+        )
+        flash('You have confirmed your account. Thanks!', 'success')
+    
+    return redirect(url_for('index'))
+
+@app.route('/resend')
+@login_required
+def resend_confirmation():
+    user_id = session["user_id"]
+    user = db.execute("SELECT * FROM users WHERE id = ?", user_id)[0]
+    
+    if user["is_confirmed"]:
+        flash('Your account is already confirmed.', 'success')
+        return redirect(url_for('index'))
+    
+    send_confirmation_email(user["email"])
+    flash('A new confirmation email has been sent.', 'success')
+    return redirect(url_for('index'))
+
+def check_confirmed(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        user_id = session.get("user_id")
+        if user_id:
+            user = db.execute("SELECT is_confirmed FROM users WHERE id = ?", user_id)[0]
+            if not user["is_confirmed"]:
+                flash('Please confirm your account!', 'warning')
+                return redirect(url_for('unconfirmed'))
+        return func(*args, **kwargs)
+    return decorated_function
+
+@app.route('/unconfirmed')
+@login_required
+def unconfirmed():
+    user_id = session.get("user_id")
+    if user_id:
+        user = db.execute("SELECT is_confirmed FROM users WHERE id = ?", user_id)[0]
+        if user["is_confirmed"]:
+            return redirect(url_for('index'))
+    return render_template('unconfirmed.html')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)
