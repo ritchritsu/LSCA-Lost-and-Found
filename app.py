@@ -249,6 +249,80 @@ def update_status():
         print(f"Error updating status: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email")
+        
+        if not email or not email.endswith("@lsca.edu.ph"):
+            flash("Invalid email. Please use your LSCA email.")
+            return render_template("forgot-password.html")
+            
+        # Check if user exists
+        user = db.execute("SELECT * FROM users WHERE email = ?", email)
+        if not user:
+            flash("No account found with that email address.")
+            return render_template("forgot-password.html")
+            
+        # Generate password reset token
+        token = generate_token(email)
+        reset_url = url_for('reset_password', token=token, _external=True)
+        
+        # Send reset email
+        html = render_template('reset_password_email.html', reset_url=reset_url)
+        subject = "Password Reset Request"
+        msg = Message(
+            subject,
+            recipients=[email],
+            html=html,
+            sender=app.config['MAIL_DEFAULT_SENDER']
+        )
+        
+        try:
+            mail.send(msg)
+            flash("Password reset instructions have been sent to your email.")
+            return redirect(url_for('login'))
+        except Exception as e:
+            print(f"Error sending email: {e}")
+            flash("Error sending reset email. Please try again later.")
+            return render_template("forgot-password.html")
+            
+    return render_template("forgot-password.html")
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    try:
+        email = confirm_token(token)
+        if not email:
+            flash('The password reset link is invalid or has expired.', 'danger')
+            return redirect(url_for('login'))
+    except:
+        flash('The password reset link is invalid or has expired.', 'danger')
+        return redirect(url_for('login'))
+        
+    if request.method == "POST":
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+        
+        if not password or len(password) < 8:
+            flash("Password must be at least 8 characters long")
+            return render_template("reset-password.html")
+            
+        if password != confirmation:
+            flash("Password and confirmation do not match")
+            return render_template("reset-password.html")
+            
+        try:
+            hashed_password = generate_password_hash(password)
+            db.execute("UPDATE users SET hash = ? WHERE email = ?", hashed_password, email)
+            flash("Your password has been updated. Please login with your new password.")
+            return redirect(url_for('login'))
+        except Exception as e:
+            print(f"Error resetting password: {e}")
+            flash("An error occurred. Please try again later.")
+            return render_template("reset-password.html")
+            
+    return render_template("reset-password.html")
 def generate_token(email):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
     return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
