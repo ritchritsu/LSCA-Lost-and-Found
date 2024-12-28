@@ -129,22 +129,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const subject = `Re: Lost Item Report - ${itemDescription}`;
                     let body = `
-                        Hello,
+Hello,
 
-                        This is a response regarding your lost item report. Here are the details of your submission:
+This is a response regarding your lost item report. Here are the details of your submission:
 
-                        - Item Status: ${itemStatus}
-                        - Item Description: ${itemDescription}
-                        - Lost Location: ${location}
-                        - Found Location: ${foundLocation}
-                        - Lost Date: ${lostDate}
-                        - Found Date: ${foundDate}
+- Item Status: ${itemStatus}
+- Item Description: ${itemDescription}
+- Lost Location: ${location}
+- Found Location: ${foundLocation}
+- Lost Date: ${lostDate}
+- Found Date: ${foundDate}
+
                     `;
 
                     if (itemStatus === 'Lost') {
                         body += `Unfortunately, the item is still listed as lost.`;
                     } else if (itemStatus === 'Found') {
-                        body += `Great news! The item has been found.`;
+                        body += `Great news! The item has been found. You may retrieve it at the Senior High School Faculty Room.`;
                     }
 
                     body += ` If you have any additional questions, feel free to reach out.
