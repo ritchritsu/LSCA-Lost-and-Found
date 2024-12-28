@@ -280,7 +280,7 @@ def forgot_password():
         
         try:
             mail.send(msg)
-            flash("Password reset instructions have been sent to your email.")
+            flash("Password reset instructions have been sent to your email. Please check your email.")
             return redirect(url_for('login'))
         except Exception as e:
             print(f"Error sending email: {e}")
