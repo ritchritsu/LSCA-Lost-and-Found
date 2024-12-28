@@ -7,6 +7,7 @@ from itsdangerous import URLSafeTimedSerializer
 from datetime import datetime
 from flask_mail import Mail, Message
 import os
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
