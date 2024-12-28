@@ -18,7 +18,11 @@
                 <div class="invalid-feedback" id="login-password-error">Please enter your password</div>
             </div>
             <button class="btn custom-green-btn w-50 mx-auto d-block" type="submit">Log In</button>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('forgot_password') }}" class="btn btn-link text-light">Forgot Password?</a>
+            </div>
         </form>
+        
     </div>
 </div>
 
@@ -40,7 +44,7 @@
         background-color: transparent;
         border-bottom: 2px solid #087830;
         box-shadow: none;
-        color: wheite;
+        color: white;
     }
 
     .custom-input:hover {
@@ -70,35 +74,34 @@
     }
 
     .custom-nav-link {
-  color: #ffffff !important;
-  position: relative;
-  text-decoration: none;
-  transition: color 0.2s ease-in-out;
-}
+        color: #ffffff !important;
+        position: relative;
+        text-decoration: none;
+        transition: color 0.2s ease-in-out;
+    }
 
-.custom-nav-link::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  display: block;
-  margin-top: 5px;
-  right: 0;
-  background: #ffffff;
-  transition: width 0.2s ease-in-out;
-  -webkit-transition: width 0.2s ease-in-out;
-}
+    .custom-nav-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        display: block;
+        margin-top: 5px;
+        right: 0;
+        background: #ffffff;
+        transition: width 0.2s ease-in-out;
+        -webkit-transition: width 0.2s ease-in-out;
+    }
 
-.custom-nav-link:hover::after {
-  width: 100%;
-  left: 0;
-  background: #ffffff;
-}
+    .custom-nav-link:hover::after {
+        width: 100%;
+        left: 0;
+        background: #ffffff;
+    }
 
-.custom-nav-link:hover {
-  color: #ffffff;
-}
-
+    .custom-nav-link:hover {
+        color: #ffffff;
+    }
 </style>
 
 <script>
