@@ -1,16 +1,14 @@
-import re
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, jsonify, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import login_required
-from functools import wraps
-from email.mime.multipart import MIMEMultipart
+from itsdangerous import URLSafeTimedSerializer
 from datetime import datetime
 from flask_mail import Mail, Message
-from itsdangerous import URLSafeTimedSerializer
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Configure application
