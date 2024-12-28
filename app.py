@@ -55,12 +55,55 @@ def index():
     """Show submission form or admin dashboard based on user"""
     if session.pop("reset_email_sent", False):
         flash("Password reset instructions have been sent to your email. Please check your email.")
+    try:
+        user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
+        
+        if user_email == "ritchangelo.dacanay@lsca.edu.ph":
+            items = db.execute("SELECT * FROM items")
+            return render_template("admin-dashboard.html", items=items)
+        else:
+            return render_template("submission.html")
     
-    # Fetch items or other data needed for the index page
-    items = db.execute("SELECT * FROM items")
-    return render_template("admin-dashboard.html", items=items)
+    except Exception as e:
+        print(f"Error fetching items: {e}")
+        return render_template("admin-dashboard.html", items=[])
+    
 
 
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in"""
+    session.clear()
+
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if not email or not email.endswith("@lsca.edu.ph"):
+            flash("Invalid email. Please use your LSCA email.")
+            return render_template("login.html")
+
+        try:
+            rows = db.execute("SELECT * FROM users WHERE email = ?", email)
+        except Exception as e:
+            flash("An error occurred while checking your credentials.")
+            print(f"Error fetching user: {e}")
+            return render_template("login.html")
+
+        if not password:
+            flash("Please provide a password")
+            return render_template("login.html")
+
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
+            flash("Invalid email or password")
+            return render_template("login.html")
+
+        session["user_id"] = rows[0]["id"]
+        flash("Logged in successfully!")
+        return redirect("/")
+
+    return render_template("login.html")
 
 @app.route("/logout")
 def logout():
@@ -220,78 +263,36 @@ def forgot_password():
             flash("Invalid email. Please use your LSCA email.")
             return render_template("forgot-password.html")
             
-        # Check if user exists and is confirmed
+        # Check if user exists
         user = db.execute("SELECT * FROM users WHERE email = ?", email)
         if not user:
             flash("No account found with that email address.")
             return render_template("forgot-password.html")
+            
+        # Generate password reset token
+        token = generate_token(email)
+        reset_url = url_for('reset_password', token=token, _external=True)
         
-        # Check if email is confirmed
-        if not user[0]["is_confirmed"]:
-            flash("Please confirm your email address first. Check your inbox for the confirmation link.")
-            return redirect(url_for('unconfirmed'))
-            
+        # Send reset email
+        html = render_template('reset_password_email.html', reset_url=reset_url)
+        subject = "Password Reset Request"
+        msg = Message(
+            subject,
+            recipients=[email],
+            html=html,
+            sender=app.config['MAIL_DEFAULT_SENDER']
+        )
+        
         try:
-            # Generate password reset token
-            token = generate_token(email)
-            reset_url = url_for('reset_password', token=token, _external=True)
-            
-            # Send reset email
-            html = render_template('reset_password_email.html', reset_url=reset_url)
-            subject = "Password Reset Request"
-            msg = Message(
-                subject,
-                recipients=[email],
-                html=html,
-                sender=app.config['MAIL_DEFAULT_SENDER']
-            )
-            
             mail.send(msg)
             flash("Password reset instructions have been sent to your email. Please check your email.")
-            return redirect("/login")
-            
+            return redirect(url_for('login'))
         except Exception as e:
             print(f"Error sending email: {e}")
             flash("Error sending reset email. Please try again later.")
             return render_template("forgot-password.html")
             
     return render_template("forgot-password.html")
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    """Log user in"""
-    if request.method == "POST":
-        # Clear the session at the start of POST request
-        session.clear()
-        
-        email = request.form.get("email")
-        password = request.form.get("password")
-
-        if not email or not email.endswith("@lsca.edu.ph"):
-            flash("Invalid email. Please use your LSCA email.")
-            return render_template("login.html")
-
-        try:
-            rows = db.execute("SELECT * FROM users WHERE email = ?", email)
-        except Exception as e:
-            flash("An error occurred while checking your credentials.")
-            print(f"Error fetching user: {e}")
-            return render_template("login.html")
-
-        if not password:
-            flash("Please provide a password")
-            return render_template("login.html")
-
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
-            flash("Invalid email or password")
-            return render_template("login.html")
-
-        session["user_id"] = rows[0]["id"]
-        flash("Logged in successfully!")
-        return redirect("/")
-
-    return render_template("login.html")
-
 
 @app.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password(token):
@@ -310,11 +311,11 @@ def reset_password(token):
         
         if not password or len(password) < 8:
             flash("Password must be at least 8 characters long")
-            return render_template("reset-password.html", token=token)
+            return render_template("reset-password.html")
             
         if password != confirmation:
             flash("Password and confirmation do not match")
-            return render_template("reset-password.html", token=token)
+            return render_template("reset-password.html")
             
         try:
             hashed_password = generate_password_hash(password)
@@ -324,10 +325,9 @@ def reset_password(token):
         except Exception as e:
             print(f"Error resetting password: {e}")
             flash("An error occurred. Please try again later.")
-            return render_template("reset-password.html", token=token)
+            return render_template("reset-password.html")
             
-    return render_template("reset-password.html", token=token)
-
+    return render_template("reset-password.html")
 def generate_token(email):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
     return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
