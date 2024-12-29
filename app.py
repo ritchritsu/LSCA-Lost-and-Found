@@ -53,8 +53,6 @@ def after_request(response):
 @login_required
 def index():
     """Show submission form or admin dashboard based on user"""
-    if session.pop("reset_email_sent", False):
-        flash("Password reset instructions have been sent to your email. Please check your email.")
     try:
         user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
         
@@ -74,7 +72,13 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
+    # Store the reset_email_sent value before clearing session
+    reset_email_sent = session.get("reset_email_sent", False)
     session.clear()
+    
+    # If there was a reset email sent, flash the message
+    if reset_email_sent:
+        flash("Password reset instructions have been sent to your email. Please check your email.")
 
     if request.method == "POST":
         email = request.form.get("email")
@@ -104,6 +108,7 @@ def login():
         return redirect("/")
 
     return render_template("login.html")
+
 
 @app.route("/logout")
 def logout():
@@ -285,7 +290,7 @@ def forgot_password():
         
         try:
             mail.send(msg)
-            flash("Password reset instructions have been sent to your email. Please check your email.")
+            session["reset_email_sent"] = True
             return redirect(url_for('login'))
         except Exception as e:
             print(f"Error sending email: {e}")
@@ -328,6 +333,7 @@ def reset_password(token):
             return render_template("reset-password.html")
             
     return render_template("reset-password.html")
+
 def generate_token(email):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
     return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
