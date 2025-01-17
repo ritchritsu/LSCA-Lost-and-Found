@@ -91,6 +91,10 @@ def login():
             print(f"Error fetching user: {e}")
             return render_template("login.html")
 
+        if not rows:
+            flash("No account found with that email address. Please register first.")
+            return redirect(url_for('register'))
+
         if not password:
             flash("Please provide a password")
             return render_template("login.html")
