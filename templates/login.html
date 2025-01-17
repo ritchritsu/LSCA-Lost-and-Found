@@ -18,8 +18,11 @@
                 <div class="invalid-feedback" id="login-password-error">Please enter your password</div>
             </div>
             <button class="btn custom-green-btn w-50 mx-auto d-block" type="submit">Log In</button>
+            <div class="text-center mv mt-3">
+                <a href="{{ url_for('register') }}" class="custom-link">Don't have an account? Sign up here</a>
+            </div>
             <div class="text-center mt-3">
-                <a href="{{ url_for('forgot_password') }}" class="btn btn-link text-light">Forgot Password?</a>
+                <a href="{{ url_for('forgot_password') }}" class="custom-link">Forgot Password?</a>
             </div>
         </form>
         
@@ -47,6 +50,15 @@
         color: white;
     }
 
+    .custom-link {
+        color: #ffffff; /* Custom link color */
+        text-decoration: none; /* Remove underline */
+    }
+
+    .custom-link:hover {
+        color: #00a748; /* Darker green on hover */
+    }
+
     .custom-input:hover {
         color: #ffffff; /* Green text on hover */
         border-bottom-color: #087830; /* Green underline on hover */
@@ -57,6 +69,7 @@
         border-color: #036631;
         color: white;
         transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+        margin-top: 10px;
     }
 
     .custom-green-btn:hover {

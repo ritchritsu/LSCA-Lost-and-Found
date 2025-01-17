@@ -376,3 +376,14 @@ li a, .navbar a {
 .custom-nav-link:hover {
   color: #ffffff;
 }
+
+.alert {
+    background-color: rgba(3, 102, 49, 0.2);
+    border-color: #036631;
+    color: white;
+}
+
+.alert-info {
+    margin: 0 auto;
+    width: 75%;
+}

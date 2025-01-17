@@ -95,6 +95,10 @@ def login():
             print(f"Error fetching user: {e}")
             return render_template("login.html")
 
+        if not rows:
+            flash("No account found with that email address. Please register first.")
+            return redirect(url_for('register'))
+
         if not password:
             flash("Please provide a password")
             return render_template("login.html")
@@ -268,30 +272,28 @@ def forgot_password():
             flash("Invalid email. Please use your LSCA email.")
             return render_template("forgot-password.html")
             
-        # Check if user exists
         user = db.execute("SELECT * FROM users WHERE email = ?", email)
         if not user:
             flash("No account found with that email address.")
             return render_template("forgot-password.html")
             
-        # Generate password reset token
-        token = generate_token(email)
-        reset_url = url_for('reset_password', token=token, _external=True)
-        
-        # Send reset email
-        html = render_template('reset_password_email.html', reset_url=reset_url)
-        subject = "Password Reset Request"
-        msg = Message(
-            subject,
-            recipients=[email],
-            html=html,
-            sender=app.config['MAIL_DEFAULT_SENDER']
-        )
-        
         try:
+            token = generate_token(email)
+            reset_url = url_for('reset_password', token=token, _external=True)
+            
+            html = render_template('reset_password_email.html', reset_url=reset_url)
+            subject = "Password Reset Request"
+            msg = Message(
+                subject,
+                recipients=[email],
+                html=html,
+                sender=app.config['MAIL_DEFAULT_SENDER']
+            )
+            
             mail.send(msg)
-            session["reset_email_sent"] = True
-            return redirect(url_for('login'))
+            flash("Password reset instructions have been sent to your email. Please check your email.")
+            return render_template("forgot-password.html")
+            
         except Exception as e:
             print(f"Error sending email: {e}")
             flash("Error sending reset email. Please try again later.")
