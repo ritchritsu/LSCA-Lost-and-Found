@@ -387,3 +387,12 @@ li a, .navbar a {
     margin: 0 auto;
     width: 75%;
 }
+
+.delete-btn {
+  padding: 2px 8px;
+  font-size: 0.8rem;
+}
+.delete-btn:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}

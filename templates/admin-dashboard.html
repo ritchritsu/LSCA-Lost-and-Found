@@ -161,6 +161,39 @@ Best regards,
             },
             { title: "Group", field: "grade_and_section", width: 80 },
             { title: "Phone Number", field: "phone_number", width: 100 },
+            {
+                title: "Delete",
+                formatter: function(cell) {
+                    return '<button class="btn btn-danger btn-sm delete-btn"><i class="fas fa-trash"></i></button>';
+                },
+                width: 80,
+                hozAlign: "center",
+                cellClick: function(e, cell) {
+                    if (!confirm("Are you sure you want to delete this item?")) {
+                        return;
+                    }
+
+                    const rowData = cell.getRow().getData();
+                    fetch('/delete-item', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: rowData.id
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            alert("Error deleting item: " + data.error);
+                        } else {
+                            cell.getRow().delete();
+                        }
+                    })
+                    .catch(err => {
+                        alert("An error occurred: " + err);
+                    });
+                }
+            }
         ],
         cellClick: function(e, cell) {
             const clickedValue = cell.getValue();

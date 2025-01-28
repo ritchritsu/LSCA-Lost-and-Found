@@ -425,5 +425,24 @@ def unconfirmed():
             return redirect(url_for('index'))
     return render_template('unconfirmed.html')
 
+
+@app.route("/delete-item", methods=["POST"])
+@login_required
+def delete_item():
+    """Delete an item from the database"""
+    try:
+        data = request.json
+        item_id = data.get("id")
+
+        if not item_id:
+            return jsonify({'success': False, 'error': 'Invalid request'})
+
+        db.execute("DELETE FROM items WHERE id = ?", item_id)
+        return jsonify({'success': True})
+    
+    except Exception as e:
+        print(f"Error deleting item: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)
