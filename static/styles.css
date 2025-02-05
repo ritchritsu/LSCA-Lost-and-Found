@@ -388,34 +388,6 @@ li a, .navbar a {
     width: 75%;
 }
 
-
-.delete-btn {
-  padding: 2px 8px;
-  font-size: 0.8rem;
-}
-.delete-btn:hover {
-  background-color: #dc3545;
-  border-color: #dc3545;
-}
-/* ...existing code... */
-
-.modal-content,
-.modal-header,
-.modal-body,
-.modal-footer {
-  background-color: #036631 !important; /* Your green color */
-  color: #ffffff !important;           /* White text */
-}
-.table {
-  --bs-table-color-type: initial;
-  --bs-table-bg-type: initial;
-  --bs-table-color-state: initial;
-  --bs-table-bg-state: initial;
-  --bs-table-color: #fff;
-  --bs-table-bg: #036631;
-
-}
-
 /* ...existing code... */
 
 .modal-content,
