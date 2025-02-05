@@ -203,6 +203,90 @@ Best regards,
         }
     });
 
+    // Add this after your existing Tabulator initialization
+    table.on("cellClick", function(e, cell){
+        if(cell.getField() === "item_description" && cell.getData().item_status === "Lost") {
+            // Get the description of the clicked item
+            const description = cell.getValue();
+            
+            // Call the API to find similar items
+            fetch('/find-similar-items', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    description: description
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSimilarItemsModal(data.items, description);
+                } else {
+                    alert("Error finding similar items: " + data.error);
+                }
+            })
+            .catch(err => {
+                alert("An error occurred: " + err);
+            });
+        }
+    });
+
+    // Add this function to show the modal
+    function showSimilarItemsModal(items, originalDescription) {
+        // Remove existing modal if any
+        const existingModal = document.getElementById('similarItemsModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Create modal HTML
+        const modalHTML = `
+        <div class="modal fade" id="similarItemsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Similar Found Items</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Original Lost Item:</strong> ${originalDescription}</p>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Location</th>
+                                        <th>Found Date</th>
+                                        <th>Similarity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${items.map(item => `
+                                        <tr>
+                                            <td>${item.item_description}</td>
+                                            <td>${item.location}</td>
+                                            <td>${item.found_date}</td>
+                                            <td>${Math.round(item.similarity * 100)}%</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        // Add modal to document
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('similarItemsModal'));
+        modal.show();
+    }
+
     // Check if there is a saved search term in localStorage
     const savedSearchTerm = localStorage.getItem('searchTerm');
     if (savedSearchTerm) {

@@ -9,6 +9,12 @@ from flask_mail import Mail, Message
 import os
 import re
 from dotenv import load_dotenv
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+import time
+from functools import lru_cache
+import requests.exceptions
 
 load_dotenv()
 
@@ -425,6 +431,7 @@ def unconfirmed():
             return redirect(url_for('index'))
     return render_template('unconfirmed.html')
 
+<<<<<<< HEAD
 
 @app.route("/delete-item", methods=["POST"])
 @login_required
@@ -442,7 +449,95 @@ def delete_item():
     
     except Exception as e:
         print(f"Error deleting item: {e}")
+=======
+# Initialize model with longer timeout and retries
+@lru_cache(maxsize=1)
+def get_model():
+    max_retries = 3
+    base_delay = 1
+    
+    for attempt in range(max_retries):
+        try:
+            # Remove "timeout" parameter
+            return SentenceTransformer(
+                'all-MiniLM-L6-v2',
+                device='cpu',
+                cache_folder='./model_cache'
+            )
+        except requests.exceptions.ReadTimeout as e:
+            if attempt == max_retries - 1:
+                raise
+            time.sleep(base_delay * (2 ** attempt))
+
+# Initialize model lazily
+model = None
+
+@app.route("/find-similar-items", methods=["POST"])
+@login_required
+def find_similar_items():
+    global model
+    
+    try:
+        # Initialize model on first request
+        if model is None:
+            try:
+                model = get_model()
+            except Exception as e:
+                print(f"Error loading model: {e}")
+                return jsonify({
+                    'success': False, 
+                    'error': 'Model initialization failed. Please try again later.'
+                })
+
+        data = request.json
+        description = data.get("description")
+        
+        if not description:
+            return jsonify({
+                'success': False,
+                'error': 'No description provided'
+            })
+
+        # Get all found items
+        found_items = db.execute("SELECT * FROM items WHERE item_status = 'Found'")
+        
+        if not found_items:
+            return jsonify({'success': True, 'items': []})
+        
+        # Create embeddings
+        query_embedding = model.encode([description])[0]
+        found_descriptions = [item['item_description'] for item in found_items]
+        found_embeddings = model.encode(found_descriptions)
+        
+        # Calculate similarities
+        similarities = cosine_similarity([query_embedding], found_embeddings)[0]
+        
+        # Sort items by similarity
+        similar_items = []
+        for idx, similarity in enumerate(similarities):
+            if similarity > 0.3:  # Similarity threshold
+                item = found_items[idx]
+                item['similarity'] = float(similarity)
+                similar_items.append(item)
+        
+        # Sort by similarity score
+        similar_items.sort(key=lambda x: x['similarity'], reverse=True)
+        
+        return jsonify({'success': True, 'items': similar_items[:5]})  # Return top 5 matches
+        
+    except Exception as e:
+        print(f"Error finding similar items: {e}")
+>>>>>>> features
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == "__main__":
+    # Pre-load model before running server
+    try:
+        print("Loading model...")
+        model = get_model()
+        print("Model loaded successfully")
+    except Exception as e:
+        print(f"Warning: Model failed to load: {e}")
+        print("Model will be loaded on first request")
+    
     app.run(host='0.0.0.0', port=5001, debug=True)
