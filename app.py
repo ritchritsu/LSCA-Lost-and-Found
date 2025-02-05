@@ -431,25 +431,6 @@ def unconfirmed():
             return redirect(url_for('index'))
     return render_template('unconfirmed.html')
 
-<<<<<<< HEAD
-
-@app.route("/delete-item", methods=["POST"])
-@login_required
-def delete_item():
-    """Delete an item from the database"""
-    try:
-        data = request.json
-        item_id = data.get("id")
-
-        if not item_id:
-            return jsonify({'success': False, 'error': 'Invalid request'})
-
-        db.execute("DELETE FROM items WHERE id = ?", item_id)
-        return jsonify({'success': True})
-    
-    except Exception as e:
-        print(f"Error deleting item: {e}")
-=======
 # Initialize model with longer timeout and retries
 @lru_cache(maxsize=1)
 def get_model():
@@ -527,10 +508,18 @@ def find_similar_items():
         
     except Exception as e:
         print(f"Error finding similar items: {e}")
->>>>>>> features
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == "__main__":
+    # Pre-load model before running server
+    try:
+        print("Loading model...")
+        model = get_model()
+        print("Model loaded successfully")
+    except Exception as e:
+        print(f"Warning: Model failed to load: {e}")
+        print("Model will be loaded on first request")
+    
     # Pre-load model before running server
     try:
         print("Loading model...")
