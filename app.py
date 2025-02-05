@@ -59,6 +59,8 @@ def after_request(response):
 @login_required
 def index():
     """Show submission form or admin dashboard based on user"""
+    if session.pop("reset_email_sent", False):
+        flash("Password reset instructions have been sent to your email. Please check your email.")
     try:
         user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
         
@@ -78,13 +80,7 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
-    # Store the reset_email_sent value before clearing session
-    reset_email_sent = session.get("reset_email_sent", False)
     session.clear()
-    
-    # If there was a reset email sent, flash the message
-    if reset_email_sent:
-        flash("Password reset instructions have been sent to your email. Please check your email.")
 
     if request.method == "POST":
         email = request.form.get("email")
@@ -118,7 +114,6 @@ def login():
         return redirect("/")
 
     return render_template("login.html")
-
 
 @app.route("/logout")
 def logout():
@@ -341,7 +336,6 @@ def reset_password(token):
             return render_template("reset-password.html")
             
     return render_template("reset-password.html")
-
 def generate_token(email):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
     return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
@@ -407,7 +401,7 @@ def resend_confirmation():
     
     send_confirmation_email(user["email"])
     flash('A new confirmation email has been sent.', 'success')
-    return redirect(url_for('unconfirmed'))
+    return redirect(url_for('index'))
 
 def check_confirmed(func):
     @wraps(func)
@@ -511,15 +505,6 @@ def find_similar_items():
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == "__main__":
-    # Pre-load model before running server
-    try:
-        print("Loading model...")
-        model = get_model()
-        print("Model loaded successfully")
-    except Exception as e:
-        print(f"Warning: Model failed to load: {e}")
-        print("Model will be loaded on first request")
-    
     # Pre-load model before running server
     try:
         print("Loading model...")
