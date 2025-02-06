@@ -1,12 +1,63 @@
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, jsonify, url_for
 from flask_session import Session
-from werkzeug.security import check_password_hash, generate_password_hash
+import hashlib
+import os
+import base64
+from hmac import compare_digest
+
+def generate_password_hash(password, method='sha256', salt_length=16):
+    """Generate a secure password hash"""
+    try:
+        # Generate a random salt
+        salt = os.urandom(salt_length)
+        
+        # Convert the password to bytes
+        password_bytes = password.encode('utf-8')
+        
+        # Combine salt and password
+        salted_password = salt + password_bytes
+        
+        # Create hash
+        hash_obj = hashlib.sha256(salted_password)
+        hash_value = hash_obj.digest()
+        
+        # Encode salt and hash for storage
+        salt_b64 = base64.b64encode(salt).decode('utf-8')
+        hash_b64 = base64.b64encode(hash_value).decode('utf-8')
+        
+        # Return format: method$salt$hash
+        return f"sha256${salt_b64}${hash_b64}"
+    except Exception as e:
+        print(f"Error generating password hash: {e}")
+        return None
+
+def check_password_hash(pwhash, password):
+    """Verify a password against a hash"""
+    try:
+        # Split the stored hash into its components
+        method, salt_b64, hash_b64 = pwhash.split('$')
+        
+        # Decode the stored salt and hash
+        salt = base64.b64decode(salt_b64)
+        stored_hash = base64.b64decode(hash_b64)
+        
+        # Hash the provided password with the same salt
+        password_bytes = password.encode('utf-8')
+        salted_password = salt + password_bytes
+        hash_obj = hashlib.sha256(salted_password)
+        calculated_hash = hash_obj.digest()
+        
+        # Compare the hashes using a secure comparison
+        return compare_digest(stored_hash, calculated_hash)
+    except Exception as e:
+        print(f"Error checking password hash: {e}")
+        return False
+
 from helpers import login_required
 from itsdangerous import URLSafeTimedSerializer
 from datetime import datetime
 from flask_mail import Mail, Message
-import os
 import re
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
@@ -86,20 +137,38 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """Log user in"""
     session.clear()
 
     if request.method == "POST":
-        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
-        
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if not email or not email.endswith("@lsca.edu.ph"):
+            flash("Invalid email. Please use your LSCA email.")
+            return render_template("login.html")
+
         try:
-            if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-                flash("Invalid username and/or password")
-                return redirect("/login")
-        except ValueError as e:
-            flash("Error verifying password. Please try again.")
-            return redirect("/login")
+            rows = db.execute("SELECT * FROM users WHERE email = ?", email)
+        except Exception as e:
+            flash("An error occurred while checking your credentials.")
+            print(f"Error fetching user: {e}")
+            return render_template("login.html")
+
+        if not rows:
+            flash("No account found with that email address. Please register first.")
+            return redirect(url_for('register'))
+
+        if not password:
+            flash("Please provide a password")
+            return render_template("login.html")
+
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
+            flash("Invalid email or password")
+            return render_template("login.html")
 
         session["user_id"] = rows[0]["id"]
+        flash("Logged in successfully!")
         return redirect("/")
 
     return render_template("login.html")
@@ -139,14 +208,18 @@ def register():
                 flash("This email is already registered")
                 return render_template("register.html")
 
-            # Hash password and insert new user
+            # Generate password hash
             hashed_password = generate_password_hash(password)
+            if not hashed_password:
+                flash("Error during registration. Please try again.")
+                return render_template("register.html")
+
+            # Insert new user
             user_id = db.execute(
                 "INSERT INTO users (email, hash, is_confirmed) VALUES (?, ?, FALSE)", 
                 email, hashed_password
             )
             
-            # Log the user in and send confirmation email
             session["user_id"] = user_id
             send_confirmation_email(email)
             
