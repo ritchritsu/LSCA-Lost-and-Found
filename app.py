@@ -10,6 +10,7 @@ import os
 import re
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
+import torch
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import time
@@ -18,6 +19,11 @@ import requests.exceptions
 
 
 load_dotenv()
+
+
+device = "cpu"  # Force CPU usage
+model = SentenceTransformer("all-MiniLM-L6-v2", device=device)
+print(f"Using device: {device}")
 
 # Configure application
 app = Flask(__name__)
@@ -515,4 +521,5 @@ if __name__ == "__main__":
         print(f"Warning: Model failed to load: {e}")
         print("Model will be loaded on first request")
     
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
