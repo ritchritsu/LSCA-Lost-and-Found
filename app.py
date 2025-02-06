@@ -248,38 +248,41 @@ def register():
 
     return render_template("register.html")
 
-@app.route("/submit", methods=["POST"])
+@app.route("/submit", methods=["GET", "POST"])
 @login_required
 def submit_item():
-    """Submit a lost or found item"""
-    item_status = request.form.get("item_status")
-    date = request.form.get("date")
-    item_description = request.form.get("item_description")
-    location = request.form.get("location")
-    email = request.form.get("email")
-    grade_and_section = request.form.get("grade_and_section")
-    phone_number = request.form.get("phone_number")
-    image_url = request.form.get("image_url")
+    if request.method == "POST":
+        item_status = request.form.get("item_status")
+        date = request.form.get("date")
+        item_description = request.form.get("item_description")
+        location = request.form.get("location")
+        email = request.form.get("email")
+        grade_and_section = request.form.get("grade_and_section")
+        phone_number = request.form.get("phone_number")
+        image_url = request.form.get("image_url")
 
-    if not all([item_status, date, item_description, location, email, grade_and_section, phone_number]):
-        flash("Please fill in all required fields.")
+        if not all([item_status, date, item_description, location, email, grade_and_section, phone_number]):
+            flash("Please fill in all required fields.")
+            return redirect("/submit")
+
+        lost_date = date if item_status == "Lost" else None
+        found_date = date if item_status == "Found" else None
+
+        try:
+            db.execute(
+                "INSERT INTO items (item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url
+            )
+        except Exception as e:
+            flash("An error occurred while submitting your item.")
+            print(f"Error inserting item: {e}")
+            return redirect("/submit")
+
+        flash("Your item has been submitted successfully!")
         return redirect("/")
 
-    lost_date = date if item_status == "Lost" else None
-    found_date = date if item_status == "Found" else None
-
-    try:
-        db.execute(
-            "INSERT INTO items (item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url
-        )
-    except Exception as e:
-        flash("An error occurred while submitting your item.")
-        print(f"Error inserting item: {e}")
-        return redirect("/")
-
-    flash("Your item has been submitted successfully!")
-    return redirect("/")
+    # For GET requests, show the submission page
+    return render_template("submission.html")
 
 @app.route("/found")
 @login_required
