@@ -6,3 +6,10 @@ services:
       pip install -r requirements.txt
       pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: OPENSSL_LEGACY_PROVIDER
+        value: "1"

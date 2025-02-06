@@ -86,38 +86,20 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Log user in"""
     session.clear()
 
     if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
-
-        if not email or not email.endswith("@lsca.edu.ph"):
-            flash("Invalid email. Please use your LSCA email.")
-            return render_template("login.html")
-
+        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
+        
         try:
-            rows = db.execute("SELECT * FROM users WHERE email = ?", email)
-        except Exception as e:
-            flash("An error occurred while checking your credentials.")
-            print(f"Error fetching user: {e}")
-            return render_template("login.html")
-
-        if not rows:
-            flash("No account found with that email address. Please register first.")
-            return redirect(url_for('register'))
-
-        if not password:
-            flash("Please provide a password")
-            return render_template("login.html")
-
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
-            flash("Invalid email or password")
-            return render_template("login.html")
+            if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+                flash("Invalid username and/or password")
+                return redirect("/login")
+        except ValueError as e:
+            flash("Error verifying password. Please try again.")
+            return redirect("/login")
 
         session["user_id"] = rows[0]["id"]
-        flash("Logged in successfully!")
         return redirect("/")
 
     return render_template("login.html")
