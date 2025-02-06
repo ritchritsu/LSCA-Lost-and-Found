@@ -171,6 +171,10 @@
             <div class="collapse navbar-collapse" id="navbar">
                 {% if session["user_id"] %}
                     <ul class="navbar-nav ms-auto mt-2">
+                        {% if is_admin() %}
+                            <li class="nav-item"><a class="nav-link custom-nav-link" href="/submit">Submit Item</a></li>
+                            <li class="nav-item"><a class="nav-link custom-nav-link" href="/">Admin Dashboard</a></li>
+                        {% endif %}
                         <li class="nav-item"><a class="nav-link custom-nav-link" href="/logout">Log Out</a></li>
                     </ul>
                 {% else %}

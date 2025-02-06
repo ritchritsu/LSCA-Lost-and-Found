@@ -65,7 +65,7 @@ import torch
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import time
-from functools import lru_cache
+from functools import lru_cache, wraps
 import requests.exceptions
 
 
@@ -112,6 +112,21 @@ def after_request(response):
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
+
+def is_admin():
+    """Check if current user is admin"""
+    try:
+        user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
+        return user_email == "ritchangelo.dacanay@lsca.edu.ph"
+    except:
+        return False
+
+@app.context_processor
+def utility_processor():
+    """Make functions available to templates"""
+    return {
+        "is_admin": is_admin
+    }
 
 @app.route("/")
 @login_required
