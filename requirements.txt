@@ -10,3 +10,4 @@ sentence_transformers==3.4.1
 Werkzeug==2.0.2
 Flask==2.0.1
 Flask-Session==0.4.0
+python-dotenv==1.0.0
