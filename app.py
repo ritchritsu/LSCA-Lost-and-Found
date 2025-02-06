@@ -16,6 +16,7 @@ import time
 from functools import lru_cache
 import requests.exceptions
 
+
 load_dotenv()
 
 # Configure application
