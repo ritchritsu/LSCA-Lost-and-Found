@@ -508,21 +508,13 @@ def unconfirmed():
 # Initialize model with longer timeout and retries
 @lru_cache(maxsize=1)
 def get_model():
-    max_retries = 3
-    base_delay = 1
-    
-    for attempt in range(max_retries):
-        try:
-            # Remove "timeout" parameter
-            return SentenceTransformer(
-                'all-MiniLM-L6-v2',
-                device='cpu',
-                cache_folder='./model_cache'
-            )
-        except requests.exceptions.ReadTimeout as e:
-            if attempt == max_retries - 1:
-                raise
-            time.sleep(base_delay * (2 ** attempt))
+    cache_dir = "./model_cache"
+    os.makedirs(cache_dir, exist_ok=True)
+    return SentenceTransformer(
+        'all-MiniLM-L6-v2',
+        device='cpu',
+        cache_folder=cache_dir
+    )
 
 # Initialize model lazily
 model = None
