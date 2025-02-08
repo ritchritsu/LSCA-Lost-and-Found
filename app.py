@@ -249,65 +249,43 @@ def register():
 @login_required
 def submit_item():
     if request.method == "POST":
-        item_status = request.form.get("item_status")
-        date = request.form.get("date")
-        item_description = request.form.get("item_description")
-        lost_location = request.form.get("lost_location")
-        found_location = request.form.get("found_location")
-        email = request.form.get("email")
-        grade_and_section = request.form.get("grade_and_section")
-        phone_number = request.form.get("phone_number")
-        image_url = request.form.get("image_url")
-
-        # Basic validation
-        if not all([item_status, date, item_description, email, 
-                    grade_and_section, phone_number]):
-            flash("Please fill in all required fields.")
-            return redirect("/submit")
-
         try:
-            if item_status.lower() == "lost":
-                if not lost_location:
-                    flash("Please provide the lost location.")
-                    return redirect("/submit")
-                    
-                db.execute(
-                    """INSERT INTO items 
-                       (item_status, lost_date, found_date, item_description, location, found_location, email, grade_and_section, phone_number, image_url)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    item_status,
-                    date,      # lost_date
-                    None,      # found_date
-                    item_description,
-                    lost_location,  # location
-                    None,           # found_location
-                    email,
-                    grade_and_section,
-                    phone_number,
-                    image_url
-                )
-            else:  # Found
-                if not found_location:
-                    flash("Please provide the found location.")
-                    return redirect("/submit")
-                    
-                db.execute(
-                    """INSERT INTO items 
-                       (item_status, lost_date, found_date, item_description, location, found_location, email, grade_and_section, phone_number, image_url)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    item_status,
-                    None,        # lost_date
-                    date,        # found_date
-                    item_description,
-                    found_location,  # location - use found_location here
-                    found_location,  # found_location
-                    email,
-                    grade_and_section,
-                    phone_number,
-                    image_url
-                )
+            item_status = request.form.get("item_status")
+            date = request.form.get("date")
+            item_description = request.form.get("item_description")
+            lost_location = request.form.get("lost_location")
+            found_location = request.form.get("found_location")
+            email = request.form.get("email")
+            grade_and_section = request.form.get("grade_and_section")
+            phone_number = request.form.get("phone_number")
+            image_data = request.form.get("image_data")  # Get base64 image data
+
+            # Set location based on item status
+            location = lost_location if item_status.lower() == "lost" else found_location
+
+            # Insert into database
+            db.execute("""
+                INSERT INTO items (
+                    item_status, lost_date, found_date, item_description, 
+                    location, found_location, email, grade_and_section, 
+                    phone_number, image_url
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                item_status,
+                date if item_status.lower() == "lost" else None,  # lost_date
+                date if item_status.lower() == "found" else None,  # found_date
+                item_description,
+                location,
+                found_location,
+                email,
+                grade_and_section,
+                phone_number,
+                image_data  # Store base64 image data
+            )
+
             flash("Your item has been submitted successfully!")
             return redirect("/")
+
         except Exception as e:
             print(f"Error inserting item: {e}")
             flash("An error occurred while submitting your item.")

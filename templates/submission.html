@@ -151,28 +151,27 @@ block main %}
       />
     </div>
     <div class="form-group">
-      <label for="image_url">Optional Image Link of Item:</label>
-      <input
-        type="text"
-        class="form-control custom-input"
-        name="image_url"
-        placeholder="Enter image URL (optional)"
-      />
-    </div>
-    <div class="form-group">
-      <label for="image">Optional Image of Item:</label>
+      <label for="image">Item Image:</label>
       <div class="d-flex flex-column gap-2">
         <input
           type="file"
           class="form-control custom-input"
-          name="image_file"
-          id="image_file"
+          name="image"
+          id="image"
           accept="image/*"
-          onchange="convertToBase64(this)"
+          onchange="handleImageUpload(this)"
         />
-        <input type="hidden" name="image_url" id="image_url" />
+        <input type="hidden" name="image_data" id="image_data" />
+        <div id="imagePreview" class="mt-2" style="display: none">
+          <img
+            id="preview"
+            src=""
+            alt="Preview"
+            style="max-width: 200px; max-height: 200px"
+          />
+        </div>
         <small class="text-light opacity-75"
-          >Supported formats: JPG, PNG, GIF</small
+          >Supported formats: JPG, PNG, GIF (max 5MB)</small
         >
       </div>
     </div>
@@ -330,15 +329,40 @@ block main %}
       }
     });
 
-  function convertToBase64(input) {
+  function handleImageUpload(input) {
     const file = input.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        document.getElementById("image_url").value = e.target.result;
-      };
-      reader.readAsDataURL(file);
+    if (!file) {
+      document.getElementById("imagePreview").style.display = "none";
+      document.getElementById("image_data").value = "";
+      return;
     }
+
+    // Check file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File is too large. Maximum size is 5MB.");
+      input.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      // Set the base64 data
+      document.getElementById("image_data").value = e.target.result;
+
+      // Show preview
+      const preview = document.getElementById("preview");
+      preview.src = e.target.result;
+      document.getElementById("imagePreview").style.display = "block";
+    };
+
+    reader.onerror = function (error) {
+      console.error("Error reading file:", error);
+      alert("Error reading file. Please try again.");
+      input.value = "";
+    };
+
+    reader.readAsDataURL(file);
   }
 </script>
 {% endblock %}
