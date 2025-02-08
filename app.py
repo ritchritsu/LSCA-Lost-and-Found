@@ -610,6 +610,20 @@ def find_similar_items():
         print(f"Error finding similar items: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route("/delete-item", methods=["POST"])
+@login_required
+def delete_item():
+    try:
+        data = request.json
+        item_id = data.get("id")
+        if not item_id:
+            return jsonify({"success": False, "error": "No item ID provided."}), 400
+
+        db.execute("DELETE FROM items WHERE id = ?", item_id)
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 if __name__ == "__main__":
     # Pre-load model before running server
     try:

@@ -128,7 +128,7 @@ block main %}
               ? `<div class="item-description">${value}</div>`
               : `<div class="item-found">${value}</div>`;
           },
-          width: 396,
+          width: 360,
         },
         {
           title: "Image",
@@ -194,6 +194,19 @@ block main %}
         },
         { title: "Group", field: "grade_and_section", width: 80 },
         { title: "Phone Number", field: "phone_number", width: 100 },
+        {
+          title: "",
+          field: "actions",
+          width: 90,
+          formatter: function (cell) {
+            return `<button class="btn btn-danger btn-sm delete-btn" onclick="deleteItem(${
+              cell.getRow().getData().id
+            })">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>`;
+          },
+          headerSort: false,
+        },
       ],
       cellClick: function (e, cell) {
         const clickedValue = cell.getValue();
@@ -464,5 +477,28 @@ block main %}
     );
     modal.show();
   }
+
+  // Add this function in your script section
+  function deleteItem(itemId) {
+    if (!confirm("Are you sure you want to delete this item?")) return;
+    fetch("/delete-item", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: itemId }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          location.reload();
+        } else {
+          alert("Error deleting item: " + data.error);
+        }
+      })
+      .catch((err) => {
+        alert("An error occurred while deleting the item: " + err);
+      });
+  }
 </script>
-{% endblock %}
+{% endblock %} /* Add to your styles.css */ .delete-btn { padding: 4px 8px;
+border-radius: 4px; transition: all 0.3s ease; } .delete-btn:hover { transform:
+scale(1.1); background-color: #dc3545; } .fa-trash-alt { color: white; }
