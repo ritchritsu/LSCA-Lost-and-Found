@@ -491,3 +491,11 @@ li a,
   background-color: #023220;
   border-radius: 5px;  /* Maintain rounded corners on hover */
 }
+
+.form-group{
+  margin-bottom: 1em;
+}
+
+.py-5{
+  margin-top: -4em !important;
+}

@@ -1,6 +1,6 @@
 {% extends "layout.html" %} {% block title %} Item Submission {% endblock %} {%
 block main %}
-<div class="container mt-4">
+<div class="container mt-0">
   <h1>Submit a Lost/Found Item</h1>
   <form
     action="/submit"
@@ -337,32 +337,54 @@ block main %}
       return;
     }
 
-    // Check file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      alert("File is too large. Maximum size is 5MB.");
-      input.value = "";
-      return;
-    }
+    const img = new Image();
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
-    const reader = new FileReader();
+      // Calculate optimal dimensions while maintaining aspect ratio
+      let width = img.width;
+      let height = img.height;
+      const maxDimension = 1200; // Reasonable size for web display
 
-    reader.onload = function (e) {
-      // Set the base64 data
-      document.getElementById("image_data").value = e.target.result;
+      if (width > height) {
+        if (width > maxDimension) {
+          height = Math.round(height * (maxDimension / width));
+          width = maxDimension;
+        }
+      } else {
+        if (height > maxDimension) {
+          width = Math.round(width * (maxDimension / height));
+          height = maxDimension;
+        }
+      }
 
-      // Show preview
+      canvas.width = width;
+      canvas.height = height;
+
+      // Apply some optimization techniques
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert to base64 with optimal quality (0.85 is a good balance)
+      const optimizedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+
+      // Store the optimized image data
+      document.getElementById("image_data").value = optimizedBase64;
+
+      // Update preview
       const preview = document.getElementById("preview");
-      preview.src = e.target.result;
+      preview.src = optimizedBase64;
       document.getElementById("imagePreview").style.display = "block";
     };
 
-    reader.onerror = function (error) {
-      console.error("Error reading file:", error);
-      alert("Error reading file. Please try again.");
+    img.onerror = function () {
+      alert("Error loading image. Please try again.");
       input.value = "";
     };
 
-    reader.readAsDataURL(file);
+    img.src = URL.createObjectURL(file);
   }
 </script>
 {% endblock %}
