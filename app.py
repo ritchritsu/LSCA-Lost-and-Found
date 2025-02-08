@@ -255,33 +255,60 @@ def submit_item():
         item_status = request.form.get("item_status")
         date = request.form.get("date")
         item_description = request.form.get("item_description")
-        location = request.form.get("location")
+        lost_location = request.form.get("lost_location")
+        found_location = request.form.get("found_location")
         email = request.form.get("email")
         grade_and_section = request.form.get("grade_and_section")
         phone_number = request.form.get("phone_number")
         image_url = request.form.get("image_url")
 
-        if not all([item_status, date, item_description, location, email, grade_and_section, phone_number]):
+        # Basic validation
+        if not all([item_status, date, item_description, email, 
+                    grade_and_section, phone_number]):
             flash("Please fill in all required fields.")
             return redirect("/submit")
 
-        lost_date = date if item_status == "Lost" else None
-        found_date = date if item_status == "Found" else None
-
         try:
-            db.execute(
-                "INSERT INTO items (item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                item_status, lost_date, found_date, item_description, location, email, grade_and_section, phone_number, image_url
-            )
+            # If status is Lost, use lost_location; else use found_location
+            if item_status.lower() == "lost":
+                db.execute(
+                    """INSERT INTO items 
+                       (item_status, lost_date, found_date, item_description, location, found_location, email, grade_and_section, phone_number, image_url)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    item_status,
+                    date,      # lost_date
+                    None,      # found_date
+                    item_description,
+                    lost_location,  # location
+                    None,           # found_location
+                    email,
+                    grade_and_section,
+                    phone_number,
+                    image_url
+                )
+            else:  # Found
+                db.execute(
+                    """INSERT INTO items 
+                       (item_status, lost_date, found_date, item_description, location, found_location, email, grade_and_section, phone_number, image_url)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    item_status,
+                    None,        # lost_date
+                    date,        # found_date
+                    item_description,
+                    "[Found]",   # location placeholder
+                    found_location,  # found_location
+                    email,
+                    grade_and_section,
+                    phone_number,
+                    image_url
+                )
+            flash("Your item has been submitted successfully!")
+            return redirect("/")
         except Exception as e:
-            flash("An error occurred while submitting your item.")
             print(f"Error inserting item: {e}")
+            flash("An error occurred while submitting your item.")
             return redirect("/submit")
 
-        flash("Your item has been submitted successfully!")
-        return redirect("/")
-
-    # For GET requests, show the submission page
     return render_template("submission.html")
 
 @app.route("/found")

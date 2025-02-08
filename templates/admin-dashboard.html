@@ -1,134 +1,164 @@
-{% extends "layout.html" %}
-{% block title %}
-    Admin Dashboard
-{% endblock %}
-
-{% block main %}
+{% extends "layout.html" %} {% block title %} Admin Dashboard {% endblock %} {%
+block main %}
 <div class="container mt-4">
-    <h1 class="text-light">Item Record</h1>
-    <div class="search-bar-wrapper d-flex">
-        <input id="search-input" type="text" placeholder="Search..." class="form-control search-bar mb-3">
-        <!-- Reset Button -->
-        <button id="reset-btn" class="btn custom-green-btn mb-3 ml-10">Reset</button>
-    </div>
-    <div id="table-container" class="table-responsive" style="width: 90vw; overflow-y: auto; margin-left: -10em;"></div> <!-- Div for Tabulator -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+  <h1 class="text-light">Item Record</h1>
+  <div class="search-bar-wrapper d-flex">
+    <input
+      id="search-input"
+      type="text"
+      placeholder="Search..."
+      class="form-control search-bar mb-3"
+    />
+    <!-- Reset Button -->
+    <button id="reset-btn" class="btn custom-green-btn mb-3 ml-10">
+      Reset
+    </button>
+  </div>
+  <div
+    id="table-container"
+    class="table-responsive"
+    style="width: 90vw; overflow-y: auto; margin-left: -10em"
+  ></div>
+  <!-- Div for Tabulator -->
 </div>
 
 <!-- Include Tabulator CDN -->
-<link rel="stylesheet" href="https://unpkg.com/tabulator-tables@5.4.4/dist/css/tabulator.min.css">
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/tabulator-tables@5.4.4/dist/css/tabulator.min.css"
+/>
 <script src="https://unpkg.com/tabulator-tables@5.4.4/dist/js/tabulator.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  rel="stylesheet"
+/>
+
+{% block styles %} {% endblock %}
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener("DOMContentLoaded", function () {
     let tableData;
     try {
-        tableData = JSON.parse(`{{ items | tojson | safe }}`);
+      tableData = JSON.parse(`{{ items | tojson | safe }}`);
     } catch (e) {
-        console.error("Error parsing JSON:", e);
-        tableData = [];
+      console.error("Error parsing JSON:", e);
+      tableData = [];
     }
 
     const table = new Tabulator("#table-container", {
-        data: tableData,
-        layout: "fitColumns",
-        height: "65vh",
-        columns: [
-            { title: "ID", field: "id", width: 50, editor: false },
-            {
-                title: "Status", 
-                field: "item_status", 
-                width: 120, 
-                editor: "select", 
-                editorParams: {
-                    values: ["Lost", "Found", "Confirmed"]
-                },
-                formatter: function(cell) {
-                    const value = cell.getValue();
-                    let iconClass = '';
-                    let iconColor = '';
-                    switch(value) {
-                        case 'Lost':
-                            iconClass = 'fa fa-exclamation-circle';
-                            iconColor = 'red';
-                            break;
-                        case 'Found':
-                            iconClass = 'fa fa-check-circle';
-                            iconColor = 'yellow';
-                            break;
-                        case 'Confirmed':
-                            iconClass = 'fa fa-thumbs-up';
-                            iconColor = '#90EE90';
-                            break;
-                        default:
-                            iconClass = 'fa fa-circle';
-                            iconColor = 'black';
-                    }
-                    return `<div style="display: flex; align-items: center; width: 100%;">
+      data: tableData,
+      layout: "fitColumns",
+      height: "65vh",
+      columns: [
+        { title: "ID", field: "id", width: 50, editor: false },
+        {
+          title: "Status",
+          field: "item_status",
+          width: 120,
+          editor: "select",
+          editorParams: {
+            values: ["Lost", "Found", "Confirmed"],
+          },
+          formatter: function (cell) {
+            const value = cell.getValue();
+            let iconClass = "";
+            let iconColor = "";
+            switch (value) {
+              case "Lost":
+                iconClass = "fa fa-exclamation-circle";
+                iconColor = "red";
+                break;
+              case "Found":
+                iconClass = "fa fa-check-circle";
+                iconColor = "yellow";
+                break;
+              case "Confirmed":
+                iconClass = "fa fa-thumbs-up";
+                iconColor = "#90EE90";
+                break;
+              default:
+                iconClass = "fa fa-circle";
+                iconColor = "black";
+            }
+            return `<div style="display: flex; align-items: center; width: 100%;">
                                 <i class="${iconClass}" style="margin-right: 10px; color: ${iconColor};"></i>
                                 <span style="flex-grow: 1;">${value}</span>
                             </div>`;
-                },
-                cellEdited: function(cell) {
-                    const rowData = cell.getRow().getData();
-                    const newStatus = cell.getValue();
-                    fetch('/update-status', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            id: rowData.id,
-                            item_status: newStatus
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.success) {
-                            alert("Error updating status: " + data.error);
-                            cell.restoreOldValue();
-                        } else {
-                            location.reload();
-                        }
-                    })
-                    .catch(err => {
-                        alert("An error occurred: " + err);
-                        cell.restoreOldValue();
-                    });
+          },
+          cellEdited: function (cell) {
+            const rowData = cell.getRow().getData();
+            const newStatus = cell.getValue();
+            fetch("/update-status", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id: rowData.id,
+                item_status: newStatus,
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (!data.success) {
+                  alert("Error updating status: " + data.error);
+                  cell.restoreOldValue();
+                } else {
+                  location.reload();
                 }
-            },
-            { title: "Lost Date", field: "lost_date", width: 90 },
-            { title: "Found Date", field: "found_date", width: 90 },
-            { title: "Lost Location", field: "location", width: 200 },
-            { title: "Found Location", field: "found_location", width: 150 },
-            { title: "Description", field: "item_description" },
-            {
-                title: "Image",
-                field: "image_url",
-                formatter: function(cell) {
-                    const value = cell.getValue();
-                    return `<div style="text-align: center;">
+              })
+              .catch((err) => {
+                alert("An error occurred: " + err);
+                cell.restoreOldValue();
+              });
+          },
+        },
+        { title: "Lost Date", field: "lost_date", width: 90 },
+        { title: "Found Date", field: "found_date", width: 90 },
+        { title: "Lost Location", field: "location", width: 200 },
+        { title: "Found Location", field: "found_location", width: 150 },
+        {
+          title: "Description",
+          field: "item_description",
+          formatter: function (cell) {
+            const value = cell.getValue() || "";
+            const status = cell.getRow().getData().item_status;
+            return status === "Lost"
+              ? `<div class="item-description">${value}</div>`
+              : `<div class="item-found">${value}</div>`;
+          },
+          width: 396,
+        },
+        {
+          title: "Image",
+          field: "image_url",
+          formatter: function (cell) {
+            const value = cell.getValue();
+            return `<div style="text-align: center;">
                                 <a href="${value}" target="_blank">
                                     <img src="${value}" style="height: 50px; width: auto;" />
                                 </a>
                             </div>`;
-                },
-                width: 100
-            },
-            {
-                title: "Email",
-                field: "email",
-                width: 200,
-                formatter: function(cell) {
-                    const email = cell.getValue();
-                    const rowData = cell.getRow().getData();
-                    const itemStatus = rowData.item_status;
-                    const itemDescription = rowData.item_description;
-                    const location = rowData.location || 'N/A';
-                    const foundLocation = rowData.found_location || 'N/A';
-                    const lostDate = rowData.lost_date || 'N/A';
-                    const foundDate = rowData.found_date || 'N/A';
+          },
+          width: 100,
+        },
+        {
+          title: "Email",
+          field: "email",
+          width: 200,
+          formatter: function (cell) {
+            const email = cell.getValue();
+            const rowData = cell.getRow().getData();
+            const itemStatus = rowData.item_status;
+            const itemDescription = rowData.item_description;
+            const location = rowData.location || "N/A";
+            const foundLocation = rowData.found_location || "N/A";
+            const lostDate = rowData.lost_date || "N/A";
+            const foundDate = rowData.found_date || "N/A";
 
-                    const subject = `Re: Lost Item Report - ${itemDescription}`;
-                    let body = `
+            const subject = `Re: Lost Item Report - ${itemDescription}`;
+            let body = `
                         Hello,
 
                         This is a response regarding your lost item report. Here are the details of your submission:
@@ -141,70 +171,80 @@ document.addEventListener('DOMContentLoaded', function () {
                         - Found Date: ${foundDate}
                     `;
 
-                    if (itemStatus === 'Lost') {
-                        body += `Unfortunately, the item is still listed as lost.`;
-                    } else if (itemStatus === 'Found') {
-                        body += `Great news! The item has been found.`;
-                    }
+            if (itemStatus === "Lost") {
+              body += `Unfortunately, the item is still listed as lost.`;
+            } else if (itemStatus === "Found") {
+              body += `Great news! The item has been found.`;
+            }
 
-                    body += ` If you have any additional questions, feel free to reach out.
+            body += ` If you have any additional questions, feel free to reach out.
 
                         Best regards,
                         [Name]
                     `;
 
-                    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+              email
+            )}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(
+              body
+            )}`;
 
-                    return `<a href="${gmailComposeUrl}" style="color: white; text-decoration: underline;" target="_blank">${email}</a>`;
-                }
-            },
-            { title: "Group", field: "grade_and_section", width: 80 },
-            { title: "Phone Number", field: "phone_number", width: 100 },
-        ],
-        cellClick: function(e, cell) {
-            const clickedValue = cell.getValue();
-            if (clickedValue) {
-                table.setFilter(cell.getColumn().getField(), "=", clickedValue);
-            }
+            return `<a href="${gmailComposeUrl}" style="color: white; text-decoration: underline;" target="_blank">${email}</a>`;
+          },
+        },
+        { title: "Group", field: "grade_and_section", width: 80 },
+        { title: "Phone Number", field: "phone_number", width: 100 },
+      ],
+      cellClick: function (e, cell) {
+        const clickedValue = cell.getValue();
+        if (clickedValue) {
+          table.setFilter(cell.getColumn().getField(), "=", clickedValue);
         }
+      },
     });
 
     // Add this after your existing Tabulator initialization
-    table.on("cellClick", function(e, cell){
-        if(cell.getField() === "item_description" && cell.getData().item_status === "Lost") {
-            const lostItem = cell.getData(); // Get full row data
-            
-            fetch('/find-similar-items', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    description: lostItem.item_description
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showSimilarItemsModal(data.items, lostItem);
-                } else {
-                    alert("Error finding similar items: " + data.error);
-                }
-            })
-            .catch(err => {
-                alert("An error occurred: " + err);
-            });
-        }
+    table.on("cellClick", function (e, cell) {
+      if (
+        cell.getField() === "item_description" &&
+        cell.getData().item_status === "Lost"
+      ) {
+        document.getElementById("loadingOverlay").style.display = "flex";
+        const lostItem = cell.getData();
+
+        fetch("/find-similar-items", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            description: lostItem.item_description,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("loadingOverlay").style.display = "none";
+            if (data.success) {
+              showSimilarItemsModal(data.items, lostItem);
+            } else {
+              alert("Error finding similar items: " + data.error);
+            }
+          })
+          .catch((err) => {
+            document.getElementById("loadingOverlay").style.display = "none";
+            alert("An error occurred: " + err);
+          });
+      }
     });
 
     // Add this function to show the modal
     function showSimilarItemsModal(items, lostItem) {
-        const existingModal = document.getElementById('similarItemsModal');
-        if (existingModal) {
-            existingModal.remove();
-        }
+      const existingModal = document.getElementById("similarItemsModal");
+      if (existingModal) {
+        existingModal.remove();
+      }
 
-        const modalHTML = `
+      const modalHTML = `
         <div class="modal fade" id="similarItemsModal" tabindex="-1">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
@@ -231,20 +271,29 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </thead>
                                 <tbody>
                                     <tr style="background-color: #023220;">
-                                        <td>${lostItem.id || ''}</td>
-                                        <td>${lostItem.item_status || ''}</td>
-                                        <td>${lostItem.lost_date || ''}</td>
-                                        <td>${lostItem.location || ''}</td>
-                                        <td>${lostItem.item_description || ''}</td>
+                                        <td>${lostItem.id || ""}</td>
+                                        <td>${lostItem.item_status || ""}</td>
+                                        <td>${lostItem.lost_date || ""}</td>
+                                        <td>${lostItem.location || ""}</td>
+                                        <td class="clickable-cell" onclick="findSimilarItems(this)" data-description="${
+                                          lostItem.item_description || ""
+                                        }">${
+        lostItem.item_description || ""
+      }</td>
                                         <td>
-                                            ${lostItem.image_url ? 
-                                                `<a href="${lostItem.image_url}" target="_blank">
+                                            ${
+                                              lostItem.image_url
+                                                ? `<a href="${lostItem.image_url}" target="_blank">
                                                     <img src="${lostItem.image_url}" style="height: 50px; width: auto;" />
-                                                </a>` : ''}
+                                                </a>`
+                                                : ""
+                                            }
                                         </td>
-                                        <td>${lostItem.email || ''}</td>
-                                        <td>${lostItem.grade_and_section || ''}</td>
-                                        <td>${lostItem.phone_number || ''}</td>
+                                        <td>${lostItem.email || ""}</td>
+                                        <td>${
+                                          lostItem.grade_and_section || ""
+                                        }</td>
+                                        <td>${lostItem.phone_number || ""}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -268,25 +317,40 @@ document.addEventListener('DOMContentLoaded', function () {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${items.map(item => `
+                                    ${items
+                                      .map(
+                                        (item) => `
                                         <tr>
-                                            <td>${item.id || ''}</td>
-                                            <td>${item.item_status || ''}</td>
-                                            <td>${item.found_date || ''}</td>
-                                            <td>${item.found_location || ''}</td>
-                                            <td>${item.item_description || ''}</td>
+                                            <td>${item.id || ""}</td>
+                                            <td>${item.item_status || ""}</td>
+                                            <td>${item.found_date || ""}</td>
+                                            <td>${
+                                              item.found_location || ""
+                                            }</td>
+                                            <td>${
+                                              item.item_description || ""
+                                            }</td>
                                             <td>
-                                                ${item.image_url ? 
-                                                    `<a href="${item.image_url}" target="_blank">
+                                                ${
+                                                  item.image_url
+                                                    ? `<a href="${item.image_url}" target="_blank">
                                                         <img src="${item.image_url}" style="height: 50px; width: auto;" />
-                                                    </a>` : ''}
+                                                    </a>`
+                                                    : ""
+                                                }
                                             </td>
-                                            <td>${item.email || ''}</td>
-                                            <td>${item.grade_and_section || ''}</td>
-                                            <td>${item.phone_number || ''}</td>
-                                            <td>${Math.round(item.similarity * 100)}%</td>
+                                            <td>${item.email || ""}</td>
+                                            <td>${
+                                              item.grade_and_section || ""
+                                            }</td>
+                                            <td>${item.phone_number || ""}</td>
+                                            <td>${Math.round(
+                                              item.similarity * 100
+                                            )}%</td>
                                         </tr>
-                                    `).join('')}
+                                    `
+                                      )
+                                      .join("")}
                                 </tbody>
                             </table>
                         </div>
@@ -295,46 +359,110 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         </div>`;
 
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
+      document.body.insertAdjacentHTML("beforeend", modalHTML);
 
-        const modal = new bootstrap.Modal(document.getElementById('similarItemsModal'));
-        modal.show();
+      const modal = new bootstrap.Modal(
+        document.getElementById("similarItemsModal")
+      );
+      modal.show();
     }
 
     // Check if there is a saved search term in localStorage
-    const savedSearchTerm = localStorage.getItem('searchTerm');
+    const savedSearchTerm = localStorage.getItem("searchTerm");
     if (savedSearchTerm) {
-        document.getElementById('search-input').value = savedSearchTerm;
+      document.getElementById("search-input").value = savedSearchTerm;
 
-        // Trigger the filter function automatically with the saved search term
-        table.clearFilter();
-        table.setFilter(function (data) {
-            return Object.values(data).some(val =>
-                String(val).toLowerCase().includes(savedSearchTerm.toLowerCase())
-            );
-        });
+      // Trigger the filter function automatically with the saved search term
+      table.clearFilter();
+      table.setFilter(function (data) {
+        return Object.values(data).some((val) =>
+          String(val).toLowerCase().includes(savedSearchTerm.toLowerCase())
+        );
+      });
     }
 
     // Search input event
-    document.getElementById('search-input').addEventListener('input', function (e) {
+    document
+      .getElementById("search-input")
+      .addEventListener("input", function (e) {
         const value = e.target.value.toLowerCase();
         table.clearFilter();
         table.setFilter(function (data) {
-            return Object.values(data).some(val =>
-                String(val).toLowerCase().includes(value)
-            );
+          return Object.values(data).some((val) =>
+            String(val).toLowerCase().includes(value)
+          );
         });
 
         // Save the search term to localStorage
-        localStorage.setItem('searchTerm', value);
-    });
+        localStorage.setItem("searchTerm", value);
+      });
 
     // Reset Button Event
-    document.getElementById('reset-btn').addEventListener('click', function () {
-        table.clearFilter();
-        localStorage.removeItem('searchTerm'); // Remove the saved search term
-        document.getElementById('search-input').value = ''; // Clear the search input
+    document.getElementById("reset-btn").addEventListener("click", function () {
+      table.clearFilter();
+      localStorage.removeItem("searchTerm"); // Remove the saved search term
+      document.getElementById("search-input").value = ""; // Clear the search input
     });
-});
+  });
+
+  function showLoading() {
+    document.getElementById("loadingOverlay").style.display = "flex";
+  }
+
+  function hideLoading() {
+    document.getElementById("loadingOverlay").style.display = "none";
+  }
+
+  async function findSimilarItems(cell) {
+    const description = cell.dataset.description;
+    showLoading();
+
+    try {
+      const response = await fetch("/find-similar-items", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ description: description }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        showSimilarItemsModal(data.items, {
+          item_description: description,
+          // Add other fields as needed
+        });
+      } else {
+        alert("Error finding similar items: " + data.error);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to find similar items");
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // Update your existing showSimilarItemsModal function
+  function showSimilarItemsModal(items, lostItem) {
+    const modalHtml = `
+        <!-- ...existing modal HTML... -->
+    `;
+
+    // Remove existing modal if present
+    const existingModal = document.getElementById("similarItemsModal");
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    // Add new modal
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
+
+    // Show the modal
+    const modal = new bootstrap.Modal(
+      document.getElementById("similarItemsModal")
+    );
+    modal.show();
+  }
 </script>
 {% endblock %}

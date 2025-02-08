@@ -2,13 +2,15 @@
 block main %}
 <div class="container mt-4">
   <h1>Submit a Lost/Found Item</h1>
-  <form action="/submit" method="post">
+  <form action="/submit" method="post" onsubmit="return validatePhoneNumber();">
     <div class="form-group">
       <label for="item_status">Item Status:</label>
       <select
         class="form-select custom-input custom-dropdown"
         name="item_status"
+        id="item_status"
         required
+        onchange="toggleLocationFields()"
       >
         <option value="" disabled selected class="placeholder-option">
           Select status
@@ -23,7 +25,30 @@ block main %}
         type="date"
         class="form-control custom-input"
         name="date"
+        id="date"
         required
+      />
+    </div>
+
+    <!-- Lost Location -->
+    <div class="form-group" id="lostLocationContainer">
+      <label for="lost_location">Lost Location:</label>
+      <input
+        type="text"
+        class="form-control custom-input"
+        name="lost_location"
+        id="lost_location"
+      />
+    </div>
+
+    <!-- Found Location -->
+    <div class="form-group" id="foundLocationContainer" style="display: none">
+      <label for="found_location">Found Location:</label>
+      <input
+        type="text"
+        class="form-control custom-input"
+        name="found_location"
+        id="found_location"
       />
     </div>
 
@@ -244,6 +269,18 @@ block main %}
       parentEmailContainer.style.display = "none"; // Hide personal email field if not "Other"
     }
   }
+
+  function toggleLocationFields() {
+    const status = document.getElementById("item_status").value;
+    if (status === "Lost") {
+      document.getElementById("lostLocationContainer").style.display = "block";
+      document.getElementById("foundLocationContainer").style.display = "none";
+    } else {
+      document.getElementById("lostLocationContainer").style.display = "none";
+      document.getElementById("foundLocationContainer").style.display = "block";
+    }
+  }
+
   document
     .querySelector('select[name="item_status"]')
     .addEventListener("change", function () {

@@ -9,12 +9,19 @@ nav .navbar-brand {
   background: transparent;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-weight: bold;
 }
 
 body {
-  background: linear-gradient(to bottom, rgba(34, 34, 34, 0.5), rgba(34, 34, 34, 0.5)), url('/static/lsca.jpg') no-repeat center center fixed;
+  background: linear-gradient(
+      to bottom,
+      rgba(34, 34, 34, 0.5),
+      rgba(34, 34, 34, 0.5)
+    ),
+    url("/static/lsca.jpg") no-repeat center center fixed;
   background-size: cover;
   color: #ffffff;
   min-height: 100vh;
@@ -54,7 +61,7 @@ body.dark-mode {
 }
 
 .custom-nav-link::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 0;
   height: 2px;
@@ -98,8 +105,8 @@ body.dark-mode {
 .custom-input {
   background-color: transparent;
   border: none;
-  border-bottom: 2px solid #86C232;
-  color: #86C232;
+  border-bottom: 2px solid #86c232;
+  color: #86c232;
   transition: border-bottom-color 0.2s ease-in-out;
 }
 
@@ -118,7 +125,8 @@ table {
   background-color: transparent; /* Make table background transparent */
 }
 
-th, td {
+th,
+td {
   padding: 10px; /* Add padding for header and cells */
   text-align: left; /* Align text to the left */
   background-color: transparent; /* Make header and cell backgrounds transparent */
@@ -126,12 +134,14 @@ th, td {
   color: inherit; /* Inherit text color from parent */
 }
 
-.dark-mode table th, .dark-mode table td {
+.dark-mode table th,
+.dark-mode table td {
   border-color: rgba(255, 255, 255, 0.5); /* White border in dark mode */
   color: white; /* Change text color to white in dark mode */
 }
 
-.table th, .table td {
+.table th,
+.table td {
   white-space: nowrap; /* Prevent text from wrapping */
 }
 
@@ -174,14 +184,16 @@ th, td {
 }
 
 /* Input and select styles for dark mode */
-input.form-control.dark-mode, select.form-select.dark-mode {
+input.form-control.dark-mode,
+select.form-select.dark-mode {
   background-color: #2a2a2a; /* Dark background for input fields */
   color: #8d8d8d; /* White text for input fields */
   border: 1px solid #ffffff; /* White border for visibility */
 }
 
 /* Input and select styles for light mode */
-input.form-control.light-mode, select.form-select.light-mode {
+input.form-control.light-mode,
+select.form-select.light-mode {
   background-color: #ffffff; /* White background for input fields */
   color: #000000; /* Black text for input fields */
   border: 1px solid #000000; /* Black border for visibility */
@@ -191,7 +203,6 @@ input.form-control.light-mode, select.form-select.light-mode {
 label {
   color: inherit; /* Use inherited color for text (white in dark mode, black in light mode) */
 }
-
 
 /* General styles */
 .background-overlay {
@@ -205,11 +216,21 @@ label {
   z-index: -1; /* Places the overlay behind other elements */
 }
 
-h1, h2, h3, h4, h5, h6, p, label, .nav-link, .alert {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+label,
+.nav-link,
+.alert {
   color: #ffffff !important;
 }
 
-li a, .navbar a {
+li a,
+.navbar a {
   color: white !important;
 }
 
@@ -220,11 +241,11 @@ li a, .navbar a {
 }
 
 /* Remove the loading class when the theme is applied */
-.light-mode, .dark-mode {
+.light-mode,
+.dark-mode {
   opacity: 1;
   pointer-events: auto;
 }
-
 
 .htCore {
   background: grey;
@@ -232,57 +253,59 @@ li a, .navbar a {
 }
 
 .handsontable .htCore,
-    .handsontable .ht_master .wtHolder,
-    .handsontable .ht_master .wtHider,
-    .handsontable .ht_master .wtSpreader,
-    .handsontable .ht_master .wtTable,
-    .handsontable .ht_master .wtHider .wtHolder,
-    .handsontable .ht_master .wtHider .wtHolder .wtSpreader,
-    .handsontable .ht_master .wtHider .wtHolder .wtSpreader .wtTable,
-    .handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable td,
-    .handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable th {
-        background: rgba(128, 128, 128, 0);
-        color: white;
-    }
+.handsontable .ht_master .wtHolder,
+.handsontable .ht_master .wtHider,
+.handsontable .ht_master .wtSpreader,
+.handsontable .ht_master .wtTable,
+.handsontable .ht_master .wtHider .wtHolder,
+.handsontable .ht_master .wtHider .wtHolder .wtSpreader,
+.handsontable .ht_master .wtHider .wtHolder .wtSpreader .wtTable,
+.handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable td,
+.handsontable .ht_master .wtHolder .wtHider .wtSpreader .wtTable th {
+  background: rgba(128, 128, 128, 0);
+  color: white;
+}
 
-    .tabulator .tabulator-header .tabulator-col {
-      display: inline-flex;
-      position: relative;
-      box-sizing: border-box;
-      flex-direction: column;
-      justify-content: flex-start;
-      border-right: 1px solid #aaa;
-      background: #ffffff !important;
-      text-align: left;
-      vertical-align: bottom;
-      overflow: hidden;
-      font-weight: bold !important;
-    }
+.tabulator .tabulator-header .tabulator-col {
+  display: inline-flex;
+  position: relative;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: flex-start;
+  border-right: 1px solid #aaa;
+  background: #ffffff !important;
+  text-align: left;
+  vertical-align: bottom;
+  overflow: hidden;
+  font-weight: bold !important;
+}
 
-    .tabulator-row .tabulator-cell{
-      background-color: #065a2b;
-      font-weight: bold;
-    }
+.tabulator-row .tabulator-cell {
+  background-color: #065a2b;
+  font-weight: bold;
+}
 
-    .tabulator .tabulator-tableholder .tabulator-table {
-      white-space: nowrap;
-      color: #fffefe !important;
-    }
+.tabulator .tabulator-tableholder .tabulator-table {
+  white-space: nowrap;
+  color: #fffefe !important;
+}
 
-    .tabulator .tabulator-row { border-bottom: 1px solid #8f8f8f !important; }
+.tabulator .tabulator-row {
+  border-bottom: 1px solid #8f8f8f !important;
+}
 
-    .alert-primary {
-      background-color: #065a2b !important;
-      color: #ffffff !important;
-      border: none;
-    }
+.alert-primary {
+  background-color: #065a2b !important;
+  color: #ffffff !important;
+  border: none;
+}
 
-    .mb-3 {
-      margin-bottom: 1rem !important;
-      margin-left: 10px;
-    }
+.mb-3 {
+  margin-bottom: 1rem !important;
+  margin-left: 10px;
+}
 
-    /* Style for status cell */
+/* Style for status cell */
 .status-cell {
   display: flex;
   justify-content: space-between; /* This will push the text to the left and the icon to the right */
@@ -355,7 +378,7 @@ li a, .navbar a {
 }
 
 .custom-nav-link::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 0;
   height: 2px;
@@ -378,14 +401,14 @@ li a, .navbar a {
 }
 
 .alert {
-    background-color: rgba(3, 102, 49, 0.2);
-    border-color: #036631;
-    color: white;
+  background-color: rgba(3, 102, 49, 0.2);
+  border-color: #036631;
+  color: white;
 }
 
 .alert-info {
-    margin: 0 auto;
-    width: 75%;
+  margin: 0 auto;
+  width: 75%;
 }
 
 /* ...existing code... */
@@ -395,7 +418,7 @@ li a, .navbar a {
 .modal-body,
 .modal-footer {
   background-color: #036631 !important; /* Your green color */
-  color: #ffffff !important;           /* White text */
+  color: #ffffff !important; /* White text */
 }
 .table {
   --bs-table-color-type: initial;
@@ -404,4 +427,75 @@ li a, .navbar a {
   --bs-table-bg-state: initial;
   --bs-table-color: #fff;
   --bs-table-bg: #036631;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #023220;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Base styles for both lost and found descriptions */
+.item-description,
+.item-found {
+  cursor: default;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  gap: 8px;
+  text-align: left;
+  margin-top: 10px;
+  margin-left: 10px; /* Added margin-left */
+  border: 1px solid transparent; /* Add transparent border */
+}
+
+/* Specific styles for lost items */
+.item-description {
+  cursor: pointer;
+}
+
+.item-description:hover {
+  background-color: #023220;
+  color: white;
+}
+
+.item-description::after {
+  content: " 🔍";
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.item-description:hover::after {
+  opacity: 1;
+}
+
+/* Specific styles for found items */
+.item-found:hover {
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border on hover */
+  background-color: rgba(255, 255, 255, 0.05); /* Very subtle background */
 }
