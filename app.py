@@ -5,6 +5,19 @@ import hashlib
 import os
 import base64
 from hmac import compare_digest
+from helpers import login_required
+from itsdangerous import URLSafeTimedSerializer
+from datetime import datetime
+from flask_mail import Mail, Message
+import re
+from dotenv import load_dotenv
+from sentence_transformers import SentenceTransformer
+import torch
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+import time
+from functools import lru_cache, wraps
+import requests.exceptions
 
 def generate_password_hash(password, method='sha256', salt_length=16):
     """Generate a secure password hash"""
@@ -54,23 +67,7 @@ def check_password_hash(pwhash, password):
         print(f"Error checking password hash: {e}")
         return False
 
-from helpers import login_required
-from itsdangerous import URLSafeTimedSerializer
-from datetime import datetime
-from flask_mail import Mail, Message
-import re
-from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
-import torch
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
-import time
-from functools import lru_cache, wraps
-import requests.exceptions
-
-
 load_dotenv()
-
 
 device = "cpu"  # Force CPU usage
 model = SentenceTransformer("all-MiniLM-L6-v2", device=device)
