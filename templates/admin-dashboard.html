@@ -1,21 +1,32 @@
 {% extends "layout.html" %} {% block title %} Admin Dashboard {% endblock %} {%
 block main %}
-<div class="container mt-4">
+<div class="container mt-10">
   <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-spinner"></div>
   </div>
   <h1 class="text-light">Item Record</h1>
-  <div class="search-bar-wrapper d-flex">
+  <div
+    class="d-flex justify-content-center align-items-center mb-3"
+    style="gap: 8px"
+  >
+    <!-- Renamed reset button to "All Items" -->
+    <button id="all-items-btn" class="btn custom-green-btn">All Items</button>
+    <button id="lost-items-btn" class="btn custom-green-btn">Lost Items</button>
+    <button id="found-items-btn" class="btn custom-green-btn">
+      Found Items
+    </button>
+    <button id="confirmed-items-btn" class="btn custom-green-btn">
+      Confirmed Items
+    </button>
+
+    <!-- Make the search bar long and centered -->
     <input
       id="search-input"
       type="text"
       placeholder="Search..."
-      class="form-control search-bar mb-3"
+      class="form-control"
+      style="max-width: 600px"
     />
-    <!-- Reset Button -->
-    <button id="reset-btn" class="btn custom-green-btn mb-3 ml-10">
-      Reset
-    </button>
   </div>
   <div
     id="table-container"
@@ -410,12 +421,34 @@ block main %}
         localStorage.setItem("searchTerm", value);
       });
 
-    // Reset Button Event
-    document.getElementById("reset-btn").addEventListener("click", function () {
-      table.clearFilter();
-      localStorage.removeItem("searchTerm"); // Remove the saved search term
-      document.getElementById("search-input").value = ""; // Clear the search input
-    });
+    document
+      .getElementById("lost-items-btn")
+      .addEventListener("click", function () {
+        table.clearFilter();
+        table.setFilter("item_status", "=", "Lost");
+      });
+
+    document
+      .getElementById("found-items-btn")
+      .addEventListener("click", function () {
+        table.clearFilter();
+        table.setFilter("item_status", "=", "Found");
+      });
+
+    document
+      .getElementById("confirmed-items-btn")
+      .addEventListener("click", function () {
+        table.clearFilter();
+        table.setFilter("item_status", "=", "Confirmed");
+      });
+
+    document
+      .getElementById("all-items-btn")
+      .addEventListener("click", function () {
+        table.clearFilter();
+        localStorage.removeItem("searchTerm"); // Clear any saved search
+        document.getElementById("search-input").value = ""; // Clear the search box
+      });
   });
 
   function showLoading() {
