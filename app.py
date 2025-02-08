@@ -269,8 +269,11 @@ def submit_item():
             return redirect("/submit")
 
         try:
-            # If status is Lost, use lost_location; else use found_location
             if item_status.lower() == "lost":
+                if not lost_location:
+                    flash("Please provide the lost location.")
+                    return redirect("/submit")
+                    
                 db.execute(
                     """INSERT INTO items 
                        (item_status, lost_date, found_date, item_description, location, found_location, email, grade_and_section, phone_number, image_url)
@@ -287,6 +290,10 @@ def submit_item():
                     image_url
                 )
             else:  # Found
+                if not found_location:
+                    flash("Please provide the found location.")
+                    return redirect("/submit")
+                    
                 db.execute(
                     """INSERT INTO items 
                        (item_status, lost_date, found_date, item_description, location, found_location, email, grade_and_section, phone_number, image_url)
@@ -295,7 +302,7 @@ def submit_item():
                     None,        # lost_date
                     date,        # found_date
                     item_description,
-                    "[Found]",   # location placeholder
+                    found_location,  # location - use found_location here
                     found_location,  # found_location
                     email,
                     grade_and_section,

@@ -31,26 +31,7 @@ block main %}
     </div>
 
     <!-- Lost Location -->
-    <div class="form-group" id="lostLocationContainer">
-      <label for="lost_location">Lost Location:</label>
-      <input
-        type="text"
-        class="form-control custom-input"
-        name="lost_location"
-        id="lost_location"
-      />
-    </div>
-
-    <!-- Found Location -->
-    <div class="form-group" id="foundLocationContainer" style="display: none">
-      <label for="found_location">Found Location:</label>
-      <input
-        type="text"
-        class="form-control custom-input"
-        name="found_location"
-        id="found_location"
-      />
-    </div>
+    
 
     <div class="form-group">
       <label for="item_description">Item Description:</label>
@@ -62,16 +43,30 @@ block main %}
         placeholder="Enter item description"
       />
     </div>
-    <div class="form-group">
-      <label for="location">Location Lost/Found:</label>
+    
+    <div class="form-group" id="lostLocationContainer" style="display: none">
+      <label for="lost_location">Lost Location:</label>
       <input
         type="text"
         class="form-control custom-input"
-        name="location"
-        placeholder="Enter location where the item was lost/found"
-        required
+        name="lost_location"
+        id="lost_location"
+        placeholder="Enter where the item was lost"
       />
     </div>
+
+    <!-- Found Location -->
+    <div class="form-group" id="foundLocationContainer" style="display: none">
+      <label for="found_location">Found Location:</label>
+      <input
+        type="text"
+        class="form-control custom-input"
+        name="found_location"
+        id="found_location"
+        placeholder="Enter where the item was found"
+      />
+    </div>
+  
 
     <!-- Group Selection (moved above the email field) -->
     <div class="form-group mb-3">
@@ -272,14 +267,35 @@ block main %}
 
   function toggleLocationFields() {
     const status = document.getElementById("item_status").value;
+    const lostContainer = document.getElementById("lostLocationContainer");
+    const foundContainer = document.getElementById("foundLocationContainer");
+    const lostInput = document.getElementById("lost_location");
+    const foundInput = document.getElementById("found_location");
+
     if (status === "Lost") {
-      document.getElementById("lostLocationContainer").style.display = "block";
-      document.getElementById("foundLocationContainer").style.display = "none";
+      lostContainer.style.display = "block";
+      foundContainer.style.display = "none";
+      lostInput.required = true;
+      foundInput.required = false;
+      foundInput.value = "";
+    } else if (status === "Found") {
+      lostContainer.style.display = "none";
+      foundContainer.style.display = "block";
+      lostInput.required = false;
+      foundInput.required = true;
+      lostInput.value = "";
     } else {
-      document.getElementById("lostLocationContainer").style.display = "none";
-      document.getElementById("foundLocationContainer").style.display = "block";
+      lostContainer.style.display = "none";
+      foundContainer.style.display = "none";
+      lostInput.required = false;
+      foundInput.required = false;
     }
   }
+
+  // Call toggleLocationFields on page load to set initial state
+  document.addEventListener("DOMContentLoaded", function () {
+    toggleLocationFields();
+  });
 
   document
     .querySelector('select[name="item_status"]')
