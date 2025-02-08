@@ -464,24 +464,17 @@ li a,
 .item-description,
 .item-found {
   cursor: default;
-  padding: 8px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  gap: 8px;
+  padding: 8px;  /* Added padding */
   text-align: left;
-  margin-top: 10px;
-  margin-left: 10px; /* Added margin-left */
-  border: 1px solid transparent; /* Add transparent border */
+  border: none;
+  border-radius: 5px;  /* Rounded corners */
+  height: 100%;  /* Extend to full height */
+  display: block;  /* Ensure block display */
 }
 
 /* Specific styles for lost items */
 .item-description {
   cursor: pointer;
-}
-
-.item-description:hover {
-  background-color: #023220;
-  color: white;
 }
 
 .item-description::after {
@@ -494,8 +487,7 @@ li a,
   opacity: 1;
 }
 
-/* Specific styles for found items */
-.item-found:hover {
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border on hover */
-  background-color: rgba(255, 255, 255, 0.05); /* Very subtle background */
+.item-description:hover {
+  background-color: #023220;
+  border-radius: 5px;  /* Maintain rounded corners on hover */
 }
