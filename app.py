@@ -250,6 +250,9 @@ def register():
 def submit_item():
     if request.method == "POST":
         try:
+            # Get current user's email to check if admin
+            user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
+            
             item_status = request.form.get("item_status")
             date = request.form.get("date")
             item_description = request.form.get("item_description")
@@ -284,7 +287,12 @@ def submit_item():
             )
 
             flash("Your item has been submitted successfully!")
-            return redirect("/")
+            
+            # Redirect based on user role
+            if user_email == "ritchangelo.dacanay@lsca.edu.ph":  # Admin email
+                return redirect("/")  # Admin dashboard
+            else:
+                return redirect("/submit")  # Regular users stay on submission page
 
         except Exception as e:
             print(f"Error inserting item: {e}")
