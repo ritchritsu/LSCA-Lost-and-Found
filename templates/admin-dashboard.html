@@ -16,7 +16,7 @@ block main %}
       Found Items
     </button>
     <button id="confirmed-items-btn" class="btn custom-green-btn">
-      Confirmed Items
+      Returned Items
     </button>
 
     <!-- Make the search bar long and centered -->
@@ -71,7 +71,7 @@ block main %}
           width: 120,
           editor: "select",
           editorParams: {
-            values: ["Lost", "Found", "Confirmed"],
+            values: ["Lost", "Found", "Returned"],
           },
           formatter: function (cell) {
             const value = cell.getValue();
@@ -86,7 +86,7 @@ block main %}
                 iconClass = "fa fa-check-circle";
                 iconColor = "yellow";
                 break;
-              case "Confirmed":
+              case "Returned":
                 iconClass = "fa fa-thumbs-up";
                 iconColor = "#90EE90";
                 break;
