@@ -323,12 +323,12 @@ def submit_item():
             user_email = db.execute("SELECT email FROM users WHERE id = ?", 
                                   session["user_id"])[0]["email"]
             
-            db.execute("""
-                INSERT INTO audit_logs 
-                (user_email, action_type, item_id, details, timestamp)
-                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-            """, user_email, "item_submission", 
-                item_id, f"Submitted {item_status} item: {item_description}")
+            log_action(
+                user_email=user_email,
+                action_type="item_submission",
+                item_id=item_id,
+                details=f"Submitted {item_status} item: {item_description}"
+            )
 
             flash("Your item has been submitted successfully!")
             return redirect("/")
@@ -728,24 +728,15 @@ def audit_log():
     """)
     return render_template("audit-log.html", logs=logs)
 
-def log_action(action_type, details, item_id=None):
-    """Log user actions to audit_logs table"""
+def log_action(user_email, action_type, item_id, details):
+    """Log an action to audit_logs"""
     try:
-        if not session.get("user_id"):
-            print("No user logged in - cannot log action")
-            return False
-            
-        user_email = db.execute("SELECT email FROM users WHERE id = ?", 
-                              session["user_id"])[0]["email"]
-        
         db.execute("""
             INSERT INTO audit_logs 
-            (user_email, action_type, item_id, details, timestamp)
-            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            (user_email, action_type, item_id, details)
+            VALUES (?, ?, ?, ?)
         """, user_email, action_type, item_id, details)
-        
         return True
-        
     except Exception as e:
         print(f"Error logging action: {e}")
         return False

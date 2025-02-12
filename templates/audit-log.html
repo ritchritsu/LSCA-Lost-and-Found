@@ -1,31 +1,135 @@
-{% extends "layout.html" %} {% block title %} Audit Log {% endblock %} {% block
+{% extends "layout.html" %} {% block title %}Audit Log{% endblock %} {% block
 main %}
 <div class="container mt-4">
   <h1 class="text-light mb-4">Audit Log</h1>
+
+  <!-- Search Bar -->
+  <div class="mb-4">
+    <input
+      type="text"
+      id="searchInput"
+      class="form-control custom-input"
+      placeholder="Search in logs..."
+      style="max-width: 600px; margin: 0 auto"
+    />
+  </div>
+
   <div class="table-responsive">
-    <table class="table table-dark table-striped">
+    <table class="table table-dark table-striped" id="auditTable">
       <thead>
         <tr>
-          <th>Timestamp</th>
-          <th>User</th>
-          <th>Action</th>
-          <th>Item ID</th>
-          <th>Details</th>
+          <th class="sortable" data-sort="timestamp">Timestamp ↕</th>
+          <th class="sortable" data-sort="user">User ↕</th>
+          <th class="sortable" data-sort="action">Action ↕</th>
+          <th class="sortable" data-sort="itemid">Item ID ↕</th>
+          <th class="sortable" data-sort="details">Details ↕</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="logTableBody">
         {% for log in logs %}
-        <tr>
-          <td>{{ log.local_time }}</td>
-          <td>{{ log.user_email }}</td>
-          <td>{{ log.action_type }}</td>
-          <td>{{ log.item_id or 'N/A' }}</td>
-          <td>{{ log.details }}</td>
+        <tr class="log-row">
+          <td data-value="{{ log.local_time }}">{{ log.local_time }}</td>
+          <td data-value="{{ log.user_email }}">{{ log.user_email }}</td>
+          <td data-value="{{ log.action_type }}">{{ log.action_type }}</td>
+          <td data-value="{{ log.item_id }}">{{ log.item_id or 'N/A' }}</td>
+          <td data-value="{{ log.details }}">{{ log.details }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
-<style></style>
+
+<style>
+  .custom-input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid #86c232;
+    color: #ffffff;
+    transition: all 0.3s ease;
+  }
+
+  .custom-input:focus {
+    background-color: rgba(134, 194, 50, 0.1);
+    border-bottom-color: #087830;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .custom-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .sortable:hover {
+    background-color: rgba(134, 194, 50, 0.2);
+  }
+</style>
+
+<script>
+  // Search functionality
+  document
+    .getElementById("searchInput")
+    .addEventListener("input", function (e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const rows = document.getElementsByClassName("log-row");
+
+      Array.from(rows).forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? "" : "none";
+      });
+    });
+
+  // Sorting functionality
+  document.querySelectorAll(".sortable").forEach((header) => {
+    header.addEventListener("click", function () {
+      const column = this.cellIndex;
+      const table = document.getElementById("auditTable");
+      const rows = Array.from(table.querySelectorAll("tbody tr"));
+      const isAscending = this.classList.contains("asc");
+
+      // Update sort indicators
+      document.querySelectorAll(".sortable").forEach((h) => {
+        h.textContent = h.textContent.replace(" ↑", " ↕").replace(" ↓", " ↕");
+      });
+      this.textContent = this.textContent.replace(
+        " ↕",
+        isAscending ? " ↓" : " ↑"
+      );
+
+      // Sort rows
+      rows.sort((a, b) => {
+        const aValue =
+          a.cells[column].getAttribute("data-value") ||
+          a.cells[column].textContent;
+        const bValue =
+          b.cells[column].getAttribute("data-value") ||
+          b.cells[column].textContent;
+
+        if (aValue === "N/A") return isAscending ? 1 : -1;
+        if (bValue === "N/A") return isAscending ? -1 : 1;
+
+        if (!isNaN(Date.parse(aValue)) && !isNaN(Date.parse(bValue))) {
+          // Sort dates
+          return isAscending
+            ? new Date(bValue) - new Date(aValue)
+            : new Date(aValue) - new Date(bValue);
+        }
+
+        // Sort strings
+        return isAscending
+          ? bValue.localeCompare(aValue)
+          : aValue.localeCompare(bValue);
+      });
+
+      // Update table
+      rows.forEach((row) => table.querySelector("tbody").appendChild(row));
+      this.classList.toggle("asc");
+    });
+  });
+</script>
 {% endblock %}
