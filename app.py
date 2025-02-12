@@ -1,5 +1,5 @@
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session, jsonify, url_for
+from flask import Flask, flash, redirect, render_template, request, session, jsonify, url_for, send_file
 from flask_session import Session
 import hashlib
 import os
@@ -18,6 +18,9 @@ import numpy as np
 import time
 from functools import lru_cache, wraps
 import requests.exceptions
+from io import BytesIO
+import openpyxl
+from openpyxl.utils import get_column_letter
 
 def generate_password_hash(password, method='sha256', salt_length=16):
     """Generate a secure password hash"""
@@ -606,6 +609,61 @@ def delete_item():
         return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/download-excel", methods=["GET"])
+@login_required
+def download_excel():
+    """Generate and download Excel backup."""
+    if not is_admin():
+        return jsonify({"success": False, "error": "Unauthorized"}), 403
+    
+    try:
+        # Query your items
+        items = db.execute("SELECT * FROM items")
+        
+        # Create a new Excel workbook in memory
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "LostAndFoundBackup"
+
+        # If there are items, create headers from dict keys.
+        if items:
+            headers = list(items[0].keys())
+            for col_num, header in enumerate(headers, start=1):
+                ws.cell(row=1, column=col_num, value=header)
+
+            # Fill each row
+            for row_num, row_data in enumerate(items, start=2):
+                for col_num, header in enumerate(headers, start=1):
+                    ws.cell(row=row_num, column=col_num, value=row_data[header])
+        
+        # Auto-fit columns (optional)
+        for col in ws.columns:
+            max_length = 0
+            column = col[0].column  
+            for cell in col:
+                cell_val = str(cell.value) if cell.value else ""
+                max_length = max(max_length, len(cell_val))
+            ws.column_dimensions[get_column_letter(column)].width = max_length + 2
+
+        # Save to an in-memory buffer
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+
+        # Generate filename with timestamp
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+        filename = f"lost_and_found_backup_{timestamp}.xlsx"
+
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name=filename,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    except Exception as e:
+        print(f"Error generating Excel: {e}")
+        return jsonify({"success": False, "error": f"Export failed: {str(e)}"}), 500
 
 if __name__ == "__main__":
     # Pre-load model before running server
