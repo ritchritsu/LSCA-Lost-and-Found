@@ -105,6 +105,19 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///app.db")
 
+def init_db():
+    """Initialize database tables"""
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS audit_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_email TEXT NOT NULL,
+            action_type TEXT NOT NULL,
+            item_id INTEGER,
+            details TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -253,9 +266,7 @@ def register():
 def submit_item():
     if request.method == "POST":
         try:
-            # Get current user's email to check if admin
-            user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
-            
+            # Get form data
             item_status = request.form.get("item_status")
             date = request.form.get("date")
             item_description = request.form.get("item_description")
@@ -264,38 +275,63 @@ def submit_item():
             email = request.form.get("email")
             grade_and_section = request.form.get("grade_and_section")
             phone_number = request.form.get("phone_number")
-            image_data = request.form.get("image_data")  # Get base64 image data
+            image_data = request.form.get("image_data")
 
-            # Set location based on item status
-            location = lost_location if item_status.lower() == "lost" else found_location
+            # Validate required fields
+            if not all([item_status, date, item_description, email, grade_and_section, phone_number]):
+                flash("Please fill in all required fields")
+                return redirect("/submit")
 
-            # Insert into database
-            db.execute("""
-                INSERT INTO items (
-                    item_status, lost_date, found_date, item_description, 
-                    location, found_location, email, grade_and_section, 
-                    phone_number, image_url
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
+            # Set correct location based on status
+            if item_status.lower() == "lost":
+                if not lost_location:
+                    flash("Please provide the lost location")
+                    return redirect("/submit")
+                location = lost_location
+                found_location = None
+            else:  # Found
+                if not found_location:
+                    flash("Please provide the found location")
+                    return redirect("/submit")
+                location = found_location
+                lost_location = None
+
+            # Insert item
+            result = db.execute("""
+                INSERT INTO items 
+                (item_status, lost_date, found_date, item_description, 
+                 location, found_location, email, grade_and_section, 
+                 phone_number, image_url) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
                 item_status,
-                date if item_status.lower() == "lost" else None,  # lost_date
-                date if item_status.lower() == "found" else None,  # found_date
+                date if item_status.lower() == "lost" else None,
+                date if item_status.lower() == "found" else None,
                 item_description,
                 location,
                 found_location,
                 email,
                 grade_and_section,
                 phone_number,
-                image_data  # Store base64 image data
+                image_data
             )
 
-            flash("Your item has been submitted successfully!")
+            # Get the last inserted ID
+            item_id = db.execute("SELECT last_insert_rowid()")[0]['last_insert_rowid()']
+
+            # Log the action
+            user_email = db.execute("SELECT email FROM users WHERE id = ?", 
+                                  session["user_id"])[0]["email"]
             
-            # Redirect based on user role
-            if user_email == "ritchangelo.dacanay@lsca.edu.ph":  # Admin email
-                return redirect("/")  # Admin dashboard
-            else:
-                return redirect("/submit")  # Regular users stay on submission page
+            db.execute("""
+                INSERT INTO audit_logs 
+                (user_email, action_type, item_id, details, timestamp)
+                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            """, user_email, "item_submission", 
+                item_id, f"Submitted {item_status} item: {item_description}")
+
+            flash("Your item has been submitted successfully!")
+            return redirect("/")
 
         except Exception as e:
             print(f"Error inserting item: {e}")
@@ -605,7 +641,18 @@ def delete_item():
         if not item_id:
             return jsonify({"success": False, "error": "No item ID provided."}), 400
 
+        # Get item details before deletion
+        item = db.execute("SELECT item_description, item_status FROM items WHERE id = ?", item_id)[0]
+        
         db.execute("DELETE FROM items WHERE id = ?", item_id)
+        
+        # Log the deletion
+        log_action(
+            "item_deletion",
+            f"Deleted {item['item_status']} item: {item['item_description']}",
+            item_id
+        )
+        
         return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -665,6 +712,44 @@ def download_excel():
         print(f"Error generating Excel: {e}")
         return jsonify({"success": False, "error": f"Export failed: {str(e)}"}), 500
 
+@app.route("/audit-log")
+@login_required
+def audit_log():
+    """Show audit log"""
+    if not is_admin():
+        return redirect("/")
+        
+    logs = db.execute("""
+        SELECT 
+            audit_logs.*,
+            datetime(timestamp, 'localtime') as local_time
+        FROM audit_logs 
+        ORDER BY timestamp DESC
+    """)
+    return render_template("audit-log.html", logs=logs)
+
+def log_action(action_type, details, item_id=None):
+    """Log user actions to audit_logs table"""
+    try:
+        if not session.get("user_id"):
+            print("No user logged in - cannot log action")
+            return False
+            
+        user_email = db.execute("SELECT email FROM users WHERE id = ?", 
+                              session["user_id"])[0]["email"]
+        
+        db.execute("""
+            INSERT INTO audit_logs 
+            (user_email, action_type, item_id, details, timestamp)
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+        """, user_email, action_type, item_id, details)
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error logging action: {e}")
+        return False
+
 if __name__ == "__main__":
     # Pre-load model before running server
     try:
@@ -674,6 +759,9 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Warning: Model failed to load: {e}")
         print("Model will be loaded on first request")
+    
+    # Initialize database tables
+    init_db()
     
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

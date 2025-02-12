@@ -1,31 +1,30 @@
-{% extends "layout.html" %}
-{% block title %}Audit Log{% endblock %}
-{% block main %}
+{% extends "layout.html" %} {% block title %} Audit Log {% endblock %} {% block
+main %}
 <div class="container mt-4">
-    <h1 class="text-light mb-4">Audit Log</h1>
-    <div class="table-responsive">
-        <table class="table table-dark table-striped">
-            <thead>
-                <tr>
-                    <th>Timestamp</th>
-                    <th>User</th>
-                    <th>Action</th>
-                    <th>Item ID</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for log in logs %}
-                <tr>
-                    <td>{{ log.timestamp }}</td>
-                    <td>{{ log.user_email }}</td>
-                    <td>{{ log.action_type }}</td>
-                    <td>{{ log.item_id or 'N/A' }}</td>
-                    <td>{{ log.details }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+  <h1 class="text-light mb-4">Audit Log</h1>
+  <div class="table-responsive">
+    <table class="table table-dark table-striped">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>User</th>
+          <th>Action</th>
+          <th>Item ID</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>{{ log.local_time }}</td>
+          <td>{{ log.user_email }}</td>
+          <td>{{ log.action_type }}</td>
+          <td>{{ log.item_id or 'N/A' }}</td>
+          <td>{{ log.details }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}
