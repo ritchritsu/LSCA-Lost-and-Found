@@ -618,7 +618,7 @@ def find_similar_items():
         # Sort items by similarity
         similar_items = []
         for idx, similarity in enumerate(similarities):
-            if similarity > 0.3:  # Similarity threshold
+            if (similarity > 0.3):  # Similarity threshold
                 item = found_items[idx]
                 item['similarity'] = float(similarity)
                 similar_items.append(item)
@@ -660,40 +660,97 @@ def delete_item():
 @app.route("/download-excel", methods=["GET"])
 @login_required
 def download_excel():
-    """Generate and download Excel backup."""
+    """Generate and download Excel backup with separate sheets for items and audit logs"""
     if not is_admin():
         return jsonify({"success": False, "error": "Unauthorized"}), 403
-    
-    try:
-        # Query your items
-        items = db.execute("SELECT * FROM items")
-        
-        # Create a new Excel workbook in memory
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "LostAndFoundBackup"
 
-        # If there are items, create headers from dict keys.
+    try:
+        # Initialize database if needed
+        init_db()
+
+        # Query items
+        items = db.execute("""
+            SELECT
+                id,
+                item_status,
+                lost_date,
+                found_date,
+                item_description,
+                location,
+                found_location,
+                email,
+                grade_and_section,
+                phone_number,
+                image_url
+            FROM items
+            ORDER BY id DESC
+        """)
+
+        # Query audit logs with explicit fields and formatted timestamp
+        audit_logs = db.execute("""
+            SELECT
+                id,
+                user_email,
+                action_type,
+                item_id,
+                details,
+                strftime('%Y-%m-%d %H:%M:%S', timestamp, 'localtime') as timestamp
+            FROM audit_logs
+            ORDER BY timestamp DESC
+        """)
+
+        # Create Excel workbook
+        wb = openpyxl.Workbook()
+
+        # Setup Items sheet
+        items_ws = wb.active
+        items_ws.title = "Items"
+
+        # Add items headers and data
         if items:
+            # Headers
             headers = list(items[0].keys())
             for col_num, header in enumerate(headers, start=1):
-                ws.cell(row=1, column=col_num, value=header)
+                cell = items_ws.cell(row=1, column=col_num, value=header.upper())
+                cell.font = openpyxl.styles.Font(bold=True)
+                cell.fill = openpyxl.styles.PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
 
-            # Fill each row
-            for row_num, row_data in enumerate(items, start=2):
+            # Data
+            for row_num, item in enumerate(items, start=2):
                 for col_num, header in enumerate(headers, start=1):
-                    ws.cell(row=row_num, column=col_num, value=row_data[header])
-        
-        # Auto-fit columns (optional)
-        for col in ws.columns:
-            max_length = 0
-            column = col[0].column  
-            for cell in col:
-                cell_val = str(cell.value) if cell.value else ""
-                max_length = max(max_length, len(cell_val))
-            ws.column_dimensions[get_column_letter(column)].width = max_length + 2
+                    items_ws.cell(row=row_num, column=col_num, value=item[header])
 
-        # Save to an in-memory buffer
+        # Setup Audit Logs sheet
+        audit_ws = wb.create_sheet(title="Audit Logs")
+
+        # Add audit logs headers and data
+        if audit_logs:
+            # Headers
+            headers = list(audit_logs[0].keys())
+            for col_num, header in enumerate(headers, start=1):
+                cell = audit_ws.cell(row=1, column=col_num, value=header.upper())
+                cell.font = openpyxl.styles.Font(bold=True)
+                cell.fill = openpyxl.styles.PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
+
+            # Data
+            for row_num, log in enumerate(audit_logs, start=2):
+                for col_num, header in enumerate(headers, start=1):
+                    audit_ws.cell(row=row_num, column=col_num, value=log[header])
+
+        # Auto-fit columns for both sheets
+        for ws in [items_ws, audit_ws]:
+            for column_cells in ws.columns:
+                max_length = 0
+                for cell in column_cells:
+                    try:
+                        if cell.value:
+                            max_length = max(max_length, len(str(cell.value)))
+                    except:
+                        pass
+                adjusted_width = min(max_length + 2, 50)  # Cap width at 50
+                ws.column_dimensions[get_column_letter(column_cells[0].column)].width = adjusted_width
+
+        # Save to memory buffer
         output = BytesIO()
         wb.save(output)
         output.seek(0)
@@ -708,9 +765,13 @@ def download_excel():
             download_name=filename,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+
     except Exception as e:
         print(f"Error generating Excel: {e}")
-        return jsonify({"success": False, "error": f"Export failed: {str(e)}"}), 500
+        return jsonify({
+            "success": False,
+            "error": f"Export failed: {str(e)}"
+        }), 500
 
 @app.route("/audit-log")
 @login_required
@@ -727,6 +788,48 @@ def audit_log():
         ORDER BY timestamp DESC
     """)
     return render_template("audit-log.html", logs=logs)
+
+@app.route("/audit-logs")
+@login_required
+def audit_logs():
+    """Display audit logs"""
+    # Ensure admin
+    if not is_admin():
+        flash("Access denied. Admin only.")
+        return redirect("/")
+
+    try:
+        # Create table if it doesn't exist
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS audit_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                action_type TEXT NOT NULL,
+                item_id INTEGER,
+                details TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Fetch audit logs
+        logs = db.execute("""
+            SELECT
+                id,
+                user_email,
+                action_type,
+                item_id,
+                details,
+                datetime(timestamp, 'localtime') as local_time
+            FROM audit_logs
+            ORDER BY timestamp DESC
+        """)
+
+        # Pass logs to audit-log.html
+        return render_template("audit-log.html", logs=logs)
+    except Exception as e:
+        print(f"Error fetching audit logs: {e}")
+        flash("Error loading audit logs.")
+        return redirect("/")
 
 def log_action(user_email, action_type, item_id, details):
     """Log an action to audit_logs"""

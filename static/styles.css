@@ -545,3 +545,21 @@ li a,
 .custom-green-btn:active {
   transform: scale(1.1); /* Slightly increase size when clicked */
 }
+
+.custom-table {
+  --bs-table-bg: #087830;
+  --bs-table-striped-bg: #087830;
+  --bs-table-hover-bg: #065a2b;
+}
+
+.custom-table thead {
+  background-color: #065a2b;
+}
+
+.custom-table tbody tr {
+  background-color: #087830 !important;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #065a2b !important;
+}
