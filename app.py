@@ -841,7 +841,27 @@ def system_monitor():
     """Show system monitoring dashboard"""
     if not is_admin():
         return redirect("/")
-    return render_template("system-monitor.html")
+        
+    try:
+        # Get audit logs with formatted timestamp
+        logs = db.execute("""
+            SELECT 
+                audit_logs.id,
+                audit_logs.user_email,
+                audit_logs.action_type,
+                audit_logs.item_id,
+                audit_logs.details,
+                datetime(audit_logs.timestamp, 'localtime') as local_time
+            FROM audit_logs 
+            ORDER BY timestamp DESC
+            LIMIT 100
+        """)
+        
+        return render_template("system-monitor.html", logs=logs)
+        
+    except Exception as e:
+        print(f"Error fetching audit logs: {e}")
+        return render_template("system-monitor.html", logs=[])
 
 @app.route("/system-metrics")
 @login_required

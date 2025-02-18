@@ -3,47 +3,104 @@ block main %}
 <div class="container mt-4">
   <h1 class="text-light mb-4">System Monitor</h1>
 
-  <div class="d-flex flex-wrap justify-content-between gap-4">
-    <!-- CPU Usage Card -->
-    <div class="metric-card">
-      <div class="card bg-dark text-light">
-        <div class="card-body d-flex flex-column align-items-center">
-          <h5 class="card-title">CPU Usage</h5>
-          <p class="card-text display-4" id="cpu-usage">0%</p>
-          <p class="card-text">Peak: <span id="cpu-peak">0%</span></p>
+  <!-- Top Grid - 3 columns -->
+  <div class="metrics-top-grid">
+    <!-- CPU Usage Column -->
+    <div class="metric-column">
+      <div class="header-cell">CPU Usage</div>
+      <div class="metric-card">
+        <div class="card bg-dark text-light">
+          <div class="card-body d-flex flex-column align-items-center">
+            <p class="card-text display-4" id="cpu-usage">0%</p>
+            <p class="card-text">Peak: <span id="cpu-peak">0%</span></p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Memory Usage Card -->
-    <div class="metric-card">
-      <div class="card bg-dark text-light">
-        <div class="card-body d-flex flex-column align-items-center">
-          <h5 class="card-title">Memory Usage</h5>
-          <p class="card-text display-4" id="memory-usage">0 MB</p>
-          <p class="card-text">Peak: <span id="memory-peak">0 MB</span></p>
+    <!-- Memory Usage Column -->
+    <div class="metric-column">
+      <div class="header-cell">Memory Usage</div>
+      <div class="metric-card">
+        <div class="card bg-dark text-light">
+          <div class="card-body d-flex flex-column align-items-center">
+            <p class="card-text display-4" id="memory-usage">0 MB</p>
+            <p class="card-text">Peak: <span id="memory-peak">0 MB</span></p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Disk I/O Card -->
-    <div class="metric-card">
-      <div class="card bg-dark text-light">
-        <div class="card-body d-flex flex-column align-items-center">
-          <h5 class="card-title">Disk I/O</h5>
-          <p class="card-text display-4 mb-2">I/O Stats</p>
-          <p class="card-text mb-1">Read: <span id="disk-read">0 MB</span></p>
-          <p class="card-text">Write: <span id="disk-write">0 MB</span></p>
+    <!-- Disk I/O Column -->
+    <div class="metric-column">
+      <div class="header-cell">Disk I/O</div>
+      <div class="metric-card">
+        <div class="card bg-dark text-light">
+          <div class="card-body d-flex flex-column align-items-center">
+            <p class="card-text display-4 mb-2">I/O Stats</p>
+            <p class="card-text mb-1">Read: <span id="disk-read">0 MB</span></p>
+            <p class="card-text">Write: <span id="disk-write">0 MB</span></p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Performance Analysis -->
-  <div class="card bg-dark text-light mt-4">
-    <div class="card-body">
-      <h5 class="card-title mb-4">Performance Analysis</h5>
-      <div id="analysis-content" class="analysis-grid"></div>
+  <!-- Performance Analysis Section -->
+  <div class="analysis-section mt-4">
+    <div class="analysis-grid" id="analysis-content">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Audit Log Section -->
+  <div class="analysis-section mt-4">
+    <div class="header-cell">Audit Log</div>
+    <div class="audit-content">
+      <!-- Search Bar -->
+      <div class="search-container">
+        <input
+          type="text"
+          id="searchInput"
+          class="form-control custom-input"
+          placeholder="Search in logs..."
+        />
+      </div>
+
+      <div class="table-container">
+        <table class="monitor-table" id="auditTable">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="timestamp">
+                Timestamp <span class="sort-icon">↕</span>
+              </th>
+              <th class="sortable" data-sort="user">
+                User <span class="sort-icon">↕</span>
+              </th>
+              <th class="sortable" data-sort="action">
+                Action <span class="sort-icon">↕</span>
+              </th>
+              <th class="sortable" data-sort="itemid">
+                Item ID <span class="sort-icon">↕</span>
+              </th>
+              <th class="sortable" data-sort="details">
+                Details <span class="sort-icon">↕</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="logTableBody">
+            {% for log in logs %}
+            <tr class="log-row">
+              <td data-value="{{ log.local_time }}">{{ log.local_time }}</td>
+              <td data-value="{{ log.user_email }}">{{ log.user_email }}</td>
+              <td data-value="{{ log.action_type }}">{{ log.action_type }}</td>
+              <td data-value="{{ log.item_id }}">{{ log.item_id or 'N/A' }}</td>
+              <td data-value="{{ log.details }}">{{ log.details }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -70,18 +127,42 @@ block main %}
         updateElement("disk-read", Math.round(data.disk_read_mb) + " MB");
         updateElement("disk-write", Math.round(data.disk_write_mb) + " MB");
 
-        // Update analysis
+        // Update analysis with specific order and headers
         const analysis = data.analysis;
         if (analysis) {
-          let analysisHtml = "";
-          for (const [key, value] of Object.entries(analysis)) {
-            if (typeof value === "object") {
-              analysisHtml += `<h6 class="mt-3">${key}</h6>`;
-              for (const [subKey, subValue] of Object.entries(value)) {
-                analysisHtml += `<p>${subKey}: ${subValue}</p>`;
-              }
-            }
-          }
+          const orderedSections = [
+            "CPU Analysis",
+            "Disk I/O Analysis",
+            "General",
+            "Memory Analysis",
+          ];
+
+          let analysisHtml = `
+            <div class="analysis-column">
+              <h6>CPU Analysis</h6>
+              ${Object.entries(analysis["CPU Analysis"] || {})
+                .map(([key, value]) => `<p>${key}: ${value}</p>`)
+                .join("")}
+            </div>
+            <div class="analysis-column">
+              <h6>Disk I/O Analysis</h6>
+              ${Object.entries(analysis["Disk I/O Analysis"] || {})
+                .map(([key, value]) => `<p>${key}: ${value}</p>`)
+                .join("")}
+            </div>
+            <div class="analysis-column">
+              <h6>General</h6>
+              ${Object.entries(analysis["General"] || {})
+                .map(([key, value]) => `<p>${key}: ${value}</p>`)
+                .join("")}
+            </div>
+            <div class="analysis-column">
+              <h6>Memory Analysis</h6>
+              ${Object.entries(analysis["Memory Analysis"] || {})
+                .map(([key, value]) => `<p>${key}: ${value}</p>`)
+                .join("")}
+            </div>
+          `;
           document.getElementById("analysis-content").innerHTML = analysisHtml;
         }
       });
@@ -94,76 +175,87 @@ block main %}
 
 <style>
   .container {
-    
+    max-width: 98vw !important;
+    padding: 1rem;
     border: 2px solid #86c232;
     border-radius: 10px;
-    padding: 2rem;
-    margin-top: 2rem;
+    background: rgba(0, 0, 0, 0.2);
+    margin: 0 auto;
   }
 
-  .d-flex {
-    position: relative;
-    padding: 1rem;
+  .metrics-top-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .metric-column {
+    background: rgba(0, 0, 0, 0.4);
     border: 1px solid #86c232;
-    border-radius: 8px;
-    background: rgba(6, 90, 43, 0.1);
+    border-radius: 5px;
   }
 
-  .metric-card {
-    flex: 1;
-    min-width: 300px;
-    max-width: 400px;
-    position: relative;
-  }
-
-  .metric-card:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    right: -2rem;
-    top: 10%;
-    height: 80%;
-    width: 2px;
-    background: linear-gradient(to bottom, transparent, #86c232, transparent);
+  .header-cell {
+    background: #86c232;
+    color: #000;
+    padding: 1rem;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 5px 5px 0 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 1.1rem;
   }
 
   .card {
-    border: 2px solid #86c232;
-    background: rgba(0, 0, 0, 0.4);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin: 1rem;
+    border: none;
+    background: transparent;
+    height: 100%;
     padding: 1rem;
   }
 
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(134, 194, 50, 0.2);
+  .analysis-section {
+    border: 1px solid #86c232;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 1rem;
   }
 
-  .card-body {
-    position: relative;
-    z-index: 1;
+  .analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    padding: 1rem;
   }
 
-  .card-title {
-    color: #86c232;
-    font-size: 1.25rem;
+  .analysis-column {
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #86c232;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .analysis-column h6 {
+    background: #86c232;
+    color: #000;
+    padding: 0.75rem;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-bottom: 2px solid #86c232;
-    padding-bottom: 0.5rem;
+    font-size: 0.9rem;
+    margin: 0;
   }
 
-  .display-4 {
-    color: #61892f;
-    font-size: 2.5rem;
-    font-weight: bold;
-    text-align: center;
-    margin: 1rem 0;
-    text-shadow: 0 0 10px rgba(134, 194, 50, 0.3);
+  .analysis-column p {
+    color: #dddddd;
+    margin: 0;
+    padding: 0.75rem;
+    background: rgba(6, 90, 43, 0.1);
+    border-left: 2px solid #86c232;
   }
 
   .card-text {
@@ -173,39 +265,12 @@ block main %}
     margin: 0.5rem 0;
   }
 
-  /* Performance Analysis Section */
-  .card.mt-4 {
-    margin-top: 2rem !important;
-    border: 2px solid #86c232;
-    background: rgba(0, 0, 0, 0.4);
-  }
-
-  .analysis-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Changed to 2 columns */
-    gap: 2rem;
-    padding: 1rem;
-  }
-
-  .analysis-grid h6 {
-    grid-column: span 1; /* Each header spans 1 column */
+  .display-4 {
     color: #86c232;
-    font-size: 1.1rem;
+    font-size: 2.5rem;
     font-weight: bold;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid #86c232;
-    padding-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .analysis-grid p {
-    color: #dddddd;
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    background: rgba(6, 90, 43, 0.1);
-    border-left: 3px solid #86c232;
-    border-radius: 0 4px 4px 0;
+    margin: 1rem 0;
+    text-shadow: 0 0 10px rgba(134, 194, 50, 0.3);
   }
 
   /* Update Animation */
@@ -227,34 +292,112 @@ block main %}
 
   /* Responsive Design */
   @media (max-width: 1200px) {
-    .metric-card:not(:last-child)::after {
-      display: none;
-    }
-
-    .metric-card {
-      border-bottom: 1px solid #86c232;
-      padding-bottom: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .metric-card:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
+    .metrics-top-grid,
+    .analysis-grid {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 
   @media (max-width: 768px) {
-    .metric-card {
-      min-width: 100%;
+    .metrics-top-grid,
+    .analysis-grid {
+      grid-template-columns: 1fr;
     }
+  }
 
-    .display-4 {
-      font-size: 2rem;
-    }
+  /* Add these styles to your existing <style> section */
+  .search-container {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
 
-    .container {
-      padding: 1rem;
-    }
+  .custom-input {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #86c232;
+    border-radius: 5px;
+    color: #ffffff;
+    padding: 0.75rem;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .custom-input:focus {
+    outline: none;
+    border-color: #61892f;
+    box-shadow: 0 0 0 2px rgba(134, 194, 50, 0.2);
+  }
+
+  .table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 0 1rem;
+  }
+
+  .monitor-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #ffffff;
+  }
+
+  .monitor-table th {
+    background: #86c232;
+    color: #000000;
+    padding: 1rem;
+    text-align: left;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .monitor-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(134, 194, 50, 0.2);
+  }
+
+  .log-row {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .log-row:hover {
+    background: rgba(134, 194, 50, 0.1);
+  }
+
+  .sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .sortable:hover {
+    background: #61892f;
+  }
+
+  .sort-icon {
+    display: inline-block;
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  /* Scrollbar styling */
+  .table-container::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .table-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .table-container::-webkit-scrollbar-thumb {
+    background: #86c232;
+    border-radius: 4px;
+  }
+
+  .table-container::-webkit-scrollbar-thumb:hover {
+    background: #61892f;
   }
 </style>
 {% endblock %}
