@@ -2,58 +2,6 @@
 block main %}
 <div class="container mt-4">
   <h1 class="text-light mb-4">System Monitor</h1>
-
-  <!-- Top Grid - 3 columns -->
-  <div class="metrics-top-grid">
-    <!-- CPU Usage Column -->
-    <div class="metric-column">
-      <div class="header-cell">CPU Usage</div>
-      <div class="metric-card">
-        <div class="card bg-dark text-light">
-          <div class="card-body d-flex flex-column align-items-center">
-            <p class="card-text display-4" id="cpu-usage">0%</p>
-            <p class="card-text">Peak: <span id="cpu-peak">0%</span></p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Memory Usage Column -->
-    <div class="metric-column">
-      <div class="header-cell">Memory Usage</div>
-      <div class="metric-card">
-        <div class="card bg-dark text-light">
-          <div class="card-body d-flex flex-column align-items-center">
-            <p class="card-text display-4" id="memory-usage">0 MB</p>
-            <p class="card-text">Peak: <span id="memory-peak">0 MB</span></p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Disk I/O Column -->
-    <div class="metric-column">
-      <div class="header-cell">Disk I/O</div>
-      <div class="metric-card">
-        <div class="card bg-dark text-light">
-          <div class="card-body d-flex flex-column align-items-center">
-            <p class="card-text display-4 mb-2">I/O Stats</p>
-            <p class="card-text mb-1">Read: <span id="disk-read">0 MB</span></p>
-            <p class="card-text">Write: <span id="disk-write">0 MB</span></p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Performance Analysis Section -->
-  <div class="analysis-section mt-4">
-    <div class="analysis-grid" id="analysis-content">
-      <!-- Content will be populated by JavaScript -->
-    </div>
-  </div>
-
-  <!-- Audit Log Section -->
   <div class="analysis-section mt-4">
     <div class="header-cell">Audit Log</div>
     <div class="audit-content">
@@ -103,6 +51,57 @@ block main %}
       </div>
     </div>
   </div>
+  <!-- Top Grid - 3 columns -->
+  <div class="metrics-top-grid">
+    <!-- CPU Usage Column -->
+    <div class="metric-column">
+      <div class="header-cell">CPU Usage</div>
+      <div class="metric-card">
+        <div class="card text-light">
+          <div class="card-body d-flex flex-column align-items-center">
+            <p class="card-text display-4" id="cpu-usage">0%</p>
+            <p class="card-text">Peak: <span id="cpu-peak">0%</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Memory Usage Column -->
+    <div class="metric-column">
+      <div class="header-cell">Memory Usage</div>
+      <div class="metric-card">
+        <div class="card text-light">
+          <div class="card-body d-flex flex-column align-items-center">
+            <p class="card-text display-4" id="memory-usage">0 MB</p>
+            <p class="card-text">Peak: <span id="memory-peak">0 MB</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disk I/O Column -->
+    <div class="metric-column">
+      <div class="header-cell">Disk I/O</div>
+      <div class="metric-card">
+        <div class="card text-light">
+          <div class="card-body d-flex flex-column align-items-center">
+            <p class="card-text display-4 mb-2">I/O Stats</p>
+            <p class="card-text mb-1">Read: <span id="disk-read">0 MB</span></p>
+            <p class="card-text">Write: <span id="disk-write">0 MB</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Analysis Section -->
+  <div class="analysis-section mt-4">
+    <div class="analysis-grid" id="analysis-content">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Audit Log Section -->
 </div>
 
 <script>
@@ -171,6 +170,57 @@ block main %}
   // Update metrics every second
   setInterval(updateMetrics, 1000);
   updateMetrics(); // Initial update
+
+  // Search functionality
+  document
+    .getElementById("searchInput")
+    .addEventListener("input", function (e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll("#logTableBody tr");
+
+      rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? "" : "none";
+      });
+    });
+
+  // Sorting functionality
+  document.querySelectorAll(".sortable").forEach((header) => {
+    header.addEventListener("click", function () {
+      const table = document.getElementById("auditTable");
+      const tbody = document.getElementById("logTableBody");
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const column = this.getAttribute("data-sort");
+      const ascending = !this.classList.contains("sorted-asc");
+
+      // Update sort indicators
+      document.querySelectorAll(".sortable").forEach((h) => {
+        h.classList.remove("sorted-asc", "sorted-desc");
+        h.querySelector(".sort-icon").textContent = "↕";
+      });
+
+      this.classList.toggle("sorted-asc", ascending);
+      this.classList.toggle("sorted-desc", !ascending);
+      this.querySelector(".sort-icon").textContent = ascending ? "↑" : "↓";
+
+      // Sort rows
+      rows.sort((a, b) => {
+        const aValue = a
+          .querySelector(`td[data-value]`)
+          .getAttribute("data-value");
+        const bValue = b
+          .querySelector(`td[data-value]`)
+          .getAttribute("data-value");
+        return ascending
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      });
+
+      // Reorder rows
+      tbody.innerHTML = "";
+      rows.forEach((row) => tbody.appendChild(row));
+    });
+  });
 </script>
 
 <style>
@@ -276,18 +326,6 @@ block main %}
   /* Update Animation */
   .updated {
     animation: glow 0.3s ease-in-out;
-  }
-
-  @keyframes glow {
-    0% {
-      text-shadow: 0 0 5px rgba(134, 194, 50, 0.5);
-    }
-    50% {
-      text-shadow: 0 0 20px rgba(134, 194, 50, 0.8);
-    }
-    100% {
-      text-shadow: 0 0 5px rgba(134, 194, 50, 0.5);
-    }
   }
 
   /* Responsive Design */
