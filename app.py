@@ -843,6 +843,18 @@ def system_monitor():
         return redirect("/")
         
     try:
+        # First verify table exists
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS audit_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT NOT NULL,
+                action_type TEXT NOT NULL,
+                item_id INTEGER,
+                details TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
         # Get audit logs with formatted timestamp
         logs = db.execute("""
             SELECT 
@@ -857,11 +869,29 @@ def system_monitor():
             LIMIT 100
         """)
         
-        return render_template("system-monitor.html", logs=logs)
+        # Debug print
+        print(f"Found {len(logs)} audit log entries")
+        
+        # Verify we have all required fields
+        for log in logs:
+            log['local_time'] = log['local_time'] or 'N/A'
+            log['user_email'] = log['user_email'] or 'N/A'
+            log['action_type'] = log['action_type'] or 'N/A'
+            log['item_id'] = log['item_id'] or 'N/A'
+            log['details'] = log['details'] or 'N/A'
+
+        # Pass logs and additional context
+        return render_template(
+            "system-monitor.html",
+            logs=logs,
+            log_count=len(logs),
+            active_page='system_monitor'
+        )
         
     except Exception as e:
         print(f"Error fetching audit logs: {e}")
-        return render_template("system-monitor.html", logs=[])
+        # Return empty list rather than redirecting
+        return render_template("system-monitor.html", logs=[], log_count=0)
 
 @app.route("/system-metrics")
 @login_required
