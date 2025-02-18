@@ -558,3 +558,7 @@ li a,
 .custom-table tbody tr:hover {
   background-color: #065a2b !important;
 }
+
+.custom-green-btn{
+  color:white !important;
+}

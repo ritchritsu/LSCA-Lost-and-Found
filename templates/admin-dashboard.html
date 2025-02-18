@@ -53,7 +53,7 @@ block main %}
   .container {
     max-width: 98vw !important;
     padding: 1rem;
-    border: 2px solid #86c232;
+    border: 2px solid #065a2b;
     border-radius: 10px;
     background: rgba(0, 0, 0, 0.2);
     margin: 0 auto;
@@ -62,13 +62,13 @@ block main %}
   /* Tabulator Overrides */
   .tabulator {
     background: transparent !important;
-    border: 1px solid #86c232 !important;
+    border: 1px solid #065a2b !important;
     border-radius: 5px;
     font-family: inherit;
   }
 
   .tabulator-header {
-    background: #86c232 !important;
+    background: #065a2b !important;
     border-bottom: 2px solid #61892f !important;
     color: #000000 !important;
     font-weight: bold !important;
@@ -78,7 +78,7 @@ block main %}
   }
 
   .tabulator-header .tabulator-col {
-    background: #86c232 !important;
+    background: #065a2b !important;
     border-right: 1px solid #61892f !important;
     padding: 0.5rem !important;
   }
@@ -107,7 +107,7 @@ block main %}
   /* Search input styling */
   #search-input {
     background: rgba(0, 0, 0, 0.4);
-    border: 1px solid #86c232;
+    border: 1px solid #065a2b;
     border-radius: 5px;
     color: #ffffff;
     padding: 0.75rem;
@@ -119,9 +119,25 @@ block main %}
     box-shadow: 0 0 0 2px rgba(134, 194, 50, 0.2);
   }
 
+  /* Update search input placeholder color */
+  #search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* For Firefox */
+  #search-input::-moz-placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+    opacity: 1;
+  }
+
+  /* For Edge */
+  #search-input::-ms-input-placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
   /* Button styling */
   .custom-green-btn {
-    background: #86c232;
+    background: #065a2b;
     color: #000;
     font-weight: bold;
     text-transform: uppercase;
@@ -147,7 +163,7 @@ block main %}
   }
 
   .tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb {
-    background: #86c232;
+    background: #065a2b;
     border-radius: 4px;
   }
 
@@ -169,11 +185,11 @@ block main %}
   /* Modal styling */
   .modal-content {
     background: rgba(0, 0, 0, 0.9);
-    border: 2px solid #86c232;
+    border: 2px solid #065a2b;
   }
 
   .modal-header {
-    background: #86c232;
+    background: #065a2b;
     color: #000;
     border-bottom: none;
   }
