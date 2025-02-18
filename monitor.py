@@ -15,13 +15,10 @@ class SystemMonitor:
         self.interval = interval
         self.monitoring = False
         self.metrics = []
-        self.start_time = None
-        self.peak_metrics = {
-            'cpu': 0,
-            'memory': 0,
-            'disk_io': 0
-        }
-        
+        self.start_time = datetime.now()
+        self.peak_metrics = {'cpu': 0, 'memory': 0, 'disk_io': 0}
+        self.io_counters = psutil.disk_io_counters()
+    
     def collect_metrics(self):
         """Collect system metrics"""
         cpu_percent = psutil.cpu_percent(interval=0.1)
@@ -151,24 +148,24 @@ class SystemMonitor:
             if not self.metrics:
                 return {}
 
-            # Calculate basic statistics
+            # Calculate statistics using statistics module
             cpu_values = [m['cpu_percent'] for m in self.metrics]
             memory_values = [m['memory_rss'] for m in self.metrics]
-            monitoring_duration = time.time() - self.start_time
+            disk_read = [m['disk_read_mb'] for m in self.metrics]
+            disk_write = [m['disk_write_mb'] for m in self.metrics]
+
+            monitoring_duration = (datetime.now() - self.start_time).total_seconds()
+            memory_growth = (memory_values[-1] - memory_values[0]) / len(memory_values) if memory_values else 0
 
             analysis = {
                 'CPU Analysis': {
-                    'Average CPU Usage': f"{np.mean(cpu_values):.2f}%",
-                    'CPU Usage Variance': f"{np.var(cpu_values):.2f}",
+                    'Average CPU Usage': f"{statistics.mean(cpu_values):.2f}%",
+                    'CPU Usage Variance': f"{statistics.variance(cpu_values) if len(cpu_values) > 1 else 0:.2f}",
                     'Peak CPU Usage': f"{max(cpu_values):.2f}%"
                 },
                 'Memory Analysis': {
-                    'Average Memory Usage': f"{np.mean(memory_values):.2f} MB",
-                    'Memory Growth Rate': f"{self.calculate_growth_rate(memory_values):.2f} MB/sample",
-                    'Peak Memory Usage': f"{max(memory_values):.2f} MB"
-                },
-                'Disk I/O Analysis': {
-                    'I/O Operations': f"{self.io_counters.read_count + self.io_counters.write_count}",
+                    'Average Memory Usage': f"{statistics.mean(memory_values):.2f} MB",
+                    'Memory Growth Rate': f"{memory_growth:.2f} MB/sample",
                     'Total Read': f"{self.io_counters.read_bytes / (1024 * 1024):.2f} MB",
                     'Total Write': f"{self.io_counters.write_bytes / (1024 * 1024):.2f} MB"
                 },
@@ -187,27 +184,53 @@ class SystemMonitor:
     def export_to_excel(self, wb):
         """Export monitoring data and analysis to Excel"""
         try:
-            # Create monitoring sheet
-            monitor_ws = wb.create_sheet(title="System Monitoring")
+            # 1. System Monitoring Analysis Sheet
+            monitor_ws = wb.create_sheet(title="System Analysis")
             
-            # Add monitoring data
-            analysis = self.analyze_metrics()
+            # Add monitoring analysis
+            analysis = self.analyze_performance()  # Use analyze_performance instead of analyze_metrics
             current_row = 1
             
             for section, metrics in analysis.items():
-                # Add section header
+                # Section header
                 cell = monitor_ws.cell(row=current_row, column=1, value=section)
                 cell.font = Font(bold=True)
                 cell.fill = PatternFill(start_color="86C232", end_color="86C232", fill_type="solid")
                 current_row += 1
                 
-                # Add metrics
+                # Metrics
                 for metric, value in metrics.items():
                     monitor_ws.cell(row=current_row, column=1, value=metric)
                     monitor_ws.cell(row=current_row, column=2, value=value)
                     current_row += 1
-                
-                current_row += 1  # Add space between sections
+                current_row += 1
+            
+            # 2. Raw Metrics Sheet
+            raw_ws = wb.create_sheet(title="Raw Metrics")
+            
+            # Headers
+            headers = ['Timestamp', 'CPU %', 'Memory (MB)', 'Disk Read (MB)', 'Disk Write (MB)', 
+                      'Read Ops', 'Write Ops']
+            for col, header in enumerate(headers, 1):
+                cell = raw_ws.cell(row=1, column=col, value=header)
+                cell.font = Font(bold=True)
+                cell.fill = PatternFill(start_color="86C232", end_color="86C232", fill_type="solid")
+            
+            # Data
+            for row, metric in enumerate(self.metrics, 2):
+                raw_ws.cell(row=row, column=1, value=metric['timestamp'])
+                raw_ws.cell(row=row, column=2, value=f"{metric['cpu_percent']:.1f}")
+                raw_ws.cell(row=row, column=3, value=f"{metric['memory_rss']:.1f}")
+                raw_ws.cell(row=row, column=4, value=f"{metric['disk_read_mb']:.1f}")
+                raw_ws.cell(row=row, column=5, value=f"{metric['disk_write_mb']:.1f}")
+                raw_ws.cell(row=row, column=6, value=metric['disk_read_count'])
+                raw_ws.cell(row=row, column=7, value=metric['disk_write_count'])
+            
+            # Auto-size columns for both sheets
+            for ws in [monitor_ws, raw_ws]:
+                for column_cells in ws.columns:
+                    length = max(len(str(cell.value or "")) for cell in column_cells)
+                    ws.column_dimensions[get_column_letter(column_cells[0].column)].width = min(length + 2, 50)
             
             return wb
             

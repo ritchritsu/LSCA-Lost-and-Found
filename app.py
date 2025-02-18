@@ -671,7 +671,7 @@ def delete_item():
 def download_excel():
     """Generate and download Excel backup with all data"""
     if not is_admin():
-        return jsonify({"success": False, "error": "Unauthorized"}), 403
+        return
     
     try:
         # Create workbook
