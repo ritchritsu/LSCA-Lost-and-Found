@@ -186,54 +186,79 @@ block main %}
 </div>
 
 <style>
+  /* Container styling (similar to system monitor) */
+  .container {
+    max-width: 98vw !important;
+    padding: 1rem;
+    border: 2px solid #065a2b;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    margin: 0 auto;
+  }
+
+  /* Match System Monitor input style */
   .custom-input {
-    background-color: transparent;
-    border: none;
-    border-bottom: 2px solid #86c232;
-    color: #ffffff; /* White text */
-    transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #065a2b;
+    border-radius: 5px;
+    color: #ffffff;
+    padding: 0.75rem;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    display: block;
   }
 
   .custom-input::placeholder {
-    color: #ffffff; /* White placeholder text */
-    opacity: 0.7; /* Slightly transparent */
+    color: #ffffff;
+    opacity: 0.7;
   }
 
   .custom-input:focus {
-    background-color: transparent;
-    border-bottom: 2px solid #087830;
-    box-shadow: none;
-    color: #ffffff; /* Ensure text remains white on focus */
+    outline: none;
+    border-color: #61892f;
+    box-shadow: 0 0 0 2px rgba(134, 194, 50, 0.2);
+    color: #ffffff;
   }
 
   .custom-dropdown {
-    color: #d0d0d0; /* White text for dropdown */
-  }
-
-  .custom-dropdown optgroup,
-  .custom-dropdown option {
-    color: #036630; /* Black text for dropdown options */
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #065a2b;
+    color: #ffffff;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    display: block;
   }
 
   .custom-dropdown .placeholder-option {
-    color: #ffffff !important; /* White text for the "Select your group" option */
+    color: #ffffff !important;
   }
 
+  /* Match button style from system monitor */
   .custom-green-btn {
-    background-color: #087830;
-    border-color: #087830;
-    color: white;
+    background-color: #065a2b;
+    border-color: #065a2b;
+    color: #ffffff;
     transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
   }
 
   .custom-green-btn:hover {
-    background-color: #065a2b;
-    border-color: #065a2b;
-    transform: scale(1.05); /* Slightly increase size */
+    background-color: #61892f;
+    border-color: #61892f;
+    transform: scale(1.05);
   }
 
   .custom-green-btn:active {
-    transform: scale(1.1); /* Slightly increase size when clicked */
+    transform: scale(1.1);
+  }
+
+  /* Headings, labels, text color */
+  h1,
+  label,
+  small {
+    color: #ffffff;
   }
 </style>
 

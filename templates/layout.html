@@ -211,26 +211,20 @@
               <a class="nav-link custom-nav-link" href="/submit">Submit Item</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link custom-nav-link" href="/">Admin Dashboard</a>
+              <a class="nav-link custom-nav-link" href="/">Item Record</a>
             </li>
+            
+            
             <li class="nav-item">
-              <a
-                class="nav-link custom-nav-link"
-                href="{{ url_for('audit_log') }}"
-              >
-                Audit Log
-              </a>
+              <a class="nav-link custom-nav-link" href="/system-monitor">System Monitor</a>
             </li>
             <li class="nav-item">
               <a
                 class="nav-link custom-nav-link"
                 href="{{ url_for('download_excel') }}"
               >
-                Download Backup
+                Download Logs
               </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link custom-nav-link" href="/system-monitor">System Monitor</a>
             </li>
             {% endif %}
             <li class="nav-item">

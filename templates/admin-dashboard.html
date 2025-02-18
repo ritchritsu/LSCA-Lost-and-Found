@@ -48,7 +48,182 @@ block main %}
 />
 
 {% block styles %} {% endblock %}
-<style></style>
+<style>
+  /* Container styling */
+  .container {
+    max-width: 98vw !important;
+    padding: 1rem;
+    border: 2px solid #065a2b;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    margin: 0 auto;
+  }
+
+  /* Tabulator Overrides */
+  .tabulator {
+    background: transparent !important;
+    border: 1px solid #065a2b !important;
+    border-radius: 5px;
+    font-family: inherit;
+  }
+
+  .tabulator-header {
+    background: #065a2b !important;
+    border-bottom: 2px solid #61892f !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.7rem !important;
+  }
+
+  .tabulator-header .tabulator-col {
+    background: #065a2b !important;
+    border-right: 1px solid #61892f !important;
+    padding: 0.5rem !important;
+  }
+  /* Prevent page scroll */
+  body {
+    overflow: hidden;
+  }
+  .tabulator-tableHolder {
+    background: rgba(0, 0, 0, 0.4) !important;
+    color: #ffffff !important;
+  }
+
+  .tabulator-row {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-bottom: 1px solid rgba(134, 194, 50, 0.2) !important;
+    color: #ffffff !important;
+  }
+
+  .tabulator-row:hover {
+    background: rgba(134, 194, 50, 0.1) !important;
+  }
+
+  .tabulator-row .tabulator-cell {
+    border-right: 1px solid rgba(134, 194, 50, 0.2) !important;
+    padding: 0.75rem !important;
+    color: #ffffff !important;
+  }
+
+  /* Search input styling */
+  #search-input {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #065a2b;
+    border-radius: 5px;
+    color: #ffffff;
+    padding: 0.75rem;
+  }
+
+  #search-input:focus {
+    outline: none;
+    border-color: #61892f;
+    box-shadow: 0 0 0 2px rgba(134, 194, 50, 0.2);
+  }
+
+  /* Update search input placeholder color */
+  #search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* For Firefox */
+  #search-input::-moz-placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+    opacity: 1;
+  }
+
+  /* For Edge */
+  #search-input::-ms-input-placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Button styling */
+  .custom-green-btn {
+    background: #065a2b;
+    color: #000;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .custom-green-btn:hover {
+    background: #61892f;
+    color: #fff;
+  }
+
+  /* Scrollbar styling */
+  .tabulator .tabulator-tableHolder::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .tabulator .tabulator-tableHolder::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb {
+    background: #065a2b;
+    border-radius: 4px;
+  }
+
+  .tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb:hover {
+    background: #61892f;
+  }
+
+  /* Fix table container */
+  #table-container {
+    margin: 0 auto !important;
+    width: 100% !important;
+  }
+
+  /* Status icons */
+  .tabulator-row .tabulator-cell i {
+    margin-right: 8px;
+  }
+
+  /* Modal styling */
+  .modal-content {
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #065a2b;
+  }
+
+  .modal-header {
+    background: #065a2b;
+    color: #000;
+    border-bottom: none;
+  }
+
+  .modal-body {
+    color: #fff;
+  }
+
+  /* Only wrap headers with multiple words */
+  .tabulator-col[tabulator-field="lost_date"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="found_date"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="lost_location"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="found_location"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="item_description"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="phone_number"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="grade_and_section"] .tabulator-col-title {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Keep single word headers on one line */
+  .tabulator-col[tabulator-field="id"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="status"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="image"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="email"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="group"] .tabulator-col-title,
+  .tabulator-col[tabulator-field="actions"] .tabulator-col-title {
+    white-space: nowrap !important;
+  }
+</style>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     let tableData;
@@ -68,7 +243,7 @@ block main %}
         {
           title: "Status",
           field: "item_status",
-          width: 120,
+          width: 130,
           editor: "select",
           editorParams: {
             values: ["Lost", "Found", "Returned"],
@@ -125,8 +300,8 @@ block main %}
               });
           },
         },
-        { title: "Lost Date", field: "lost_date", width: 90 },
-        { title: "Found Date", field: "found_date", width: 90 },
+        { title: "Lost Date", field: "lost_date", width: 110 },
+        { title: "Found Date", field: "found_date", width: 110 },
         { title: "Lost Location", field: "location", width: 200 },
         { title: "Found Location", field: "found_location", width: 150 },
         {
@@ -139,7 +314,7 @@ block main %}
               ? `<div class="item-description">${value}</div>`
               : `<div class="item-found">${value}</div>`;
           },
-          width: 360,
+          width: 340,
         },
         {
           title: "Image",
@@ -162,12 +337,12 @@ block main %}
             return createEmailLink(cell.getRow().getData());
           },
         },
-        { title: "Group", field: "grade_and_section", width: 80 },
-        { title: "Phone Number", field: "phone_number", width: 100 },
+        { title: "Group", field: "grade_and_section", width: 95 },
+        { title: "Phone Number", field: "phone_number", width: 120 },
         {
           title: "",
           field: "actions",
-          width: 35,
+          width: 5,
           formatter: function (cell) {
             return `<button class="btn btn-danger btn-sm delete-btn" onclick="deleteItem(${
               cell.getRow().getData().id
@@ -377,8 +552,12 @@ block main %}
         const value = e.target.value.toLowerCase();
         table.clearFilter();
         table.setFilter(function (data) {
-          return Object.values(data).some((val) =>
-            String(val).toLowerCase().includes(value)
+          // Create a copy of data without image_url
+          const searchableData = { ...data };
+          delete searchableData.image_url;
+
+          return Object.values(searchableData).some(
+            (val) => val !== null && String(val).toLowerCase().includes(value)
           );
         });
 
@@ -404,7 +583,7 @@ block main %}
       .getElementById("confirmed-items-btn")
       .addEventListener("click", function () {
         table.clearFilter();
-        table.setFilter("item_status", "=", "Confirmed");
+        table.setFilter("item_status", "=", "Returned"); // Changed from "Confirmed" to "Returned"
       });
 
     document

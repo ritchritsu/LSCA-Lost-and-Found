@@ -1,4 +1,4 @@
-import psutil
+import psutil  # Add to requirements.txt
 import time
 from datetime import datetime
 import threading
@@ -12,42 +12,53 @@ from openpyxl.utils import get_column_letter
 
 class SystemMonitor:
     def __init__(self, interval=1):
-        self.interval = interval
-        self.monitoring = False
-        self.metrics = []
-        self.start_time = None
-        self.peak_metrics = {
-            'cpu': 0,
-            'memory': 0,
-            'disk_io': 0
-        }
-        
+        """Initialize system monitor"""
+        try:
+            self.interval = interval
+            self.monitoring = False
+            self.metrics = []
+            self.start_time = datetime.now()
+            self.peak_metrics = {
+                'cpu': 0, 
+                'memory': 0, 
+                'disk_io': 0  # Added this line
+            }
+            self.disk_stats = psutil.disk_io_counters()
+        except ImportError:
+            print("psutil not available - system monitoring disabled")
+            self.monitoring = False
+    
     def collect_metrics(self):
         """Collect system metrics"""
-        cpu_percent = psutil.cpu_percent(interval=0.1)
-        memory = psutil.Process().memory_info()
-        disk_io = psutil.disk_io_counters()
-        
-        metrics = {
-            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'cpu_percent': cpu_percent,
-            'memory_rss': memory.rss / 1024 / 1024,  # MB
-            'memory_vms': memory.vms / 1024 / 1024,  # MB
-            'disk_read_mb': disk_io.read_bytes / 1024 / 1024,  # MB
-            'disk_write_mb': disk_io.write_bytes / 1024 / 1024,  # MB
-            'disk_read_count': disk_io.read_count,
-            'disk_write_count': disk_io.write_count
-        }
-        
-        # Update peak metrics
-        self.peak_metrics['cpu'] = max(self.peak_metrics['cpu'], cpu_percent)
-        self.peak_metrics['memory'] = max(self.peak_metrics['memory'], metrics['memory_rss'])
-        self.peak_metrics['disk_io'] = max(
-            self.peak_metrics['disk_io'], 
-            metrics['disk_read_mb'] + metrics['disk_write_mb']
-        )
-        
-        return metrics
+        try:
+            cpu_percent = psutil.cpu_percent(interval=0.1)
+            memory = psutil.Process().memory_info()
+            disk_io = psutil.disk_io_counters()
+            
+            metrics = {
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'cpu_percent': cpu_percent,
+                'memory_rss': memory.rss / 1024 / 1024,  # MB
+                'memory_vms': memory.vms / 1024 / 1024,  # MB
+                'disk_read_mb': disk_io.read_bytes / 1024 / 1024,  # MB
+                'disk_write_mb': disk_io.write_bytes / 1024 / 1024,  # MB
+                'disk_read_count': disk_io.read_count,
+                'disk_write_count': disk_io.write_count
+            }
+            
+            # Update peak metrics with error handling
+            self.peak_metrics['cpu'] = max(self.peak_metrics['cpu'], cpu_percent)
+            self.peak_metrics['memory'] = max(self.peak_metrics['memory'], metrics['memory_rss'])
+            self.peak_metrics['disk_io'] = max(
+                self.peak_metrics.get('disk_io', 0),
+                metrics['disk_read_mb'] + metrics['disk_write_mb']
+            )
+            
+            return metrics
+            
+        except Exception as e:
+            print(f"Error collecting metrics: {e}")
+            return None
     
     def monitor(self):
         """Monitor system continuously"""
@@ -151,24 +162,24 @@ class SystemMonitor:
             if not self.metrics:
                 return {}
 
-            # Calculate basic statistics
+            # Calculate statistics using statistics module
             cpu_values = [m['cpu_percent'] for m in self.metrics]
             memory_values = [m['memory_rss'] for m in self.metrics]
-            monitoring_duration = time.time() - self.start_time
+            disk_read = [m['disk_read_mb'] for m in self.metrics]
+            disk_write = [m['disk_write_mb'] for m in self.metrics]
+
+            monitoring_duration = (datetime.now() - self.start_time).total_seconds()
+            memory_growth = (memory_values[-1] - memory_values[0]) / len(memory_values) if memory_values else 0
 
             analysis = {
                 'CPU Analysis': {
-                    'Average CPU Usage': f"{np.mean(cpu_values):.2f}%",
-                    'CPU Usage Variance': f"{np.var(cpu_values):.2f}",
+                    'Average CPU Usage': f"{statistics.mean(cpu_values):.2f}%",
+                    'CPU Usage Variance': f"{statistics.variance(cpu_values) if len(cpu_values) > 1 else 0:.2f}",
                     'Peak CPU Usage': f"{max(cpu_values):.2f}%"
                 },
                 'Memory Analysis': {
-                    'Average Memory Usage': f"{np.mean(memory_values):.2f} MB",
-                    'Memory Growth Rate': f"{self.calculate_growth_rate(memory_values):.2f} MB/sample",
-                    'Peak Memory Usage': f"{max(memory_values):.2f} MB"
-                },
-                'Disk I/O Analysis': {
-                    'I/O Operations': f"{self.io_counters.read_count + self.io_counters.write_count}",
+                    'Average Memory Usage': f"{statistics.mean(memory_values):.2f} MB",
+                    'Memory Growth Rate': f"{memory_growth:.2f} MB/sample",
                     'Total Read': f"{self.io_counters.read_bytes / (1024 * 1024):.2f} MB",
                     'Total Write': f"{self.io_counters.write_bytes / (1024 * 1024):.2f} MB"
                 },
@@ -185,15 +196,16 @@ class SystemMonitor:
             return {}
 
     def export_to_excel(self, wb):
-        """Export monitoring data and analysis to Excel"""
+        """Export monitoring data to Excel"""
         try:
             # Create monitoring sheet
             monitor_ws = wb.create_sheet(title="System Monitoring")
-            
-            # Add monitoring data
-            analysis = self.analyze_metrics()
             current_row = 1
+
+            # Get analysis data
+            analysis = self.analyze_performance()
             
+            # Add analysis sections
             for section, metrics in analysis.items():
                 # Add section header
                 cell = monitor_ws.cell(row=current_row, column=1, value=section)
@@ -204,10 +216,14 @@ class SystemMonitor:
                 # Add metrics
                 for metric, value in metrics.items():
                     monitor_ws.cell(row=current_row, column=1, value=metric)
-                    monitor_ws.cell(row=current_row, column=2, value=value)
+                    monitor_ws.cell(row=current_row, column=2, value=str(value))
                     current_row += 1
-                
-                current_row += 1  # Add space between sections
+                current_row += 1
+
+            # Auto-adjust columns
+            for column_cells in monitor_ws.columns:
+                length = max(len(str(cell.value or "")) for cell in column_cells)
+                monitor_ws.column_dimensions[get_column_letter(column_cells[0].column)].width = min(length + 2, 50)
             
             return wb
             

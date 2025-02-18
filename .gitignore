@@ -1,1 +1,23 @@
-model_cache/
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# VS Code settings
+.vscode/
+
+# Database
+*.db
+*.sqlite3
+
+# Environment variables
+.env
+
+# System files
+.DS_Store
+Thumbs.db
