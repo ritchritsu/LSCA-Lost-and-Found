@@ -18,7 +18,11 @@ class SystemMonitor:
             self.monitoring = False
             self.metrics = []
             self.start_time = datetime.now()
-            self.peak_metrics = {'cpu': 0, 'memory': 0}
+            self.peak_metrics = {
+                'cpu': 0, 
+                'memory': 0, 
+                'disk_io': 0  # Added this line
+            }
             self.disk_stats = psutil.disk_io_counters()
         except ImportError:
             print("psutil not available - system monitoring disabled")
@@ -26,30 +30,35 @@ class SystemMonitor:
     
     def collect_metrics(self):
         """Collect system metrics"""
-        cpu_percent = psutil.cpu_percent(interval=0.1)
-        memory = psutil.Process().memory_info()
-        disk_io = psutil.disk_io_counters()
-        
-        metrics = {
-            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'cpu_percent': cpu_percent,
-            'memory_rss': memory.rss / 1024 / 1024,  # MB
-            'memory_vms': memory.vms / 1024 / 1024,  # MB
-            'disk_read_mb': disk_io.read_bytes / 1024 / 1024,  # MB
-            'disk_write_mb': disk_io.write_bytes / 1024 / 1024,  # MB
-            'disk_read_count': disk_io.read_count,
-            'disk_write_count': disk_io.write_count
-        }
-        
-        # Update peak metrics
-        self.peak_metrics['cpu'] = max(self.peak_metrics['cpu'], cpu_percent)
-        self.peak_metrics['memory'] = max(self.peak_metrics['memory'], metrics['memory_rss'])
-        self.peak_metrics['disk_io'] = max(
-            self.peak_metrics['disk_io'], 
-            metrics['disk_read_mb'] + metrics['disk_write_mb']
-        )
-        
-        return metrics
+        try:
+            cpu_percent = psutil.cpu_percent(interval=0.1)
+            memory = psutil.Process().memory_info()
+            disk_io = psutil.disk_io_counters()
+            
+            metrics = {
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'cpu_percent': cpu_percent,
+                'memory_rss': memory.rss / 1024 / 1024,  # MB
+                'memory_vms': memory.vms / 1024 / 1024,  # MB
+                'disk_read_mb': disk_io.read_bytes / 1024 / 1024,  # MB
+                'disk_write_mb': disk_io.write_bytes / 1024 / 1024,  # MB
+                'disk_read_count': disk_io.read_count,
+                'disk_write_count': disk_io.write_count
+            }
+            
+            # Update peak metrics with error handling
+            self.peak_metrics['cpu'] = max(self.peak_metrics['cpu'], cpu_percent)
+            self.peak_metrics['memory'] = max(self.peak_metrics['memory'], metrics['memory_rss'])
+            self.peak_metrics['disk_io'] = max(
+                self.peak_metrics.get('disk_io', 0),
+                metrics['disk_read_mb'] + metrics['disk_write_mb']
+            )
+            
+            return metrics
+            
+        except Exception as e:
+            print(f"Error collecting metrics: {e}")
+            return None
     
     def monitor(self):
         """Monitor system continuously"""
@@ -194,7 +203,7 @@ class SystemMonitor:
             current_row = 1
 
             # Get analysis data
-            analysis = self.analyze_metrics()
+            analysis = self.analyze_performance()
             
             # Add analysis sections
             for section, metrics in analysis.items():

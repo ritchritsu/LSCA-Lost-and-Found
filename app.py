@@ -205,6 +205,7 @@ def login():
             return render_template("login.html")
 
         session["user_id"] = rows[0]["id"]
+
         return redirect("/")
 
     return render_template("login.html")
@@ -670,7 +671,7 @@ def delete_item():
 def download_excel():
     """Generate and download Excel backup with all data"""
     if not is_admin():
-        return
+        return jsonify({"success": False, "error": "Unauthorized"}), 403
     
     try:
         # Create workbook
@@ -731,8 +732,7 @@ def download_excel():
                 audit_ws.cell(row=row_num, column=6, value=log['timestamp'])
 
         # 3. Add monitoring data and analysis
-        if hasattr(app, 'monitor'):
-            wb = app.monitor.export_to_excel(wb)
+        app.monitor.export_to_excel(wb)
 
         # Auto-adjust column widths for all sheets
         for ws in wb.worksheets:
