@@ -140,62 +140,77 @@ class SystemMonitor:
                 'Total Read': f"{max(disk_read):.2f} MB",
                 'Total Write': f"{max(disk_write):.2f} MB",
                 'I/O Operations': f"{sum([m['disk_read_count'] + m['disk_write_count'] for m in self.metrics])}"
-            },
-            'Optimization Suggestions': [
-                "Consider implementing caching for frequently accessed data" if statistics.mean(cpu_values) > 70 else "",
-                "Memory usage shows potential leak, investigate memory management" if (memory_values[-1] - memory_values[0]) > 100 else "",
-                "High disk I/O detected, consider batch processing" if max(disk_write) > 100 else "",
-                "System performs within normal parameters" if statistics.mean(cpu_values) < 70 and max(memory_values) < 500 else ""
-            ]
+            }
         }
         
         return analysis
 
+    def analyze_metrics(self):
+        """Analyze collected metrics and generate insights"""
+        try:
+            if not self.metrics:
+                return {}
+
+            # Calculate basic statistics
+            cpu_values = [m['cpu_percent'] for m in self.metrics]
+            memory_values = [m['memory_rss'] for m in self.metrics]
+            monitoring_duration = time.time() - self.start_time
+
+            analysis = {
+                'CPU Analysis': {
+                    'Average CPU Usage': f"{np.mean(cpu_values):.2f}%",
+                    'CPU Usage Variance': f"{np.var(cpu_values):.2f}",
+                    'Peak CPU Usage': f"{max(cpu_values):.2f}%"
+                },
+                'Memory Analysis': {
+                    'Average Memory Usage': f"{np.mean(memory_values):.2f} MB",
+                    'Memory Growth Rate': f"{self.calculate_growth_rate(memory_values):.2f} MB/sample",
+                    'Peak Memory Usage': f"{max(memory_values):.2f} MB"
+                },
+                'Disk I/O Analysis': {
+                    'I/O Operations': f"{self.io_counters.read_count + self.io_counters.write_count}",
+                    'Total Read': f"{self.io_counters.read_bytes / (1024 * 1024):.2f} MB",
+                    'Total Write': f"{self.io_counters.write_bytes / (1024 * 1024):.2f} MB"
+                },
+                'General': {
+                    'Monitoring Duration': f"{monitoring_duration:.2f} seconds",
+                    'Total Samples': f"{len(self.metrics)}"
+                }
+            }
+            
+            return analysis
+            
+        except Exception as e:
+            print(f"Error in analyze_metrics: {e}")
+            return {}
+
     def export_to_excel(self, wb):
         """Export monitoring data and analysis to Excel"""
-        # Raw Metrics Sheet
-        metrics_ws = wb.create_sheet(title="System Metrics")
-        headers = list(self.metrics[0].keys())
-        
-        # Add headers
-        for col, header in enumerate(headers, 1):
-            cell = metrics_ws.cell(row=1, column=col, value=header.upper())
-            cell.font = Font(bold=True)
-            cell.fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
-        
-        # Add metrics data
-        for row, metric in enumerate(self.metrics, 2):
-            for col, header in enumerate(headers, 1):
-                metrics_ws.cell(row=row, column=col, value=metric[header])
-
-        # Analysis Sheet
-        analysis_ws = wb.create_sheet(title="Performance Analysis")
-        analysis = self.analyze_performance()
-        current_row = 1
-
-        for section, data in analysis.items():
-            # Section header
-            cell = analysis_ws.cell(row=current_row, column=1, value=section)
-            cell.font = Font(bold=True)
-            cell.fill = PatternFill(start_color="86C232", end_color="86C232", fill_type="solid")
-            current_row += 1
-
-            if isinstance(data, dict):
-                for key, value in data.items():
-                    analysis_ws.cell(row=current_row, column=1, value=key)
-                    analysis_ws.cell(row=current_row, column=2, value=value)
+        try:
+            # Create monitoring sheet
+            monitor_ws = wb.create_sheet(title="System Monitoring")
+            
+            # Add monitoring data
+            analysis = self.analyze_metrics()
+            current_row = 1
+            
+            for section, metrics in analysis.items():
+                # Add section header
+                cell = monitor_ws.cell(row=current_row, column=1, value=section)
+                cell.font = Font(bold=True)
+                cell.fill = PatternFill(start_color="86C232", end_color="86C232", fill_type="solid")
+                current_row += 1
+                
+                # Add metrics
+                for metric, value in metrics.items():
+                    monitor_ws.cell(row=current_row, column=1, value=metric)
+                    monitor_ws.cell(row=current_row, column=2, value=value)
                     current_row += 1
-            elif isinstance(data, list):
-                for item in data:
-                    if item:  # Only add non-empty suggestions
-                        analysis_ws.cell(row=current_row, column=1, value=item)
-                        current_row += 1
-            current_row += 1  # Add space between sections
-
-        # Auto-adjust column widths
-        for ws in [metrics_ws, analysis_ws]:
-            for column_cells in ws.columns:
-                length = max(len(str(cell.value) if cell.value else "") for cell in column_cells)
-                ws.column_dimensions[get_column_letter(column_cells[0].column)].width = length + 2
-
-        return wb
+                
+                current_row += 1  # Add space between sections
+            
+            return wb
+            
+        except Exception as e:
+            print(f"Error in export_to_excel: {e}")
+            return wb
