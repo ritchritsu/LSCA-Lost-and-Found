@@ -1,4 +1,4 @@
-import psutil
+import psutil  # Add to requirements.txt
 import time
 from datetime import datetime
 import threading
@@ -12,12 +12,17 @@ from openpyxl.utils import get_column_letter
 
 class SystemMonitor:
     def __init__(self, interval=1):
-        self.interval = interval
-        self.monitoring = False
-        self.metrics = []
-        self.start_time = datetime.now()
-        self.peak_metrics = {'cpu': 0, 'memory': 0, 'disk_io': 0}
-        self.io_counters = psutil.disk_io_counters()
+        """Initialize system monitor"""
+        try:
+            self.interval = interval
+            self.monitoring = False
+            self.metrics = []
+            self.start_time = datetime.now()
+            self.peak_metrics = {'cpu': 0, 'memory': 0}
+            self.disk_stats = psutil.disk_io_counters()
+        except ImportError:
+            print("psutil not available - system monitoring disabled")
+            self.monitoring = False
     
     def collect_metrics(self):
         """Collect system metrics"""
@@ -182,55 +187,34 @@ class SystemMonitor:
             return {}
 
     def export_to_excel(self, wb):
-        """Export monitoring data and analysis to Excel"""
+        """Export monitoring data to Excel"""
         try:
-            # 1. System Monitoring Analysis Sheet
-            monitor_ws = wb.create_sheet(title="System Analysis")
-            
-            # Add monitoring analysis
-            analysis = self.analyze_performance()  # Use analyze_performance instead of analyze_metrics
+            # Create monitoring sheet
+            monitor_ws = wb.create_sheet(title="System Monitoring")
             current_row = 1
+
+            # Get analysis data
+            analysis = self.analyze_metrics()
             
+            # Add analysis sections
             for section, metrics in analysis.items():
-                # Section header
+                # Add section header
                 cell = monitor_ws.cell(row=current_row, column=1, value=section)
                 cell.font = Font(bold=True)
                 cell.fill = PatternFill(start_color="86C232", end_color="86C232", fill_type="solid")
                 current_row += 1
                 
-                # Metrics
+                # Add metrics
                 for metric, value in metrics.items():
                     monitor_ws.cell(row=current_row, column=1, value=metric)
-                    monitor_ws.cell(row=current_row, column=2, value=value)
+                    monitor_ws.cell(row=current_row, column=2, value=str(value))
                     current_row += 1
                 current_row += 1
-            
-            # 2. Raw Metrics Sheet
-            raw_ws = wb.create_sheet(title="Raw Metrics")
-            
-            # Headers
-            headers = ['Timestamp', 'CPU %', 'Memory (MB)', 'Disk Read (MB)', 'Disk Write (MB)', 
-                      'Read Ops', 'Write Ops']
-            for col, header in enumerate(headers, 1):
-                cell = raw_ws.cell(row=1, column=col, value=header)
-                cell.font = Font(bold=True)
-                cell.fill = PatternFill(start_color="86C232", end_color="86C232", fill_type="solid")
-            
-            # Data
-            for row, metric in enumerate(self.metrics, 2):
-                raw_ws.cell(row=row, column=1, value=metric['timestamp'])
-                raw_ws.cell(row=row, column=2, value=f"{metric['cpu_percent']:.1f}")
-                raw_ws.cell(row=row, column=3, value=f"{metric['memory_rss']:.1f}")
-                raw_ws.cell(row=row, column=4, value=f"{metric['disk_read_mb']:.1f}")
-                raw_ws.cell(row=row, column=5, value=f"{metric['disk_write_mb']:.1f}")
-                raw_ws.cell(row=row, column=6, value=metric['disk_read_count'])
-                raw_ws.cell(row=row, column=7, value=metric['disk_write_count'])
-            
-            # Auto-size columns for both sheets
-            for ws in [monitor_ws, raw_ws]:
-                for column_cells in ws.columns:
-                    length = max(len(str(cell.value or "")) for cell in column_cells)
-                    ws.column_dimensions[get_column_letter(column_cells[0].column)].width = min(length + 2, 50)
+
+            # Auto-adjust columns
+            for column_cells in monitor_ws.columns:
+                length = max(len(str(cell.value or "")) for cell in column_cells)
+                monitor_ws.column_dimensions[get_column_letter(column_cells[0].column)].width = min(length + 2, 50)
             
             return wb
             
