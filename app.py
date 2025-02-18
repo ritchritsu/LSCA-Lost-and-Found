@@ -21,6 +21,15 @@ import requests.exceptions
 from io import BytesIO
 import openpyxl
 from openpyxl.utils import get_column_letter
+from monitor import SystemMonitor
+import atexit
+import psutil
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.utils import get_column_letter
+from monitor import SystemMonitor
+import atexit
+import psutil
 
 def generate_password_hash(password, method='sha256', salt_length=16):
     """Generate a secure password hash"""
@@ -660,94 +669,77 @@ def delete_item():
 @app.route("/download-excel", methods=["GET"])
 @login_required
 def download_excel():
-    """Generate and download Excel backup with separate sheets for items and audit logs"""
+    """Generate and download Excel backup with all data"""
     if not is_admin():
         return jsonify({"success": False, "error": "Unauthorized"}), 403
-
+    
     try:
-        # Initialize database if needed
-        init_db()
-
-        # Query items
-        items = db.execute("""
-            SELECT
-                id,
-                item_status,
-                lost_date,
-                found_date,
-                item_description,
-                location,
-                found_location,
-                email,
-                grade_and_section,
-                phone_number,
-                image_url
-            FROM items
-            ORDER BY id DESC
-        """)
-
-        # Query audit logs with explicit fields and formatted timestamp
-        audit_logs = db.execute("""
-            SELECT
-                id,
-                user_email,
-                action_type,
-                item_id,
-                details,
-                strftime('%Y-%m-%d %H:%M:%S', timestamp, 'localtime') as timestamp
-            FROM audit_logs
-            ORDER BY timestamp DESC
-        """)
-
-        # Create Excel workbook
+        # Create workbook
         wb = openpyxl.Workbook()
-
-        # Setup Items sheet
+        
+        # 1. Items Sheet (Admin Dashboard)
         items_ws = wb.active
         items_ws.title = "Items"
-
-        # Add items headers and data
+        
+        # Query items
+        items = db.execute("""
+            SELECT 
+                id, item_status, lost_date, found_date, 
+                item_description, location, found_location,
+                email, grade_and_section, phone_number
+            FROM items ORDER BY id DESC
+        """)
+        
         if items:
-            # Headers
+            # Add headers
             headers = list(items[0].keys())
-            for col_num, header in enumerate(headers, start=1):
+            for col_num, header in enumerate(headers, 1):
                 cell = items_ws.cell(row=1, column=col_num, value=header.upper())
-                cell.font = openpyxl.styles.Font(bold=True)
-                cell.fill = openpyxl.styles.PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
-
-            # Data
-            for row_num, item in enumerate(items, start=2):
-                for col_num, header in enumerate(headers, start=1):
+                cell.font = Font(bold=True)
+                cell.fill = PatternFill(start_color="86C232", end_color="86C232", fill_type="solid")
+            
+            # Add data
+            for row_num, item in enumerate(items, 2):
+                for col_num, header in enumerate(headers, 1):
                     items_ws.cell(row=row_num, column=col_num, value=item[header])
 
-        # Setup Audit Logs sheet
+        # 2. Audit Logs Sheet
         audit_ws = wb.create_sheet(title="Audit Logs")
-
-        # Add audit logs headers and data
+        
+        # Query audit logs
+        audit_logs = db.execute("""
+            SELECT 
+                id, user_email, action_type, item_id, details,
+                datetime(timestamp, 'localtime') as timestamp
+            FROM audit_logs ORDER BY timestamp DESC
+        """)
+        
         if audit_logs:
-            # Headers
-            headers = list(audit_logs[0].keys())
-            for col_num, header in enumerate(headers, start=1):
-                cell = audit_ws.cell(row=1, column=col_num, value=header.upper())
-                cell.font = openpyxl.styles.Font(bold=True)
-                cell.fill = openpyxl.styles.PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
+            # Add headers
+            audit_headers = ["ID", "User", "Action", "Item ID", "Details", "Timestamp"]
+            for col_num, header in enumerate(audit_headers, 1):
+                cell = audit_ws.cell(row=1, column=col_num, value=header)
+                cell.font = Font(bold=True)
+                cell.fill = PatternFill(start_color="86C232", end_color="86C232", fill_type="solid")
+            
+            # Add data
+            for row_num, log in enumerate(audit_logs, 2):
+                audit_ws.cell(row=row_num, column=1, value=log['id'])
+                audit_ws.cell(row=row_num, column=2, value=log['user_email'])
+                audit_ws.cell(row=row_num, column=3, value=log['action_type'])
+                audit_ws.cell(row=row_num, column=4, value=log['item_id'])
+                audit_ws.cell(row=row_num, column=5, value=log['details'])
+                audit_ws.cell(row=row_num, column=6, value=log['timestamp'])
 
-            # Data
-            for row_num, log in enumerate(audit_logs, start=2):
-                for col_num, header in enumerate(headers, start=1):
-                    audit_ws.cell(row=row_num, column=col_num, value=log[header])
+        # 3. Add monitoring data and analysis
+        if hasattr(app, 'monitor'):
+            wb = app.monitor.export_to_excel(wb)
 
-        # Auto-fit columns for both sheets
-        for ws in [items_ws, audit_ws]:
+        # Auto-adjust column widths for all sheets
+        for ws in wb.worksheets:
             for column_cells in ws.columns:
-                max_length = 0
-                for cell in column_cells:
-                    try:
-                        if cell.value:
-                            max_length = max(max_length, len(str(cell.value)))
-                    except:
-                        pass
-                adjusted_width = min(max_length + 2, 50)  # Cap width at 50
+                length = max(len(str(cell.value) if cell.value else "") for cell in column_cells)
+                adjusted_width = min(length + 2, 50)  # Cap width at 50
                 ws.column_dimensions[get_column_letter(column_cells[0].column)].width = adjusted_width
 
         # Save to memory buffer
@@ -768,10 +760,7 @@ def download_excel():
 
     except Exception as e:
         print(f"Error generating Excel: {e}")
-        return jsonify({
-            "success": False,
-            "error": f"Export failed: {str(e)}"
-        }), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/audit-log")
 @login_required
@@ -843,6 +832,47 @@ def log_action(user_email, action_type, item_id, details):
     except Exception as e:
         print(f"Error logging action: {e}")
         return False
+
+# Add this with your other routes
+
+@app.route("/system-monitor")
+@login_required
+def system_monitor():
+    """Show system monitoring dashboard"""
+    if not is_admin():
+        return redirect("/")
+    return render_template("system-monitor.html")
+
+@app.route("/system-metrics")
+@login_required
+def system_metrics():
+    """Get current system metrics"""
+    if not is_admin():
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    try:
+        metrics = app.monitor.collect_metrics()
+        metrics['analysis'] = app.monitor.analyze_performance()
+        metrics['peak_metrics'] = app.monitor.peak_metrics
+        return jsonify(metrics)
+    except Exception as e:
+        print(f"Error getting metrics: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# Initialize monitor
+monitor = SystemMonitor(interval=1)
+
+# Start monitoring when app starts
+@app.before_first_request
+def start_monitoring():
+    monitor.start()
+
+# Stop monitoring when app stops
+atexit.register(lambda: monitor.stop())
+
+# After creating Flask app
+app.monitor = SystemMonitor()
+app.monitor.start()
 
 if __name__ == "__main__":
     # Pre-load model before running server
