@@ -552,8 +552,12 @@ block main %}
         const value = e.target.value.toLowerCase();
         table.clearFilter();
         table.setFilter(function (data) {
-          return Object.values(data).some((val) =>
-            String(val).toLowerCase().includes(value)
+          // Create a copy of data without image_url
+          const searchableData = { ...data };
+          delete searchableData.image_url;
+
+          return Object.values(searchableData).some(
+            (val) => val !== null && String(val).toLowerCase().includes(value)
           );
         });
 
@@ -579,7 +583,7 @@ block main %}
       .getElementById("confirmed-items-btn")
       .addEventListener("click", function () {
         table.clearFilter();
-        table.setFilter("item_status", "=", "Confirmed");
+        table.setFilter("item_status", "=", "Returned"); // Changed from "Confirmed" to "Returned"
       });
 
     document
