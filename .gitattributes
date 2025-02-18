@@ -1,1 +1,11 @@
-model_cache/models--sentence-transformers--all-MiniLM-L6-v2/blobs/* filter=lfs diff=lfs merge=lfs -text
+# Remove LFS tracking for model files
+model_cache/** -filter=lfs -diff=lfs -merge=lfs -text
+
+# Images - use standard Git instead of LFS
+*.jpg -filter=lfs -diff=lfs -merge=lfs -text
+*.png -filter=lfs -diff=lfs -merge=lfs -text
+*.gif -filter=lfs -diff=lfs -merge=lfs -text
+
+# Keep other large files in LFS
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text

@@ -21,3 +21,6 @@ ENV/
 # System files
 .DS_Store
 Thumbs.db
+
+# Model cache
+model_cache/
