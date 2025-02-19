@@ -61,6 +61,7 @@ block main %}
           <div class="card-body d-flex flex-column align-items-center">
             <p class="card-text display-4" id="cpu-usage">0%</p>
             <p class="card-text">Peak: <span id="cpu-peak">0%</span></p>
+            <p class="card-text">Avg: <span id="cpu-avg">0%</span></p>
           </div>
         </div>
       </div>
@@ -87,7 +88,12 @@ block main %}
           <div class="card-body d-flex flex-column align-items-center">
             <p class="card-text display-4 mb-2">I/O Stats</p>
             <p class="card-text mb-1">Read: <span id="disk-read">0 MB</span></p>
-            <p class="card-text">Write: <span id="disk-write">0 MB</span></p>
+            <p class="card-text mb-1">
+              Write: <span id="disk-write">0 MB</span>
+            </p>
+            <p class="card-text">
+              Operations: <span id="io-operations">0</span>
+            </p>
           </div>
         </div>
       </div>
@@ -112,6 +118,7 @@ block main %}
     setTimeout(() => element.classList.remove("updated"), 300);
   }
 
+  // Update the updateMetrics() function
   function updateMetrics() {
     fetch("/system-metrics")
       .then((response) => response.json())
@@ -126,12 +133,27 @@ block main %}
         updateElement("disk-read", Math.round(data.disk_read_mb) + " MB");
         updateElement("disk-write", Math.round(data.disk_write_mb) + " MB");
 
+        // Add CPU average update
+        if (data.analysis && data.analysis["CPU Analysis"]) {
+          updateElement(
+            "cpu-avg",
+            data.analysis["CPU Analysis"]["Average CPU Usage"]
+          );
+        }
+
+        // Update disk I/O stats
+        if (data.analysis && data.analysis["Disk I/O Analysis"]) {
+          const diskAnalysis = data.analysis["Disk I/O Analysis"];
+          updateElement("disk-read", diskAnalysis["Total Read"]);
+          updateElement("disk-write", diskAnalysis["Total Write"]);
+          updateElement("io-operations", diskAnalysis["I/O Operations"]);
+        }
+
         // Update analysis with specific order and headers
         const analysis = data.analysis;
         if (analysis) {
           const orderedSections = [
             "CPU Analysis",
-            "Disk I/O Analysis",
             "General",
             "Memory Analysis",
           ];
@@ -140,12 +162,6 @@ block main %}
             <div class="analysis-column">
               <h6>CPU Analysis</h6>
               ${Object.entries(analysis["CPU Analysis"] || {})
-                .map(([key, value]) => `<p>${key}: ${value}</p>`)
-                .join("")}
-            </div>
-            <div class="analysis-column">
-              <h6>Disk I/O Analysis</h6>
-              ${Object.entries(analysis["Disk I/O Analysis"] || {})
                 .map(([key, value]) => `<p>${key}: ${value}</p>`)
                 .join("")}
             </div>
@@ -164,7 +180,8 @@ block main %}
           `;
           document.getElementById("analysis-content").innerHTML = analysisHtml;
         }
-      });
+      })
+      .catch((error) => console.error("Error updating metrics:", error));
   }
 
   // Update metrics every second
@@ -274,7 +291,7 @@ block main %}
 
   .analysis-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr); /* Changed from 4 to 3 columns */
     gap: 1.5rem;
     padding: 1rem;
   }

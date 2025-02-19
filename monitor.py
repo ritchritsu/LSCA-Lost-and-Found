@@ -177,6 +177,7 @@ class SystemMonitor:
             'CPU Analysis': {
                 'Average CPU Usage': f"{statistics.mean(cpu_values):.2f}%",
                 'Peak CPU Usage': f"{max(cpu_values):.2f}%",
+                'Lowest CPU Usage': f"{min(cpu_values):.2f}%",  # Added lowest CPU usage
                 'CPU Usage Variance': f"{statistics.variance(cpu_values):.2f}"
             },
             'Memory Analysis': {
@@ -211,14 +212,13 @@ class SystemMonitor:
             analysis = {
                 'CPU Analysis': {
                     'Average CPU Usage': f"{statistics.mean(cpu_values):.2f}%",
-                    'CPU Usage Variance': f"{statistics.variance(cpu_values) if len(cpu_values) > 1 else 0:.2f}",
-                    'Peak CPU Usage': f"{max(cpu_values):.2f}%"
+                    'Peak CPU Usage': f"{max(cpu_values):.2f}%",
+                    'Lowest CPU Usage': f"{min(cpu_values):.2f}%",  # Added lowest CPU usage
+                    'CPU Usage Variance': f"{statistics.variance(cpu_values) if len(cpu_values) > 1 else 0:.2f}"
                 },
                 'Memory Analysis': {
                     'Average Memory Usage': f"{statistics.mean(memory_values):.2f} MB",
-                    'Memory Growth Rate': f"{memory_growth:.2f} MB/sample",
-                    'Total Read': f"{self.io_counters.read_bytes / (1024 * 1024):.2f} MB",
-                    'Total Write': f"{self.io_counters.write_bytes / (1024 * 1024)::.2f} MB"
+                    'Memory Growth Rate': f"{memory_growth:.2f} MB/sample"
                 },
                 'General': {
                     'Monitoring Duration': f"{monitoring_duration:.2f} seconds",
