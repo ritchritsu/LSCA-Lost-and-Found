@@ -223,6 +223,49 @@ block main %}
   .tabulator-col[tabulator-field="actions"] .tabulator-col-title {
     white-space: nowrap !important;
   }
+
+  /* Description column hover effects */
+  .dynamic-description {
+    padding: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-radius: 4px;
+    position: relative;
+  }
+
+  /* Lost item styling - Red */
+  .dynamic-description.lost-item {
+    border-left: 3px solid #dc3545;
+    background: rgba(220, 53, 69, 0.1);
+  }
+
+  .dynamic-description.lost-item:hover {
+    background: rgba(220, 53, 69, 0.2);
+    padding-right: 30px;
+  }
+
+  .dynamic-description.lost-item:hover::after {
+    content: "\f002";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* Found item styling - Yellow */
+  .dynamic-description.item-found {
+    border-left: 3px solid #ffc107;
+    background: rgba(255, 193, 7, 0.1);
+  }
+
+  /* Returned item styling - Green */
+  .dynamic-description.item-returned {
+    border-left: 3px solid #28a745;
+    background: rgba(40, 167, 69, 0.1);
+  }
 </style>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -310,11 +353,27 @@ block main %}
           formatter: function (cell) {
             const value = cell.getValue() || "";
             const status = cell.getRow().getData().item_status;
-            return status === "Lost"
-              ? `<div class="item-description">${value}</div>`
-              : `<div class="item-found">${value}</div>`;
+            let className = "";
+
+            switch (status) {
+              case "Lost":
+                className = "dynamic-description lost-item";
+                break;
+              case "Found":
+                className = "dynamic-description item-found";
+                break;
+              case "Returned":
+                className = "dynamic-description item-returned";
+                break;
+              default:
+                className = "dynamic-description";
+            }
+
+            return `<div class="${className}">${value}</div>`;
           },
-          width: 340,
+          widthGrow: 3,
+          minWidth: 200,
+          responsive: 2,
         },
         {
           title: "Image",
