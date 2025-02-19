@@ -24,8 +24,8 @@ class SystemMonitor:
             self.initial_read_bytes = initial_io.read_bytes
             self.initial_write_bytes = initial_io.write_bytes
             self.last_io = initial_io
-            self.total_read_bytes = initial_io.read_bytes  # Changed: Start with current value
-            self.total_write_bytes = initial_io.write_bytes  # Changed: Start with current value
+            self.total_read_bytes = 0  # Changed: Start from 0
+            self.total_write_bytes = 0  # Changed: Start from 0
             
             # Initialize CPU tracking with better defaults
             self.cpu_values = []
@@ -43,8 +43,8 @@ class SystemMonitor:
     def collect_metrics(self):
         """Collect system metrics"""
         try:
-            # Get CPU metrics and round to 2 decimal places
-            cpu_percent = psutil.cpu_percent(interval=1.0)
+            # Get CPU metrics with longer interval for stability
+            cpu_percent = psutil.cpu_percent(interval=0.5, percpu=False)  # Changed: Use system-wide CPU
             cpu_percent = round(cpu_percent, 2)
             
             # Update CPU tracking
@@ -57,26 +57,13 @@ class SystemMonitor:
             memory = psutil.Process().memory_info()
             current_io = psutil.disk_io_counters()
             
-            # Calculate disk I/O deltas
-            read_delta = current_io.read_bytes - self.last_io.read_bytes
-            write_delta = current_io.write_bytes - self.last_io.write_bytes
+            # Calculate disk I/O as delta from initial values
+            read_delta = (current_io.read_bytes - self.initial_read_bytes) / (1024 * 1024)  # Convert to MB
+            write_delta = (current_io.write_bytes - self.initial_write_bytes) / (1024 * 1024)
             
-            # Handle counter resets
-            if read_delta < 0:
-                read_delta = 0
-            if write_delta < 0:
-                write_delta = 0
-                
-            # Update totals
-            self.total_read_bytes += read_delta
-            self.total_write_bytes += write_delta
-            
-            # Convert to MB
-            total_read_mb = self.total_read_bytes / (1024 * 1024)
-            total_write_mb = self.total_write_bytes / (1024 * 1024)
-            
-            # Store current I/O values for next iteration
-            self.last_io = current_io
+            # Cap maximum values for sanity
+            read_delta = min(read_delta, 1000)  # Cap at 1GB
+            write_delta = min(write_delta, 1000)
             
             metrics = {
                 'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -85,10 +72,10 @@ class SystemMonitor:
                 'cpu_low': round(self.peak_metrics['cpu_low'], 2),
                 'cpu_avg': round(statistics.mean(self.cpu_values), 2) if self.cpu_values else 0,
                 'memory_rss': round(memory.rss / (1024 * 1024), 2),
-                'disk_read_mb': round(total_read_mb, 2),
-                'disk_write_mb': round(total_write_mb, 2),
-                'disk_read_count': current_io.read_count,
-                'disk_write_count': current_io.write_count
+                'disk_read_mb': round(read_delta, 2),
+                'disk_write_mb': round(write_delta, 2),
+                'disk_read_count': current_io.read_count - self.initial_read_count if hasattr(self, 'initial_read_count') else 0,
+                'disk_write_count': current_io.write_count - self.initial_write_count if hasattr(self, 'initial_write_count') else 0
             }
             
             return metrics
