@@ -19,23 +19,19 @@ class SystemMonitor:
             self.metrics = []
             self.start_time = datetime.now()
             
-            # Initialize disk I/O tracking
+            # Initialize disk I/O tracking with absolute values
             initial_io = psutil.disk_io_counters()
             self.initial_read_bytes = initial_io.read_bytes
             self.initial_write_bytes = initial_io.write_bytes
             self.last_io = initial_io
+            self.total_read_bytes = initial_io.read_bytes  # Changed: Start with current value
+            self.total_write_bytes = initial_io.write_bytes  # Changed: Start with current value
             
-            # Initialize counters
-            self.total_read_bytes = 0
-            self.total_write_bytes = 0
-            
-            # Initialize CPU tracking
-            self.cpu_values = []  # Store all CPU readings
-            
-            # Initialize peak/low metrics
+            # Initialize CPU tracking with better defaults
+            self.cpu_values = []
             self.peak_metrics = {
                 'cpu': 0,
-                'cpu_low': 100,  # Start at max possible
+                'cpu_low': float('inf'),  # Changed: Start with infinity for proper min tracking
                 'memory': 0,
                 'disk_read': 0,
                 'disk_write': 0
@@ -47,59 +43,53 @@ class SystemMonitor:
     def collect_metrics(self):
         """Collect system metrics"""
         try:
-            # Use longer interval for more accurate CPU reading
-            cpu_percent = psutil.cpu_percent(interval=1.0)  # Changed to 1.0s
-            self.cpu_values.append(cpu_percent)  # Store CPU value
+            # Get CPU metrics and round to 2 decimal places
+            cpu_percent = psutil.cpu_percent(interval=1.0)
+            cpu_percent = round(cpu_percent, 2)
             
-            memory = psutil.Process().memory_info()
-            current_io = psutil.disk_io_counters()
-
-            # Update CPU peaks and lows
-            if cpu_percent > 0:  # Valid reading
+            # Update CPU tracking
+            if cpu_percent > 0:
+                self.cpu_values.append(cpu_percent)
                 self.peak_metrics['cpu'] = max(self.peak_metrics['cpu'], cpu_percent)
                 self.peak_metrics['cpu_low'] = min(self.peak_metrics['cpu_low'], cpu_percent)
-
-            # Calculate I/O deltas since last collection
+            
+            # Get memory and I/O stats
+            memory = psutil.Process().memory_info()
+            current_io = psutil.disk_io_counters()
+            
+            # Calculate disk I/O deltas
             read_delta = current_io.read_bytes - self.last_io.read_bytes
             write_delta = current_io.write_bytes - self.last_io.write_bytes
-
-            # Sanity check on deltas
-            if read_delta < 0 or read_delta > 1e9:  # Cap at 1GB per interval
+            
+            # Handle counter resets
+            if read_delta < 0:
                 read_delta = 0
-            if write_delta < 0 or write_delta > 1e9:
+            if write_delta < 0:
                 write_delta = 0
-
-            # Update running totals
+                
+            # Update totals
             self.total_read_bytes += read_delta
             self.total_write_bytes += write_delta
             
-            # Convert to MB with sanity checks
-            total_read_mb = min(self.total_read_bytes / (1024 * 1024), 1e6)  # Cap at 1TB
-            total_write_mb = min(self.total_write_bytes / (1024 * 1024), 1e6)
-
-            # Store current counters for next iteration
+            # Convert to MB
+            total_read_mb = self.total_read_bytes / (1024 * 1024)
+            total_write_mb = self.total_write_bytes / (1024 * 1024)
+            
+            # Store current I/O values for next iteration
             self.last_io = current_io
-
-
+            
             metrics = {
                 'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'cpu_percent': cpu_percent,
-                'cpu_peak': self.peak_metrics['cpu'],
-                'cpu_low': self.peak_metrics['cpu_low'],
-                'cpu_avg': statistics.mean(self.cpu_values) if self.cpu_values else 0,
-                'memory_rss': memory.rss / (1024 * 1024),  # MB
-                'disk_read_mb': total_read_mb,
-                'disk_write_mb': total_write_mb,
+                'cpu_percent': round(cpu_percent, 2),
+                'cpu_peak': round(self.peak_metrics['cpu'], 2),
+                'cpu_low': round(self.peak_metrics['cpu_low'], 2),
+                'cpu_avg': round(statistics.mean(self.cpu_values), 2) if self.cpu_values else 0,
+                'memory_rss': round(memory.rss / (1024 * 1024), 2),
+                'disk_read_mb': round(total_read_mb, 2),
+                'disk_write_mb': round(total_write_mb, 2),
                 'disk_read_count': current_io.read_count,
                 'disk_write_count': current_io.write_count
             }
-            
-            # Update peak metrics with sanity checks
-            if cpu_percent > 0 and cpu_percent <= 100:
-                self.peak_metrics['cpu'] = max(self.peak_metrics['cpu'], cpu_percent)
-            self.peak_metrics['memory'] = max(self.peak_metrics['memory'], metrics['memory_rss'])
-            self.peak_metrics['disk_read'] = min(max(self.peak_metrics['disk_read'], total_read_mb), 1e6)
-            self.peak_metrics['disk_write'] = min(max(self.peak_metrics['disk_write'], total_write_mb), 1e6)
             
             return metrics
             
