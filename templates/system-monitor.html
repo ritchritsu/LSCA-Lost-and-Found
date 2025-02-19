@@ -74,7 +74,6 @@ block main %}
         <div class="card text-light">
           <div class="card-body d-flex flex-column align-items-center">
             <p class="card-text display-4" id="memory-usage">0 MB</p>
-            <p class="card-text">Peak: <span id="memory-peak">0 MB</span></p>
           </div>
         </div>
       </div>
@@ -126,10 +125,6 @@ block main %}
         updateElement("cpu-usage", data.cpu_percent + "%");
         updateElement("cpu-peak", data.peak_metrics.cpu + "%");
         updateElement("memory-usage", Math.round(data.memory_rss) + " MB");
-        updateElement(
-          "memory-peak",
-          Math.round(data.peak_metrics.memory) + " MB"
-        );
         updateElement("disk-read", Math.round(data.disk_read_mb) + " MB");
         updateElement("disk-write", Math.round(data.disk_write_mb) + " MB");
 
