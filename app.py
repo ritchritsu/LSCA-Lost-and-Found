@@ -150,9 +150,22 @@ def utility_processor():
         "is_admin": is_admin
     }
 
+def check_confirmed(func):
+    """Decorator to check if user has confirmed their email"""
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        user_id = session.get("user_id")
+        if user_id:
+            user = db.execute("SELECT is_confirmed FROM users WHERE id = ?", user_id)[0]
+            if not user["is_confirmed"]:
+                flash('Please confirm your account!', 'warning')
+                return redirect(url_for('unconfirmed'))
+        return func(*args, **kwargs)
+    return decorated_function
+
 @app.route("/")
 @login_required
-@check_confirmed  # Add confirmation check
+@check_confirmed  # Now the decorator is defined before use
 def index():
     """Show submission form or admin dashboard based on user"""
     if session.pop("reset_email_sent", False):
