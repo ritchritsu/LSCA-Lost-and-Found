@@ -152,12 +152,15 @@ def utility_processor():
 
 @app.route("/")
 @login_required
+@check_confirmed  # Add confirmation check
 def index():
     """Show submission form or admin dashboard based on user"""
     if session.pop("reset_email_sent", False):
-        flash("Password reset instructions have been sent to your email. Please check your email.")
+        flash("Password reset instructions have been sent to your email.")
+    
     try:
-        user_email = db.execute("SELECT email FROM users WHERE id = ?", session["user_id"])[0]["email"]
+        user_email = db.execute("SELECT email FROM users WHERE id = ?", 
+                              session["user_id"])[0]["email"]
         
         if user_email == "ritchangelo.dacanay@lsca.edu.ph":
             items = db.execute("SELECT * FROM items")
@@ -166,11 +169,8 @@ def index():
             return render_template("submission.html")
     
     except Exception as e:
-        print(f"Error fetching items: {e}")
-        return render_template("admin-dashboard.html", items=[])
-    
-
-
+        print(f"Error in index route: {e}")
+        return render_template("error.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -537,16 +537,24 @@ def confirm_email(token):
 @app.route('/resend')
 @login_required
 def resend_confirmation():
-    user_id = session["user_id"]
-    user = db.execute("SELECT * FROM users WHERE id = ?", user_id)[0]
-    
-    if user["is_confirmed"]:
-        flash('Your account is already confirmed.', 'success')
-        return redirect(url_for('index'))
-    
-    send_confirmation_email(user["email"])
-    flash('A new confirmation email has been sent.', 'success')
-    return redirect(url_for('index'))
+    """Resend confirmation email"""
+    try:
+        user_id = session["user_id"]
+        user = db.execute("SELECT * FROM users WHERE id = ?", user_id)[0]
+        
+        if user["is_confirmed"]:
+            flash('Your account is already confirmed.', 'success')
+            return redirect(url_for('index'))
+        
+        send_confirmation_email(user["email"])
+        flash('A new confirmation email has been sent.', 'success')
+        # Redirect back to unconfirmed page instead of index
+        return redirect(url_for('unconfirmed'))
+        
+    except Exception as e:
+        print(f"Error resending confirmation: {e}")
+        flash('Error sending confirmation email. Please try again.', 'error')
+        return redirect(url_for('unconfirmed'))
 
 def check_confirmed(func):
     @wraps(func)
