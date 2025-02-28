@@ -165,9 +165,9 @@ def check_confirmed(func):
 
 @app.route("/")
 @login_required
-@check_confirmed  # Now the decorator is defined before use
+@check_confirmed
 def index():
-    """Show submission form or admin dashboard based on user"""
+    """Show admin dashboard or redirect to user dashboard if items exist"""
     if session.pop("reset_email_sent", False):
         flash("Password reset instructions have been sent to your email.")
     
@@ -175,11 +175,23 @@ def index():
         user_email = db.execute("SELECT email FROM users WHERE id = ?", 
                               session["user_id"])[0]["email"]
         
+        # If admin, show admin dashboard
         if user_email == "ritchangelo.dacanay@lsca.edu.ph":
             items = db.execute("SELECT * FROM items")
             return render_template("admin-dashboard.html", items=items)
         else:
-            return render_template("submission.html")
+            # Check if user has submitted items
+            user_items_count = db.execute(
+                "SELECT COUNT(*) as count FROM items WHERE email = ?", 
+                user_email
+            )[0]['count']
+            
+            if user_items_count > 0:
+                # User has items, redirect to dashboard
+                return redirect("/dashboard")
+            else:
+                # First-time user, go to submission page
+                return render_template("submission.html")
     
     except Exception as e:
         print(f"Error in index route: {e}")
@@ -661,27 +673,46 @@ def find_similar_items():
 @app.route("/delete-item", methods=["POST"])
 @login_required
 def delete_item():
+    """Allow admins to delete any item"""
     try:
+        if not is_admin():
+            return jsonify({"success": False, "error": "Unauthorized"})
+            
         data = request.json
         item_id = data.get("id")
-        if not item_id:
-            return jsonify({"success": False, "error": "No item ID provided."}), 400
-
-        # Get item details before deletion
-        item = db.execute("SELECT item_description, item_status FROM items WHERE id = ?", item_id)[0]
         
+        if not item_id:
+            return jsonify({"success": False, "error": "No item ID provided"})
+        
+        # Get item details before deletion
+        item = db.execute("SELECT * FROM items WHERE id = ?", item_id)
+        
+        if not item:
+            return jsonify({"success": False, "error": "Item not found"})
+            
+        item_details = item[0]
+        item_description = item_details["item_description"]
+        item_status = item_details["item_status"]
+        
+        # Delete the item
         db.execute("DELETE FROM items WHERE id = ?", item_id)
         
-        # Log the deletion
+        # Log the admin action with proper details
+        user_email = db.execute("SELECT email FROM users WHERE id = ?", 
+                              session["user_id"])[0]["email"]
+        
         log_action(
-            "item_deletion",
-            f"Deleted {item['item_status']} item: {item['item_description']}",
-            item_id
+            user_email=user_email,
+            action_type="admin_item_deletion",
+            item_id=item_id,
+            details=f"Admin deleted {item_status} item: {item_description}"
         )
         
-        return jsonify({"success": True}), 200
+        return jsonify({"success": True})
+        
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        print(f"Error deleting item: {e}")
+        return jsonify({"success": False, "error": str(e)})
 
 @app.route("/download-excel", methods=["GET"])
 @login_required
@@ -993,40 +1024,40 @@ def delete_user_item():
         data = request.json
         item_id = data.get("id")
         if not item_id:
-            return jsonify({'success': False, 'error': 'Invalid item ID'})
+            return jsonify({"success": False, "error": "No item ID provided."})
 
         # Get current user email
         user_email = db.execute("SELECT email FROM users WHERE id = ?", 
                               session["user_id"])[0]["email"]
         
         # Check if the item belongs to the user
-        item = db.execute(
-            "SELECT * FROM items WHERE id = ? AND email = ?", 
-            item_id, user_email
-        )
+        item = db.execute("SELECT * FROM items WHERE id = ? AND email = ?", 
+                         item_id, user_email)
         
         if not item:
-            return jsonify({'success': False, 'error': 'Item not found or not yours'})
+            return jsonify({"success": False, "error": "Item not found or not yours"})
         
-        # Get item details before deletion
+        # Get item details before deletion for the log
         item_details = item[0]
+        item_description = item_details["item_description"]
+        item_status = item_details["item_status"]
         
         # Delete the item
         db.execute("DELETE FROM items WHERE id = ?", item_id)
         
-        # Log the action
+        # Log the action with proper details
         log_action(
             user_email=user_email,
             action_type="item_deletion",
             item_id=item_id,
-            details=f"User deleted {item_details['item_status']} item: {item_details['item_description']}"
+            details=f"User deleted {item_status} item: {item_description}"
         )
         
-        return jsonify({'success': True})
+        return jsonify({"success": True})
         
     except Exception as e:
         print(f"Error deleting user item: {e}")
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({"success": False, "error": str(e)})
 
 if __name__ == "__main__":
     # Pre-load model before running server
