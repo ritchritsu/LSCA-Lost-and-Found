@@ -1,0 +1,372 @@
+{% extends "layout.html" %} {% block title %} My Submissions {% endblock %} {%
+block main %}
+<div class="container mt-10">
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+  <h1 class="text-light">My Submissions</h1>
+  <div class="mb-3 d-flex justify-content-between align-items-center">
+    <div>
+      <span class="badge bg-danger me-2">Lost: {{ lost_count }}</span>
+      <span class="badge bg-warning me-2">Found: {{ found_count }}</span>
+      <span class="badge bg-success">Returned: {{ returned_count }}</span>
+    </div>
+    <a href="/submit" class="btn custom-green-btn">
+      <i class="fas fa-plus"></i> Submit New Item
+    </a>
+  </div>
+  <div id="table-container" class="table-responsive"></div>
+</div>
+
+<!-- Include Tabulator CDN -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/tabulator-tables@5.4.4/dist/css/tabulator.min.css"
+/>
+<script src="https://unpkg.com/tabulator-tables@5.4.4/dist/js/tabulator.min.js"></script>
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<style>
+  /* Container styling */
+  .container {
+    max-width: 98vw !important;
+    padding: 1rem;
+    border: 2px solid #065a2b;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    margin: 0 auto;
+  }
+
+  /* Tabulator Overrides */
+  .tabulator {
+    background: transparent !important;
+    border: 1px solid #065a2b !important;
+    border-radius: 5px;
+    font-family: inherit;
+  }
+
+  .tabulator-header {
+    background: #065a2b !important;
+    border-bottom: 2px solid #61892f !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.7rem !important;
+  }
+
+  .tabulator-header .tabulator-col {
+    background: #065a2b !important;
+    border-right: 1px solid #61892f !important;
+    padding: 0.5rem !important;
+  }
+
+  .tabulator-tableHolder {
+    background: rgba(0, 0, 0, 0.4) !important;
+    color: #ffffff !important;
+  }
+
+  .tabulator-row {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-bottom: 1px solid rgba(134, 194, 50, 0.2) !important;
+    color: #ffffff !important;
+  }
+
+  .tabulator-row:hover {
+    background: rgba(134, 194, 50, 0.1) !important;
+  }
+
+  .tabulator-row .tabulator-cell {
+    border-right: 1px solid rgba(134, 194, 50, 0.2) !important;
+    padding: 0.75rem !important;
+    color: #ffffff !important;
+  }
+
+  /* Button styling */
+  .custom-green-btn {
+    background: #065a2b;
+    color: #000;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .custom-green-btn:hover {
+    background: #61892f;
+    color: #fff;
+  }
+
+  /* Scrollbar styling */
+  .tabulator .tabulator-tableHolder::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .tabulator .tabulator-tableHolder::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb {
+    background: #065a2b;
+    border-radius: 4px;
+  }
+
+  .tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb:hover {
+    background: #61892f;
+  }
+
+  /* Description column hover effects */
+  .dynamic-description {
+    padding: 8px;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    position: relative;
+  }
+
+  /* Lost item styling - Red */
+  .dynamic-description.lost-item {
+    border-left: 3px solid #dc3545;
+    background: rgba(220, 53, 69, 0.1);
+  }
+
+  /* Found item styling - Yellow */
+  .dynamic-description.item-found {
+    border-left: 3px solid #ffc107;
+    background: rgba(255, 193, 7, 0.1);
+  }
+
+  /* Returned item styling - Green */
+  .dynamic-description.item-returned {
+    border-left: 3px solid #28a745;
+    background: rgba(40, 167, 69, 0.1);
+  }
+  
+  /* Loading overlay */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #065a2b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Delete button */
+  .delete-btn {
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .delete-btn:hover {
+    transform: scale(1.1);
+    background-color: #dc3545;
+  }
+
+  .fa-trash-alt {
+    color: white;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #fff;
+    opacity: 0.7;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let tableData;
+    try {
+      tableData = JSON.parse(`{{ user_items | tojson | safe }}`);
+    } catch (e) {
+      console.error("Error parsing JSON:", e);
+      tableData = [];
+    }
+
+    // Show empty state if no items
+    if (tableData.length === 0) {
+      document.getElementById("table-container").innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-box-open fa-3x mb-3"></i>
+          <h4>No items submitted yet</h4>
+          <p>Items you submit will appear here.</p>
+          <a href="/submit" class="btn custom-green-btn mt-3">Submit an Item</a>
+        </div>
+      `;
+      return;
+    }
+
+    const table = new Tabulator("#table-container", {
+      data: tableData,
+      layout: "fitColumns",
+      height: "65vh",
+      columns: [
+        { title: "ID", field: "id", width: 50, editor: false },
+        {
+          title: "Status",
+          field: "item_status",
+          width: 130,
+          formatter: function (cell) {
+            const value = cell.getValue();
+            let iconClass = "";
+            let iconColor = "";
+            switch (value) {
+              case "Lost":
+                iconClass = "fa fa-exclamation-circle";
+                iconColor = "red";
+                break;
+              case "Found":
+                iconClass = "fa fa-check-circle";
+                iconColor = "yellow";
+                break;
+              case "Returned":
+                iconClass = "fa fa-thumbs-up";
+                iconColor = "#90EE90";
+                break;
+              default:
+                iconClass = "fa fa-circle";
+                iconColor = "black";
+            }
+            return `<div style="display: flex; align-items: center; width: 100%;">
+                    <i class="${iconClass}" style="margin-right: 10px; color: ${iconColor};"></i>
+                    <span style="flex-grow: 1;">${value}</span>
+                </div>`;
+          }
+        },
+        { 
+          title: "Date", 
+          field: "date", 
+          width: 110,
+          formatter: function(cell) {
+            const row = cell.getRow().getData();
+            return row.lost_date || row.found_date || "";
+          }
+        },
+        { 
+          title: "Location", 
+          field: "location", 
+          width: 150,
+          formatter: function(cell) {
+            const row = cell.getRow().getData();
+            return row.location || row.found_location || "";
+          }
+        },
+        {
+          title: "Description",
+          field: "item_description",
+          formatter: function (cell) {
+            const value = cell.getValue() || "";
+            const status = cell.getRow().getData().item_status;
+            let className = "";
+
+            switch (status) {
+              case "Lost":
+                className = "dynamic-description lost-item";
+                break;
+              case "Found":
+                className = "dynamic-description item-found";
+                break;
+              case "Returned":
+                className = "dynamic-description item-returned";
+                break;
+              default:
+                className = "dynamic-description";
+            }
+
+            return `<div class="${className}">${value}</div>`;
+          },
+          widthGrow: 3,
+          minWidth: 200,
+          responsive: 2,
+        },
+        {
+          title: "Image",
+          field: "image_url",
+          formatter: function (cell) {
+            const value = cell.getValue();
+            if (!value) return "";
+            return `<div style="text-align: center;">
+                    <a href="${value}" target="_blank">
+                        <img src="${value}" style="height: 50px; width: auto;" />
+                    </a>
+                </div>`;
+          },
+          width: 100,
+        },
+        {
+          title: "",
+          field: "actions",
+          width: 70,
+          formatter: function (cell) {
+            return `<button class="btn btn-danger btn-sm delete-btn" onclick="deleteItem(${
+              cell.getRow().getData().id
+            })">
+                  <i class="fas fa-trash-alt"></i>
+                </button>`;
+          },
+          headerSort: false,
+        },
+      ],
+    });
+  });
+
+  function showLoading() {
+    document.getElementById("loadingOverlay").style.display = "flex";
+  }
+
+  function hideLoading() {
+    document.getElementById("loadingOverlay").style.display = "none";
+  }
+
+  function deleteItem(itemId) {
+    if (!confirm("Are you sure you want to delete this item?")) return;
+    showLoading();
+    
+    fetch("/delete-user-item", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: itemId }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        hideLoading();
+        if (data.success) {
+          location.reload();
+        } else {
+          alert("Error deleting item: " + data.error);
+        }
+      })
+      .catch((err) => {
+        hideLoading();
+        alert("An error occurred while deleting the item: " + err);
+      });
+  }
+</script>
+{% endblock %}

@@ -243,7 +243,7 @@ def register():
             return render_template("register.html")
 
         if not password or len(password) < 8:
-            flash("Password must be at least 8 characters long")
+            flash("Password must be at least  characters long")
             return render_template("register.html")
 
         if password != confirmation:
@@ -285,6 +285,7 @@ def register():
 
 @app.route("/submit", methods=["GET", "POST"])
 @login_required
+@check_confirmed
 def submit_item():
     if request.method == "POST":
         try:
@@ -294,31 +295,28 @@ def submit_item():
             item_description = request.form.get("item_description")
             lost_location = request.form.get("lost_location")
             found_location = request.form.get("found_location")
-            email = request.form.get("email")
+            
+            # Use logged-in user's email instead of form input
+            user_email = db.execute("SELECT email FROM users WHERE id = ?", 
+                                  session["user_id"])[0]["email"]
+            
             grade_and_section = request.form.get("grade_and_section")
             phone_number = request.form.get("phone_number")
             image_data = request.form.get("image_data")
 
             # Validate required fields
-            if not all([item_status, date, item_description, email, grade_and_section, phone_number]):
-                flash("Please fill in all required fields")
+            if not all([item_status, date, item_description, grade_and_section, phone_number]):
+                flash("Please fill all required fields")
                 return redirect("/submit")
 
             # Set correct location based on status
+            location = None
             if item_status.lower() == "lost":
-                if not lost_location:
-                    flash("Please provide the lost location")
-                    return redirect("/submit")
                 location = lost_location
-                found_location = None
-            else:  # Found
-                if not found_location:
-                    flash("Please provide the found location")
-                    return redirect("/submit")
+            else:
                 location = found_location
-                lost_location = None
 
-            # Insert item
+            # Insert item with user's email from session
             result = db.execute("""
                 INSERT INTO items 
                 (item_status, lost_date, found_date, item_description, 
@@ -332,7 +330,7 @@ def submit_item():
                 item_description,
                 location,
                 found_location,
-                email,
+                user_email,  # Use session email
                 grade_and_section,
                 phone_number,
                 image_data
@@ -340,11 +338,8 @@ def submit_item():
 
             # Get the last inserted ID
             item_id = db.execute("SELECT last_insert_rowid()")[0]['last_insert_rowid()']
-
-            # Log the action
-            user_email = db.execute("SELECT email FROM users WHERE id = ?", 
-                                  session["user_id"])[0]["email"]
             
+            # Log the action
             log_action(
                 user_email=user_email,
                 action_type="item_submission",
@@ -352,8 +347,9 @@ def submit_item():
                 details=f"Submitted {item_status} item: {item_description}"
             )
 
+            print(f"Item submitted successfully: ID={item_id}, user={user_email}")
             flash("Your item has been submitted successfully!")
-            return redirect("/")
+            return redirect("/dashboard")
 
         except Exception as e:
             print(f"Error inserting item: {e}")
@@ -943,6 +939,94 @@ atexit.register(lambda: monitor.stop())
 # After creating Flask app
 app.monitor = SystemMonitor()
 app.monitor.start()
+
+@app.route("/dashboard")
+@login_required
+@check_confirmed
+def user_dashboard():
+    """Show user dashboard with their submitted items"""
+    try:
+        user_email = db.execute("SELECT email FROM users WHERE id = ?", 
+                              session["user_id"])[0]["email"]
+        
+        # Check if admin (redirect to admin dashboard)
+        if user_email == "ritchangelo.dacanay@lsca.edu.ph":
+            return redirect("/")
+            
+        # Get user's items
+        user_items = db.execute("""
+            SELECT * FROM items 
+            WHERE email = ?
+            ORDER BY 
+                CASE 
+                    WHEN item_status = 'Lost' THEN 1
+                    WHEN item_status = 'Found' THEN 2
+                    WHEN item_status = 'Returned' THEN 3
+                    ELSE 4
+                END,
+                id DESC
+        """, user_email)
+        
+        # Count statuses
+        lost_count = sum(1 for item in user_items if item['item_status'] == 'Lost')
+        found_count = sum(1 for item in user_items if item['item_status'] == 'Found')
+        returned_count = sum(1 for item in user_items if item['item_status'] == 'Returned')
+        
+        return render_template(
+            "user-dashboard.html", 
+            user_items=user_items,
+            lost_count=lost_count,
+            found_count=found_count,
+            returned_count=returned_count
+        )
+        
+    except Exception as e:
+        print(f"Error in user dashboard: {e}")
+        flash("An error occurred loading your dashboard")
+        return redirect("/")
+
+@app.route("/delete-user-item", methods=["POST"])
+@login_required
+def delete_user_item():
+    """Allow users to delete their own items"""
+    try:
+        data = request.json
+        item_id = data.get("id")
+        if not item_id:
+            return jsonify({'success': False, 'error': 'Invalid item ID'})
+
+        # Get current user email
+        user_email = db.execute("SELECT email FROM users WHERE id = ?", 
+                              session["user_id"])[0]["email"]
+        
+        # Check if the item belongs to the user
+        item = db.execute(
+            "SELECT * FROM items WHERE id = ? AND email = ?", 
+            item_id, user_email
+        )
+        
+        if not item:
+            return jsonify({'success': False, 'error': 'Item not found or not yours'})
+        
+        # Get item details before deletion
+        item_details = item[0]
+        
+        # Delete the item
+        db.execute("DELETE FROM items WHERE id = ?", item_id)
+        
+        # Log the action
+        log_action(
+            user_email=user_email,
+            action_type="item_deletion",
+            item_id=item_id,
+            details=f"User deleted {item_details['item_status']} item: {item_details['item_description']}"
+        )
+        
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        print(f"Error deleting user item: {e}")
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == "__main__":
     # Pre-load model before running server
