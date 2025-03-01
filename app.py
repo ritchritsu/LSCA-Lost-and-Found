@@ -855,7 +855,7 @@ def audit_logs():
                 action_type,
                 item_id,
                 details,
-                datetime(timestamp, 'localtime') as local_time
+                datetime(timestamp, '+8 hours') as local_time
             FROM audit_logs
             ORDER BY timestamp DESC
         """)
@@ -910,7 +910,7 @@ def system_monitor():
                 audit_logs.action_type,
                 audit_logs.item_id,
                 audit_logs.details,
-                datetime(audit_logs.timestamp, 'localtime') as local_time
+                datetime(audit_logs.timestamp, '+8 hours') as local_time
             FROM audit_logs 
             ORDER BY timestamp DESC
             LIMIT 100

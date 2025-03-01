@@ -122,6 +122,29 @@ block main %}
     fetch("/system-metrics")
       .then((response) => response.json())
       .then((data) => {
+        // Format timestamp to China time (UTC+8)
+        const timestamp = new Date(data.timestamp + " UTC");
+        // Adjust to UTC+8
+        timestamp.setHours(timestamp.getHours() + 8);
+
+        const formattedTime = timestamp.toLocaleString("en-US", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+          timeZone: "Asia/Shanghai",
+        });
+
+        // Update timestamp display if you have an element for it
+        if (document.getElementById("current-timestamp")) {
+          document.getElementById("current-timestamp").textContent =
+            formattedTime;
+        }
+
+        // Rest of your existing code...
         updateElement("cpu-usage", data.cpu_percent + "%");
         updateElement("cpu-peak", data.peak_metrics.cpu + "%");
         updateElement("memory-usage", Math.round(data.memory_rss) + " MB");
@@ -448,6 +471,17 @@ block main %}
 
   .table-container::-webkit-scrollbar-thumb:hover {
     background: #61892f;
+  }
+
+  .time-indicator {
+    display: inline-block;
+    background: rgba(6, 90, 43, 0.2);
+    color: #dddddd;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 1rem;
+    border-left: 2px solid #61892f;
   }
 </style>
 {% endblock %}
