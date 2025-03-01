@@ -308,7 +308,7 @@ def submit_item():
             lost_location = request.form.get("lost_location")
             found_location = request.form.get("found_location")
             
-            # Use logged-in user's email instead of form input
+            # Use logged-in user's email directly from session
             user_email = db.execute("SELECT email FROM users WHERE id = ?", 
                                   session["user_id"])[0]["email"]
             

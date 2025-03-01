@@ -79,7 +79,6 @@ block main %}
         name="grade_and_section"
         id="grade_and_section"
         required
-        onchange="toggleEmailField()"
       >
         <option value="" disabled selected class="placeholder-option">
           Select your group
@@ -112,21 +111,6 @@ block main %}
           <option value="Other">Other</option>
         </optgroup>
       </select>
-    </div>
-
-    <!-- Email Field (label changes based on group selection) -->
-    <div class="form-group">
-      <label for="email" id="email_label">Your school email:</label>
-      <input
-        type="email"
-        class="form-control custom-input"
-        name="email"
-        id="email"
-        placeholder="Enter your school email"
-        required
-        pattern=".+@lsca\.edu\.ph"
-        title="Valid LSCA email address (e.g., example@lsca.edu.ph)"
-      />
     </div>
 
     <div class="form-group" id="other_group_container" style="display: none">
@@ -276,37 +260,6 @@ block main %}
       return false;
     }
     return true;
-  }
-
-  function toggleEmailField() {
-    var groupSelect = document.getElementById("grade_and_section");
-    var emailField = document.getElementById("email");
-    var emailLabel = document.getElementById("email_label");
-    var parentEmailContainer = document.getElementById(
-      "parent_email_container"
-    );
-    var parentEmailInput = document.getElementById("parent_email");
-
-    var selectedValue = groupSelect.value;
-
-    if (selectedValue === "Other") {
-      // Change the email field to a personal email field
-      emailLabel.innerText = "Your personal email:";
-      emailField.setAttribute("placeholder", "Enter your personal email");
-      emailField.removeAttribute("pattern");
-      emailField.setAttribute("title", "Enter your personal email address");
-      parentEmailContainer.style.display = "none"; // Hide redundant personal email field
-    } else {
-      // Change the email field back to the school email
-      emailLabel.innerText = "Your school email:";
-      emailField.setAttribute("placeholder", "Enter your school email");
-      emailField.setAttribute("pattern", ".+@lsca\\.edu\\.ph");
-      emailField.setAttribute(
-        "title",
-        "Valid LSCA email address (e.g., example@lsca.edu.ph)"
-      );
-      parentEmailContainer.style.display = "none"; // Hide personal email field if not "Other"
-    }
   }
 
   function toggleLocationFields() {
